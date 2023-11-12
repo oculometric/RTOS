@@ -15,4 +15,9 @@ it begins
 - [ ] raycasting
 - [ ] rendering and drawing
 - [ ] text menu navigation
+- [ ] filesystem driver, loading obj files
+- [ ] graphics driver, to be inserted into the graphics buffer abstraction
+- [ ] 
 
+## Reference points
+https://wiki.osdev.org/GCC_Cross-Compiler
