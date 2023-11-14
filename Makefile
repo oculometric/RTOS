@@ -38,13 +38,14 @@ build: $(CC_FILES_OUT) $(AS_FILES_OUT) obj_dir
 	@$(LK) -T $(LD) -o $(BIN_OUT) $(LK_FLAGS) $(AS_FILES_OUT) $(CC_FILES_OUT)
 	@grub-file --is-x86-multiboot $(BIN_OUT)
 
-	#@mkdir -p bin/isodir/boot/grub
-	#@cp $(BIN_OUT) bin/isodir/boot/$(BIN)
-	#@cp src/grub.cfg bin/isodir/boot/grub.cfg
-	#@grub-mkrescue -o $(ISO) bin/isodir
+	@mkdir -p bin/isodir/boot/grub
+	@cp $(BIN_OUT) bin/isodir/boot/$(BIN)
+	@cp src/grub.cfg bin/isodir/boot/grub.cfg
+	@grub-mkrescue -o $(ISO) bin/isodir
+	@cp $(BIN_OUT) $(BIN)
 
 clean:
 	rm -fr bin
 
 emulate: build
-	qemu-system-i386 -kernel $(BIN_OUT)
+	qemu-system-i386 -kernel $(BIN_OUT) -serial file:serial.log
