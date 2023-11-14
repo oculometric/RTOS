@@ -32,7 +32,7 @@ _start:
     mov $stack_top, %esp
 
     // jump into the C main
-    //call kernel_main
+    call kernel_main
 
     // disable interrupts and lock up the computer
     cli
