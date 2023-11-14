@@ -39,5 +39,30 @@ inline void set_baud_rate(uint32_t port, uint16_t br)
     write_COM_register(port, COM::LINE_CONTROL, v);
 }
 
-inline void serial_output(uint32_t port, uint8_t c);
+inline void serial_output(uint32_t port, uint8_t c)
+{
+    // make sure DLAB is cleared
+    write_COM_register(port, COM::LINE_CONTROL, read_COM_register(port, COM::LINE_CONTROL) & 0b01111111);
+    // write the character
+    write_COM_register(port, COM::DATA, c);
+}
+
 inline uint8_t serial_input(uint32_t port);
+
+inline void serial_output(uint32_t port, uint8_t* s)
+{
+    // make sure DLAB is cleared
+    write_COM_register(port, COM::LINE_CONTROL, read_COM_register(port, COM::LINE_CONTROL) & 0b01111111);
+    // write the character
+    for (size_t i = 0; s[i] != '\0'; i++)
+        write_COM_register(port, COM::DATA, s[i]);
+}
+
+inline void serial_output(uint32_t port, uint8_t* s, size_t n)
+{
+    // make sure DLAB is cleared
+    write_COM_register(port, COM::LINE_CONTROL, read_COM_register(port, COM::LINE_CONTROL) & 0b01111111);
+    // write the character
+    for (size_t i = 0; i < n; i++)
+        write_COM_register(port, COM::DATA, s[i]);
+}
