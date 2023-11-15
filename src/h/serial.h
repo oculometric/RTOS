@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "io.h"
+
 #define COM1 0x3F8
 #define COM2 0x2F8
 
@@ -20,14 +22,12 @@ enum COM
 
 inline uint8_t read_COM_register(uint32_t port, COM reg)
 {
-    uint8_t ret;
-    asm volatile("inb %1, %0" : "=a"(ret) : "Nd"(port+reg));
-    return ret;
+    return inb(port+reg);
 }
 
 inline void write_COM_register(uint32_t port, COM reg, uint8_t value)
 {
-    asm volatile("outb %1, %0" : : "dN" (port+reg), "a" (value));
+    return outb(port+reg, value);
 }
 
 inline void serial_output(uint32_t port, uint8_t c)
