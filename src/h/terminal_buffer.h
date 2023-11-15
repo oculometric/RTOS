@@ -1,8 +1,10 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 
 #include "vector2.h"
+#include "memory.h"
 
 enum layer
 {
@@ -70,4 +72,6 @@ public:
     }
 
     inline ~terminal_buffer(); // TODO
+
+    void draw(uint8_t*);
 };

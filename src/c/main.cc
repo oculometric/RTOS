@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#include "serial.h"
+
 extern "C"
 void kernel_main()
 {
@@ -14,5 +16,21 @@ void kernel_main()
 		}
 	}
 
-    while (true);
+	int b = initialise_serial(COM1, 38400);
+	const char* text = "all work no play makes jack a dull boy";
+
+	uint8_t c = 'a';
+	int i = 0;
+    while (b == 0)
+	{
+		serial_output(COM1, (uint8_t*)text);
+
+		i++;
+		if (i >= 25*80)
+		{
+			i = 0;
+			c++;
+		}
+		terminal_buffer[i] = (uint16_t)c | ((uint16_t) 0 << 8) | ((uint16_t) 4 << 12);
+	}
 }
