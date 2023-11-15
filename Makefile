@@ -27,19 +27,20 @@ obj_dir:
 	@[ -d $(OBJ_DIR) ] || mkdir $(OBJ_DIR) -p
 
 $(OBJ_DIR)/%.o: $(CC_DIR)/%.cc obj_dir
-	@$(CC) -c $< -o $@ $(CC_FLAGS) -g -I$(INC_DIR)
+	@$(CC) -c $< -o $@ $(CC_FLAGS) -I$(INC_DIR)
 
 $(OBJ_DIR)/%.o: $(AS_DIR)/%.s obj_dir
 	@$(AS) $< -o $@
 
 build: $(CC_FILES_OUT) $(AS_FILES_OUT) obj_dir
-	@$(LK) -T $(LD) -o $(BIN_OUT) $(LK_FLAGS) -g $(AS_FILES_OUT) $(CC_FILES_OUT) -I$(INC_DIR)
-	@grub-file --is-x86-multiboot $(BIN_OUT)
+	@$(LK) -T $(LD) -o $(BIN_OUT) $(LK_FLAGS) $(AS_FILES_OUT) $(CC_FILES_OUT) -I$(INC_DIR)
+	@echo Link success.
+	@grub-file --is-x86-multiboot2 $(BIN_OUT)
 
 	@mkdir -p bin/isodir/boot/grub
 	@cp $(BIN_OUT) bin/isodir/boot/$(BIN)
 	@cp src/grub.cfg bin/isodir/boot/grub.cfg
-	@grub-mkrescue -o $(ISO) bin/isodir
+	@grub-mkrescue /usr/lib/grub/i386-pc -o $(ISO) bin/isodir
 	@cp $(BIN_OUT) $(BIN)
 
 clean:
