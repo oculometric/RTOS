@@ -1,3 +1,4 @@
+.section .text
 .code16
 
 idt_real:
@@ -26,8 +27,8 @@ enter_real_mode:
     and $0x7FFFFFFe, %eax
     mov %eax, %cr0
 
-    ljmp $0, real_mode_begin // TODO: this wont compile
-
+    ljmp $0, $real_mode_begin
+    
 real_mode_begin:
     // set stack pointer
     mov $0x8000, %sp

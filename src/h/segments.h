@@ -12,6 +12,8 @@ struct global_descriptor_entry
     uint8_t base_high;
 };
 
+#define GDT_SIZE sizeof(global_descriptor_entry)
+
 enum gdt_privilege
 {
     RING_0 = 0b00000000,
@@ -42,12 +44,5 @@ enum gdt_flags
     LONG_PAGE         = 0b10100000
 };
 
-void populate_gdt_entry(global_descriptor_entry& entry, uint32_t base, uint32_t limit, gdt_privilege dpl, gdt_access_type access, gdt_flags flags)
-{
-    entry.limit_low = limit & 0xFFFF;
-    entry.base_low = base & 0xFFFF;
-    entry.base_mid = (base >> 16) & 0xFF;
-    entry.access = 0b10000000 | dpl | access;
-    entry.attributes = flags | ((limit >> 16) & 0xF);
-    entry.base_high = (base >> 24) & 0xFF;
-}
+void populate_gdt_entry(global_descriptor_entry&, uint32_t, uint32_t, gdt_privilege, gdt_access_type, gdt_flags);
+void init_flat_gdt(void*, void*);
