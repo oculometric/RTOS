@@ -24,8 +24,6 @@ void kernel_main()
 	int i = 0;
     while (true)
 	{
-		//serial_output(COM1, (uint8_t*)text);
-
 		i++;
 		if (i >= 25*80)
 		{
@@ -35,6 +33,7 @@ void kernel_main()
 		terminal_buffer[i] = (uint16_t)c | ((uint16_t) 0 << 8) | ((uint16_t) 4 << 12);
 		if (c == 255) break;
 	}
+
 	serial_output(COM1, (uint8_t*)"now i am going to try and perform an interrupt.\n");
 
 	uint16_t kb = 0;
@@ -42,6 +41,7 @@ void kernel_main()
 	asm volatile ("int $0x12");
 	asm volatile ("mov %0, %%ax" : "=a"(kb));
 
-	serial_output(COM1, (kb >> 8) & 0b11111111);
-	serial_output(COM1, kb & 0b11111111);
+	serial_output(COM1, (uint8_t*)"woo yaay!");
+
+	serial_output_u16(COM1, kb);
 }

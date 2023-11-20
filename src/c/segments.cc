@@ -33,14 +33,17 @@ void init_flat_gdt(uint8_t* gdt_address, uint8_t* TSS)
     populate_gdt_entry(working_entry, (uint32_t)TSS, sizeof(*TSS), gdt_privilege::RING_0, (gdt_access_type)0x9, (gdt_flags)0x0);
     gdt_base[3] = working_entry;
 
-    // load GDT into the segment registers TODO:HERE
+    uint16_t limit = (4*sizeof(global_descriptor_entry))-1;
+    uint32_t offset = (uint32_t)gdt_address;
+
+    // load GDT into the segment registers
     asm volatile
     (
         "gdtr:                      \n\t"
         "   .int 0                  \n\t"
         "   .long 0                 \n\t"
-        "mov %%limit, (gdtr)        \n\t"
-        "mov %%base, (gdtr + 2)     \n\t"
+        "mov %0, (gdtr)             \n\t"
+        "mov %1, (gdtr + 2)         \n\t"
         "lgdt (gdtr)                \n\t"
-    );
+    : "=r"(limit), "=r"(offset));
 }
