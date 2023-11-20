@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include "serial.h"
+#include "segments.h"
 
 extern "C"
 void kernel_main()
@@ -34,12 +35,25 @@ void kernel_main()
 		if (c == 255) break;
 	}
 
+	serial_output(COM1, (uint8_t*)"initialising GDT...\n");
+
+	global_descriptor_entry gdt_address[4] = { NULL };
+	init_flat_gdt((uint8_t *)gdt_address, NULL);
+
+	serial_output(COM1, (uint8_t*)"GDT placed at ");
+	serial_output_u32(COM1, (uint32_t)gdt_address);
+	serial_output(COM1, (uint8_t*)" size ");
+	serial_output_u16(COM1, (4*sizeof(global_descriptor_entry))-1);
+	serial_output(COM1, '\n');
+
+	serial_output(COM1, (uint8_t*)"checking current CS:IP...\n");
+
 	serial_output(COM1, (uint8_t*)"now i am going to try and perform an interrupt.\n");
 
 	uint16_t kb = 0;
 	asm volatile ("clc");
 	asm volatile ("int $0x12");
-	asm volatile ("mov %0, %%ax" : "=a"(kb));
+	asm volatile ("mov %0, %%ax" : "=r"(kb));
 
 	serial_output(COM1, (uint8_t*)"woo yaay!");
 

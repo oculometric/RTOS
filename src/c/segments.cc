@@ -45,5 +45,6 @@ void init_flat_gdt(uint8_t* gdt_address, uint8_t* TSS)
         "mov %0, (gdtr)             \n\t"
         "mov %1, (gdtr + 2)         \n\t"
         "lgdt (gdtr)                \n\t"
-    : "=r"(limit), "=r"(offset));
+    :: "r"(limit), "r"(offset));
+    // TODO: we maybe need to perform a far jump to set CS
 }

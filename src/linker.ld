@@ -8,6 +8,7 @@ SECTIONS
     {
         . = ALIGN(8);
         KEEP(*(.multiboot_header))
+        *(.text16)
         *(.text)
     }
 

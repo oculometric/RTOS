@@ -1,4 +1,4 @@
-.section .text
+.section .text16
 .code16
 
 idt_real:

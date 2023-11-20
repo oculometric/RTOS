@@ -45,4 +45,4 @@ enum gdt_flags
 };
 
 void populate_gdt_entry(global_descriptor_entry&, uint32_t, uint32_t, gdt_privilege, gdt_access_type, gdt_flags);
-void init_flat_gdt(void*, void*);
+void init_flat_gdt(uint8_t*, uint8_t*);
