@@ -1,5 +1,5 @@
-PREFIX		= /usr/bin/
-CC			= $(PREFIX)g++
+PREFIX		= /usr/bin/x86_64-w64-mingw32-
+CC			= $(PREFIX)gcc
 CC_FLAGS 	= -fpic -ffreestanding -fno-stack-protector -fno-stack-check -fshort-wchar -mno-red-zone -maccumulate-outgoing-args
 AS			= $(PREFIX)as
 LK			= $(PREFIX)ld
@@ -8,8 +8,8 @@ GNU_EFI_INC_DIR = /usr/include/efi
 GNU_EFI_DIR = static_gnu_efi
 GNU_RELOCATOR = $(GNU_EFI_DIR)/x86_64/gnuefi/crt0-efi-x86_64.o
 
-OVMF_DIR	= ovmf
-OVMF_FLASH	= ovmf/RELEASEX64_OVMF.fd
+OVMF_DIR	= /usr/share/OVMF/
+OVMF_FLASH	= /usr/share/ovmf/OVMF.fd
 
 CC_DIR		= src/c
 INC_DIR		= src/h
@@ -23,7 +23,7 @@ CC_FILES_OUT=$(patsubst $(CC_DIR)/%.cc, $(OBJ_DIR)/%.o, $(CC_FILES_IN))
 AS_FILES_OUT=$(patsubst $(AS_DIR)/%.s, $(OBJ_DIR)/%.o, $(AS_FILES_IN))
 
 LD			= $(GNU_EFI_DIR)/gnuefi/elf_x86_64_efi.lds
-LD_LIB		= -shared -Bsymbolic -L$(GNU_EFI_DIR)/x86_64/lib -L$(GNU_EFI_DIR)/x86_64/gnuefi
+LD_LIB		= -shared -Bsymbolic -L$(GNU_EFI_DIR)/x86_64/lib -L$(GNU_EFI_DIR)/x86_64/gnuefi -nostdlib -e efi_main
 
 BIN 		= rtos
 BIN_OUT		= bin/$(BIN)
@@ -58,6 +58,9 @@ fat: build
 	@cp $(BIN_OUT).efi bin/BOOTX64.EFI
 	@mcopy -i $(FAT_IMG) bin/BOOTX64.EFI ::/EFI/BOOT
 	@cp $(FAT_IMG) $(BIN).img
+
+	@mkdir -p bin/image/EFI/BOOT
+	@cp -f bin/BOOTX64.EFI bin/image/EFI/BOOT
 	@echo Done.
 
 harddrive: fat
@@ -72,5 +75,4 @@ clean:
 	@echo Cleaned.
 
 emulate: harddrive
-	@#qemu-system-i386 -kernel $(BIN_OUT) -serial file:serial.log -machine type=pc-i440fx-3.1 --no-shutdown --no-reboot
-	sudo qemu-system-x86_64 -bios $(OVMF_FLASH) -kernel bin/rtos.efi -serial file:serial.log
+	qemu-system-x86_64 -bios $(OVMF_FLASH) -hda $(BIN).bin -serial file:serial.log
