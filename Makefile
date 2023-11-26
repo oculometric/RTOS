@@ -36,7 +36,7 @@ obj_dir:
 
 $(OBJ_DIR)/%.o: $(CC_DIR)/%.c obj_dir
 	@echo Compiling $<...
-	@$(CC) -c $< -o $@ $(CC_FLAGS) -I$(INC_DIR) -I$(GNU_EFI_INC_DIR)
+	@$(CC) -I$(INC_DIR) -I$(GNU_EFI_INC_DIR) -c $< -o $@ $(CC_FLAGS)
 
 $(OBJ_DIR)/%.o: $(AS_DIR)/%.s obj_dir
 	@echo Compiling $<...

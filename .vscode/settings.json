@@ -3,6 +3,7 @@
         "src/h"
     ],
     "files.associations": {
-        "efi.h": "c"
+        "efi.h": "c",
+        "efilib.h": "c"
     }
 }
