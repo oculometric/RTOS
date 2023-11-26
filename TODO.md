@@ -1,11 +1,11 @@
 - [+] set up build environment
 - [+] early boot
 - [+] text on screen
-- [ ] numbers to text
+- [+] numbers to text
 - [+] console/serial logging
+- [+] UEFI boot
+- [ ] working UEFI build environment
 - [ ] GDT
-- [ ] protected-to-real
-- [ ] real-to-protected
 - [ ] interrupts
 - [ ] memory management
 - [ ] basic keyboard input and output
