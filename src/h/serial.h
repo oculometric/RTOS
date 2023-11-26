@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 #include "io.h"
+#define CHARS_FOR_ITOS "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 #define COM1 0x3F8
 #define COM2 0x2F8

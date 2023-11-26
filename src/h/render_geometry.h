@@ -28,7 +28,7 @@ inline float operator^(const rtos_vector3& v, const rtos_vector3& w) { return (v
 inline rtos_vector3 operator%(const rtos_vector3& v, const rtos_vector3& w) { return rtos_vector3{ (v.y*w.z)-(v.z*w.y), (v.z*w.x)-(v.x*w.z), (v.x*w.y)-(v.y*w.x) }; }
 
 inline float mag_sq(rtos_vector3& v) { return v.x * v.y * v.z; }
-inline float mag(rtos_vector3& v) { sqrt(mag_sq(v)); }
+inline float mag(rtos_vector3& v) { return sqrt(mag_sq(v)); }
 inline void norm_self(rtos_vector3& v) { v /= mag(v); }
 rtos_vector3 norm_copy(rtos_vector3& v) { return v / mag(v); }
 
