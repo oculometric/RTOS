@@ -1,6 +1,0 @@
-hello! i am alive.
-all work no play makes jack a dull boy
-initialising GDT...
-GDT placed at 0x00204FD0 size 0x001F
-checking current CS:IP...
-now i am going to try and perform an interrupt.

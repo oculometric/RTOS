@@ -2,7 +2,8 @@ ENTRY(_start)
 
 SECTIONS
 {
-    . = 2M;
+    . = 0x100000;
+    KERNEL_START = .;
 
     .text BLOCK(4K) : ALIGN(4K)
     {
