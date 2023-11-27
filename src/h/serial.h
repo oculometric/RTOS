@@ -26,7 +26,7 @@ static inline uint8_t read_COM_register(uint32_t port, uint8_t reg)
 
 static inline void write_COM_register(uint32_t port, uint8_t reg, uint8_t value)
 {
-    return outb(port+reg, value);
+    outb(port+reg, value);
 }
 
 void serial_output_c(uint32_t, uint8_t);

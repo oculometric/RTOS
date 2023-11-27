@@ -3,7 +3,7 @@
 void serial_output_c(uint32_t port, uint8_t c)
 {
     // wait for line to be clear
-    while (!(read_COM_register(port, LINE_STATUS) & 0b00100000));
+    while (!(read_COM_register(port, LINE_STATUS) & 0x20));
     // write the character
     write_COM_register(port, DATA, c);
 }
@@ -11,7 +11,7 @@ void serial_output_c(uint32_t port, uint8_t c)
 uint8_t serial_input(uint32_t port)
 {
     // wait for data to be available
-    while (!(read_COM_register(port, LINE_STATUS) & 0b00000001));
+    while (!(read_COM_register(port, LINE_STATUS) & 0x01));
     // read the character
     return read_COM_register(port, DATA);
 }
@@ -72,21 +72,21 @@ int initialise_serial(uint32_t port, uint16_t baud)
     // disable interrupts
     write_COM_register(port, INTERRUPT_ENABLE, 0x00);
     // set DLAB
-    write_COM_register(port, LINE_CONTROL, 0b10000000);
+    write_COM_register(port, LINE_CONTROL, 0x80);
     // set baud rate
     uint16_t baud_rate_divisor = 115200/baud;
-    write_COM_register(port, DATA, baud_rate_divisor & 0b11111111);
-    write_COM_register(port, INTERRUPT_ENABLE, (baud_rate_divisor >> 8) & 0b11111111);
+    write_COM_register(port, DATA, baud_rate_divisor & 0xFF);
+    write_COM_register(port, INTERRUPT_ENABLE, (baud_rate_divisor >> 8) & 0xFF);
     // set line config, and clear DLAB
-    write_COM_register(port, LINE_CONTROL, 0b00000011);
+    write_COM_register(port, LINE_CONTROL, 0x03);
     // enable FIFO, clear them, with 14 bit threshold (why do we do this? nobody knows!)
     write_COM_register(port, INTERRUPT_ID, 0xC7);
     // enable OUT2 pin/IRQ, request to send pin (RTS), and data terminal ready (DTR)
-    write_COM_register(port, MODEM_CONTROL, 0b00001011);
+    write_COM_register(port, MODEM_CONTROL, 0x0B);
 
     // perform loopback test
     // set loop, OUT1, OUT2, RTS
-    write_COM_register(port, MODEM_CONTROL, 0b00011110);
+    write_COM_register(port, MODEM_CONTROL, 0x1E);
     // send test byte
     write_COM_register(port, DATA, 0xAE);
 
@@ -94,6 +94,6 @@ int initialise_serial(uint32_t port, uint16_t baud)
         return 1; // serial port faulty or i fucked something up
 
     // enter normal operation
-    write_COM_register(port, MODEM_CONTROL, 0b00001111);
+    write_COM_register(port, MODEM_CONTROL, 0x0F);
     return 0;
 }

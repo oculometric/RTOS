@@ -1,15 +1,17 @@
-PREFIX		= /usr/bin/x86_64-w64-mingw32-
+PREFIX		= /opt/cross/i686-elf/bin/i686-elf-
 CC			= $(PREFIX)gcc
-CC_FLAGS 	= -fpic -ffreestanding -fno-stack-protector -fno-stack-check -fshort-wchar -mno-red-zone -maccumulate-outgoing-args
 AS			= $(PREFIX)as
 LK			= $(PREFIX)gcc
+OC			= $(PREFIX)objcopy
 
 GNU_EFI_INC_DIR = /usr/include/efi
-GNU_EFI_DIR = static_gnu_efi
-GNU_RELOCATOR = $(GNU_EFI_DIR)/x86_64/gnuefi/crt0-efi-x86_64.o
+GNU_EFI_DIR = ../gnu-efi
 
-OVMF_DIR	= /usr/share/OVMF/
-OVMF_FLASH	= /usr/share/ovmf/OVMF.fd
+CC_FLAGS 	= -ffreestanding -fpic -fno-stack-protector -fshort-wchar -mgeneral-regs-only -Wall -Wextra -Wpedantic
+
+LK_DOC		= $(GNU_EFI_DIR)/gnuefi/elf_ia32_efi.lds
+LK_FLAGS	= -nostdlib -shared -Wl,-T,$(LK_DOC) -Wl,-Bsymbolic -Wl,-znocombreloc
+LIB_SEARCH	= -L$(GNU_EFI_DIR)/x86_64/lib -L$(GNU_EFI_DIR)/x86_64/gnuefi
 
 CC_DIR		= src/c
 INC_DIR		= src/h
@@ -22,21 +24,25 @@ AS_FILES_IN	:= $(wildcard $(AS_DIR)/*.s)
 CC_FILES_OUT=$(patsubst $(CC_DIR)/%.c, $(OBJ_DIR)/%.o, $(CC_FILES_IN))
 AS_FILES_OUT=$(patsubst $(AS_DIR)/%.s, $(OBJ_DIR)/%.o, $(AS_FILES_IN))
 
-LD			= $(GNU_EFI_DIR)/gnuefi/elf_x86_64_efi.lds
-LD_FLAGS	= -nostdlib -Wl,-dll -shared -Wl,--subsystem,10 -e efi_main -L$(GNU_EFI_DIR)/x86_64/lib -L$(GNU_EFI_DIR)/x86_64/gnuefi -lgnuefi -lefi -I$(INC_DIR) -I$(GNU_EFI_INC_DIR)
-
 BIN 		= rtos
 BIN_OUT		= bin/$(BIN)
+EFI_OUT		= bin/BOOTIA32.EFI
 
 ISO			= $(BIN_OUT).iso
 FAT_IMG		= $(BIN_OUT).img
+
+OVMF_DIR	= OVMF
+
+QEMU_DRIVER = $(OVMF_DIR)/OVMF-pure-efi.fd
+OVMF_CODE	= $(OVMF_DIR)/OVMF_CODE-pure-efi.fd
+OVMF_VARS	= $(OVMF_DIR)/OVMF_VARS-pure-efi.fd
 
 obj_dir:
 	@[ -d $(OBJ_DIR) ] || mkdir $(OBJ_DIR) -p
 
 $(OBJ_DIR)/%.o: $(CC_DIR)/%.c obj_dir
 	@echo Compiling $<...
-	@$(CC) -I$(INC_DIR) -I$(GNU_EFI_INC_DIR) -c $< -o $@ $(CC_FLAGS)
+	@$(CC) $(CC_FLAGS) -I$(INC_DIR) -I$(GNU_EFI_INC_DIR) -o $@ -c $<
 
 $(OBJ_DIR)/%.o: $(AS_DIR)/%.s obj_dir
 	@echo Compiling $<...
@@ -44,10 +50,10 @@ $(OBJ_DIR)/%.o: $(AS_DIR)/%.s obj_dir
 
 build: $(CC_FILES_OUT) $(AS_FILES_OUT) obj_dir
 	@echo Linking...
-	@$(LK) $(LD_FLAGS) -o $(BIN_OUT).efi $(AS_FILES_OUT) $(CC_FILES_OUT) -lgnuefi
+	@$(LK) $(LK_FLAGS) $(LIB_SEARCH) -o $(BIN_OUT).elf $(AS_FILES_OUT) $(CC_FILES_OUT) -lgnuefi -lefi -lgcc
+	@$(OC) -I elf32_i386 -O efi-app-ia32 $(BIN_OUT).elf $(EFI_OUT)
 	@echo Link success.
 
-	#@objcopy -j .text -j .sdata -j .data -j .dynamic -j .dynsym  -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --target efi-app-x86_64 --subsystem=10 $(BIN_OUT).so $(BIN_OUT).efi
 
 fat: build
 	@echo Building FAT image...
@@ -55,12 +61,8 @@ fat: build
 	@mformat -i $(FAT_IMG) -f 1440 ::
 	@mmd -i $(FAT_IMG) ::/EFI
 	@mmd -i $(FAT_IMG) ::/EFI/BOOT
-	@cp $(BIN_OUT).efi bin/BOOTX64.EFI
-	@mcopy -i $(FAT_IMG) bin/BOOTX64.EFI ::/EFI/BOOT
+	@mcopy -i $(FAT_IMG) $(EFI_OUT) ::/EFI/BOOT
 	@cp $(FAT_IMG) $(BIN).img
-
-	@mkdir -p bin/image/EFI/BOOT
-	@cp -f bin/BOOTX64.EFI bin/image/EFI/BOOT
 	@echo Done.
 
 harddrive: fat
@@ -74,5 +76,11 @@ clean:
 	@rm -f $(BIN).img
 	@echo Cleaned.
 
-emulate: harddrive
-	qemu-system-x86_64 -bios $(OVMF_FLASH) -hda $(BIN).bin -serial file:serial.log
+emulate: fat
+	qemu-system-i386 -bios $(OVMF_FLASH) -hda $(BIN).bin -serial file:serial.log
+
+	qemu-system-i386 -machine q35 -m 256 -smp 2 -net none \
+	-global driver=$(QEMU_DRIVER),property=secure,value=on \
+	-drive if=pflash,format=raw,unit=0,file=$(OVMF_CODE),readonly=on \
+    -drive if=pflash,format=raw,unit=1,file=$(OVMF_VARS) \
+    -drive if=ide,format=raw,file=$(BIN).img
