@@ -8,8 +8,8 @@ make
 
 cd ..
 
-export TARGET=i686-elf
-export TARGETS=$TARGET,i686-pe
+export TARGET=x86_64-elf
+export TARGETS=$TARGET,x86_64-pe
 
 export PREFIX=/opt/cross/$TARGET
 export PATH="$PREFIX/bin:$PATH"

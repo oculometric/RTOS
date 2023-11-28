@@ -1,4 +1,4 @@
-PREFIX		= /opt/cross/i686-elf/bin/i686-elf-
+PREFIX		= /opt/cross/x86_64-elf/bin/x86_64-elf-
 CC			= $(PREFIX)gcc
 AS			= $(PREFIX)as
 LK			= $(PREFIX)gcc
@@ -7,9 +7,10 @@ OC			= $(PREFIX)objcopy
 GNU_EFI_INC_DIR = /usr/include/efi
 GNU_EFI_DIR = ../gnu-efi
 
-CC_FLAGS 	= -ffreestanding -fpic -fno-stack-protector -fshort-wchar -mgeneral-regs-only -Wall -Wextra -Wpedantic
+CC_FLAGS 	= -ffreestanding -fpic -fno-stack-protector -fshort-wchar -mgeneral-regs-only -Wall -Wextra -Wpedantic -mno-red-zone -mabi=ms
 
-LK_DOC		= $(GNU_EFI_DIR)/gnuefi/elf_ia32_efi.lds
+LK_DOC		= $(GNU_EFI_DIR)/gnuefi/elf_x86_64_efi.lds
+LK_DOC		= linker.ld
 LK_FLAGS	= -nostdlib -shared -Wl,-T,$(LK_DOC) -Wl,-Bsymbolic -Wl,-znocombreloc
 LIB_SEARCH	= -L$(GNU_EFI_DIR)/x86_64/lib -L$(GNU_EFI_DIR)/x86_64/gnuefi
 
@@ -26,7 +27,7 @@ AS_FILES_OUT=$(patsubst $(AS_DIR)/%.s, $(OBJ_DIR)/%.o, $(AS_FILES_IN))
 
 BIN 		= rtos
 BIN_OUT		= bin/$(BIN)
-EFI_OUT		= bin/BOOTIA32.EFI
+EFI_OUT		= bin/BOOTX64.EFI
 
 ISO			= $(BIN_OUT).iso
 FAT_IMG		= $(BIN_OUT).img
@@ -51,7 +52,7 @@ $(OBJ_DIR)/%.o: $(AS_DIR)/%.s obj_dir
 build: $(CC_FILES_OUT) $(AS_FILES_OUT) obj_dir
 	@echo Linking...
 	@$(LK) $(LK_FLAGS) $(LIB_SEARCH) -o $(BIN_OUT).elf $(AS_FILES_OUT) $(CC_FILES_OUT) -lgnuefi -lefi -lgcc
-	@$(OC) -I elf32_i386 -O efi-app-ia32 $(BIN_OUT).elf $(EFI_OUT)
+	@$(OC) -I elf64-x86-64 -O efi-app-x86_64 $(BIN_OUT).elf $(EFI_OUT)
 	@echo Link success.
 
 
@@ -74,13 +75,22 @@ harddrive: fat
 clean:
 	@rm -fr bin
 	@rm -f $(BIN).img
+	@rm -f $(BIN).bin
 	@echo Cleaned.
 
 emulate: fat
-	qemu-system-i386 -bios $(OVMF_FLASH) -hda $(BIN).bin -serial file:serial.log
+	#qemu-system-i386 -bios $(OVMF_FLASH) -hda $(BIN).bin -serial file:serial.log
 
-	qemu-system-i386 -machine q35 -m 256 -smp 2 -net none \
-	-global driver=$(QEMU_DRIVER),property=secure,value=on \
-	-drive if=pflash,format=raw,unit=0,file=$(OVMF_CODE),readonly=on \
-    -drive if=pflash,format=raw,unit=1,file=$(OVMF_VARS) \
-    -drive if=ide,format=raw,file=$(BIN).img
+	#qemu-system-i386 -machine q35 -m 256 -smp 2 -net none \
+	#-global driver=$(QEMU_DRIVER),property=secure,value=on \
+	#-drive if=pflash,format=raw,unit=0,file=$(OVMF_CODE),readonly=on \
+    #-drive if=pflash,format=raw,unit=1,file=$(OVMF_VARS) \
+    #-drive if=ide,format=raw,file=$(BIN).img
+
+	#qemu-system-x86_64 -machine q35 -m 256 -smp 2 -net none \
+    #-global driver=$(QEMU_DRIVER),property=secure,value=on \
+    #-drive if=pflash,format=raw,unit=0,file=$(OVMF_CODE),readonly=on \
+    #-drive if=pflash,format=raw,unit=1,file=$(OVMF_VARS) \
+    #-drive if=ide,format=raw,file=$(BIN).img
+
+	qemu-system-x86_64 -pflash $(QEMU_DRIVER) -drive if=ide,format=raw,file=$(BIN).img -net none -serial file:serial.log

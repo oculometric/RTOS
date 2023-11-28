@@ -8,7 +8,7 @@
                 "src/h"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/x86_64-w64-mingw32-gcc",
+            "compilerPath": "/opt/cross/i686-elf/bin/i686-elf-gcc",
             "cStandard": "c17",
             "cppStandard": "c++14",
             "intelliSenseMode": "linux-gcc-x64"
