@@ -1,5 +1,5 @@
-ARCH 		= x86
-SUBSYSTEM	= 10
+ARCH 			= x64
+SUBSYSTEM		= 10
 
 ifeq ($(shell uname -m),x86_64)
   MINGW_HOST    = w64
@@ -12,22 +12,22 @@ ifeq ($(ARCH),x64)
 	GCC_ARCH		= x86_64
 	QEMU_ARCH		= x86_64
 	FW_BASE			= OVMF
-	CROSS_COMPILE	= $(GCC_ARCH)-$(MINGW_HOST)-mingw32-
+	#CROSS_COMPILE	= $(GCC_ARCH)-$(MINGW_HOST)-mingw32-
+	CROSS_COMPILE	= 
 	EP_PREFIX		=
 	C_FLAGS			= -m64 -mno-red-zone
-	LD_FLAGS		= -Wl,-dll -Wl,--subsystem,$(SUBSYSTEM)
+	LD_FLAGS		= -Wl,-dll #-Wl,--subsystem,$(SUBSYSTEM)
 endif
 
 CC			:= $(CROSS_COMPILE)gcc
-OBJCOPY		:= $(CROSS_COMPILE)objcopy
 AS			:= $(CROSS_COMPILE)as
-LK			:= $(CROSS_COMPILE)gcc
+LD			:= $(CROSS_COMPILE)gcc
 OC			:= $(CROSS_COMPILE)objcopy
 
-CC_DIR		= src/arch/$(ARCH)/c
-INC_DIR		= src/arch/$(ARCH)/h
-AS_DIR		= src/arch/$(ARCH)/s
-OBJ_DIR		= bin/arch/$(ARCH)/o
+CC_DIR		= src/arch/$(GCC_ARCH)/c
+INC_DIR		= src/arch/$(GCC_ARCH)/h
+AS_DIR		= src/arch/$(GCC_ARCH)/s
+OBJ_DIR		= bin/arch/$(GCC_ARCH)/o
 
 GNUEFI_DIR = ../gnu-efi
 
@@ -37,33 +37,32 @@ C_DEFS		= -DCONFIG_$(GNUEFI_ARCH) -D__MAKEWITH_GNUEFI -DGNU_EFI_USE_MS_ABI
 
 LD_FLAGS	+= -s -Wl,-Bsymbolic -nostdlib -shared
 LD_LIB		+= -L$(GNUEFI_DIR)/$(GNUEFI_ARCH)/lib -e $(EP_PREFIX)efi_main
-LIBS		= -lefi $(CRT0_LIBS)
+LIBS		= -lefi -lgnuefi
 
+QEMU		= qemu-system-$(QEMU_ARCH)
 
+#LK_DOC		= $(GNU_EFI_DIR)/gnuefi/elf_x86_64_efi.lds
+#LK_DOC		= linker.ld
+#LK_FLAGS	= -nostdlib -shared,-T,$(LK_DOC) -Wl,-Bsymbolic -Wl,-znocombreloc
+#LIB_SEARCH	= -L$(GNU_EFI_DIR)/x86_64/lib -L$(GNU_EFI_DIR)/x86_64/gnuefi
 
-LK_DOC		= $(GNU_EFI_DIR)/gnuefi/elf_x86_64_efi.lds
-LK_DOC		= linker.ld
-LK_FLAGS	= -nostdlib -shared,-T,$(LK_DOC) -Wl,-Bsymbolic -Wl,-znocombreloc
-LIB_SEARCH	= -L$(GNU_EFI_DIR)/x86_64/lib -L$(GNU_EFI_DIR)/x86_64/gnuefi
+CC_FILES_IN		:= $(wildcard $(CC_DIR)/*.c)
+AS_FILES_IN		:= $(wildcard $(AS_DIR)/*.s)
 
-CC_FILES_IN	:= $(wildcard $(CC_DIR)/*.c)
-AS_FILES_IN	:= $(wildcard $(AS_DIR)/*.s)
+CC_FILES_OUT	= $(patsubst $(CC_DIR)/%.c, $(OBJ_DIR)/%.o, $(CC_FILES_IN))
+AS_FILES_OUT	= $(patsubst $(AS_DIR)/%.s, $(OBJ_DIR)/%.o, $(AS_FILES_IN))
 
-CC_FILES_OUT=$(patsubst $(CC_DIR)/%.c, $(OBJ_DIR)/%.o, $(CC_FILES_IN))
-AS_FILES_OUT=$(patsubst $(AS_DIR)/%.s, $(OBJ_DIR)/%.o, $(AS_FILES_IN))
+BIN 			= novos_$(ARCH)
+BIN_OUT			= bin/$(BIN)
+EFI_OUT			= bin/arch/$(GCC_ARCH)/BOOT$(ARCH).EFI
 
-BIN 		= novos
-BIN_OUT		= bin/$(BIN)
-EFI_OUT		= bin/arch/$(ARCH)/BOOTX64.EFI
+ISO				= $(BIN_OUT).iso
+FAT_IMG			= $(BIN_OUT).img
 
-ISO			= $(BIN_OUT).iso
-FAT_IMG		= $(BIN_OUT).img
+OVMF_DIR		= OVMF
+OVMF_FIRMWARE 	= $(OVMF_DIR)/OVMF-pure-efi.fd
 
-OVMF_DIR	= OVMF
-
-QEMU_DRIVER = $(OVMF_DIR)/OVMF-pure-efi.fd
-OVMF_CODE	= $(OVMF_DIR)/OVMF_CODE-pure-efi.fd
-OVMF_VARS	= $(OVMF_DIR)/OVMF_VARS-pure-efi.fd
+all: $(EFI_OUT)
 
 obj_dir:
 	@[ -d $(OBJ_DIR) ] || mkdir $(OBJ_DIR) -p
@@ -72,21 +71,26 @@ $(OBJ_DIR)/%.o: $(CC_DIR)/%.c obj_dir
 	@echo Compiling $<...
 	@$(CC) $(C_FLAGS) $(C_INC) $(C_DEFS) -o $@ -c $<
 
-build: $(CC_FILES_OUT) $(AS_FILES_OUT) obj_dir
+$(EFI_OUT): $(CC_FILES_OUT) $(AS_FILES_OUT) obj_dir
 	@echo Linking...
-	@$(LK) $(LK_FLAGS) $(LIB_SEARCH) -o $(BIN_OUT).elf $(AS_FILES_OUT) $(CC_FILES_OUT) -lgnuefi -lefi -lgcc
-	@$(OC) -I elf64-x86-64 -O efi-app-x86_64 $(BIN_OUT).elf $(EFI_OUT)
+	@$(LD) $(LD_FLAGS) $(LD_LIB) -o $(BIN_OUT).elf $(AS_FILES_OUT) $(CC_FILES_OUT) $(LIBS)
+	#@$(OC) -I elf64-x86-64 -O efi-app-x86_64 $(BIN_OUT).elf $(EFI_OUT)
+	@mkdir -p bin/arch/$(GCC_ARCH)
+	@$(OC) -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel* -j .rela* -j .reloc -j .eh_frame -O binary $(BIN_OUT).elf $(EFI_OUT)
 	@echo Link success.
 
-
-fat: build
+$(FAT_IMG): $(EFI_OUT)
 	@echo Building FAT image...
-	@dd if=/dev/zero of=$(FAT_IMG) bs=1k count=1440
-	@mformat -i $(FAT_IMG) -f 1440 ::
-	@mmd -i $(FAT_IMG) ::/EFI
-	@mmd -i $(FAT_IMG) ::/EFI/BOOT
-	@mcopy -i $(FAT_IMG) $(EFI_OUT) ::/EFI/BOOT
-	@cp $(FAT_IMG) $(BIN).img
+	@dd if=/dev/zero of=$@ bs=1k count=1440
+	@mformat -i $@ -f 1440 ::
+	@mmd -i $@ ::/EFI
+	@mmd -i $@ ::/EFI/BOOT
+	@mcopy -i $@ $(EFI_OUT) ::/EFI/BOOT
+	@cp $@ $(BIN).img
+
+	@mkdir -p image/efi/boot
+	@cp -f $(EFI_OUT) image/efi/boot/BOOT$(ARCH).EFI
+
 	@echo Done.
 
 harddrive: fat
@@ -101,19 +105,5 @@ clean:
 	@rm -f $(BIN).bin
 	@echo Cleaned.
 
-emulate: fat
-	#qemu-system-i386 -bios $(OVMF_FLASH) -hda $(BIN).bin -serial file:serial.log
-
-	#qemu-system-i386 -machine q35 -m 256 -smp 2 -net none \
-	#-global driver=$(QEMU_DRIVER),property=secure,value=on \
-	#-drive if=pflash,format=raw,unit=0,file=$(OVMF_CODE),readonly=on \
-    #-drive if=pflash,format=raw,unit=1,file=$(OVMF_VARS) \
-    #-drive if=ide,format=raw,file=$(BIN).img
-
-	#qemu-system-x86_64 -machine q35 -m 256 -smp 2 -net none \
-    #-global driver=$(QEMU_DRIVER),property=secure,value=on \
-    #-drive if=pflash,format=raw,unit=0,file=$(OVMF_CODE),readonly=on \
-    #-drive if=pflash,format=raw,unit=1,file=$(OVMF_VARS) \
-    #-drive if=ide,format=raw,file=$(BIN).img
-
-	qemu-system-x86_64 -pflash $(QEMU_DRIVER) -drive if=ide,format=raw,file=$(BIN).img -net none -serial file:serial.log
+emulate: $(FAT_IMG)
+	$(QEMU) $(QEMU_FLAGS) -bios $(OVMF_FIRMWARE) -net none -hda fat:rw:image -serial file:serial.log

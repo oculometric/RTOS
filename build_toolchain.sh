@@ -8,12 +8,13 @@ make
 
 cd ..
 
-export TARGET=x86_64-elf
+export TARGET=x86_64-w64-mingw32
 export TARGETS=$TARGET,x86_64-pe
 
 export PREFIX=/opt/cross/$TARGET
 export PATH="$PREFIX/bin:$PATH"
 
+rm -fr build-binutils
 mkdir build-binutils
 cd build-binutils
 ../binutils-*/configure --target=$TARGET --enable-targets=$TARGETS --prefix="$PREFIX" --with-sysroot --disable-nls
@@ -22,6 +23,7 @@ sudo make install
 
 cd ..
 
+rm -fr build-gcc
 mkdir build-gcc
 cd build-gcc
 ../gcc-*/configure --target=$TARGET --prefix="$PREFIX" --disable-nls --enable-languages=c,c++ --without-headers
@@ -29,6 +31,5 @@ make all-gcc
 make all-target-libgcc
 sudo make install-gcc
 sudo make install-target-libgcc
-
 
 echo "prefix is $PREFIX"
