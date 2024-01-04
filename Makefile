@@ -1,5 +1,5 @@
 assemble:
-	nasm -f bin start.asm -o boot.bin
+	nasm -f bin graphical.asm -o boot.bin
 
 emulate:
 	qemu-system-x86_64 boot.bin -monitor stdio
