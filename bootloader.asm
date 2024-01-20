@@ -2,8 +2,29 @@
 section .text.boot
 
 ; setup stack pointer
+align 4
 mov bp, $+0x400
 mov sp, bp
+
+; get CPU info
+mov eax, 1
+cpuid
+mov DWORD [os_hint_table+8], ecx        ; store in hint structure
+mov DWORD [os_hint_table+12], edx       ; store in hint structure
+and edx, 0b10000000000000000000000000   ; check that we have have SSE instructions available
+cmp edx, 0
+je $                                    ; noo SSE, no game
+
+; enable SSE
+mov eax, cr0
+and ax, 0b1111111111111011  ; disable coprocessor emulation
+or ax, 0b0000000000000010   ; enable coprocessor monitoring
+mov cr0, eax
+mov eax, cr4
+or ax, 0b0000011000000000   ; set OSFXSR and OSXMMEXCPT
+mov cr4, eax
+
+jmp $
 
 jmp screen_mode_success
 
@@ -23,7 +44,6 @@ screen_mode_success:
 
 ; TODO: load disk sectors
 ; TODO: then jump to main
-; TODO: read video data
 ; TODO: read memory data
 ; TODO: enable floating point extensions
 
@@ -43,7 +63,7 @@ protected_mode_arrival:
 ; TODO: data table to pass to OS
 
 [bits 16]
-
+align 4
 ; GDT
 gdt_descriptor:
     dw (gdt_end - gdt_start) - 1    ; length - 1
@@ -71,6 +91,14 @@ gdt_end:
 
 GDT_CODE_SEGMENT_OFFSET equ gdt_code - gdt_start
 GDT_DATA_SEGMENT_OFFSET equ gdt_data - gdt_start
+
+align 4
+os_hint_table:      ; define a table of useful info to pass to the OS when we eventually jump to kernel main
+    dd gdt_descriptor   ; pointer to the GDT
+    dd 0x0              ; number of available 1k blocks
+    dd 0x0              ; contents of ECX after CPUID
+    dd 0x0              ; contents of EDX after CPUID
+    dd 0x4a6b7900       ; checksum
 
 times 510-($-$$) db 0   ; fill with zeros
 dw 0xaa55               ; define bootable signature byte
