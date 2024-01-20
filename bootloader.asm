@@ -24,9 +24,7 @@ mov eax, cr4
 or ax, 0b0000011000000000   ; set OSFXSR and OSXMMEXCPT
 mov cr4, eax
 
-jmp $
-
-jmp screen_mode_success
+;jmp screen_mode_success
 
 ; set graphics to pixel based
 mov ah, 0x4f    ; we want to talk to the VBE controller
@@ -38,14 +36,18 @@ cmp ax, 0x004f  ; check for success
 je screen_mode_success
 jmp $           ; hang
 
+; query number of memory blocks
+int 12
+jmp $
+
 screen_mode_success:
-; TODO: better demo screen
-;jmp $           ; lock up
 
 ; TODO: load disk sectors
 ; TODO: then jump to main
 ; TODO: read memory data
-; TODO: enable floating point extensions
+; TODO: project build structure
+; TODO: relocate stack?
+; TODO: keyboard/mouse IO?
 
 ; prepare for the jump to protected mode
 cli                     ; clear interrupts
