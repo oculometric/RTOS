@@ -1,5 +1,5 @@
 [org 0x7c00]
-section .text.boot
+section .boot
 
 ; set up os hint table, to be passed to OS when jumping to protected mode
 mov DWORD [OS_HINT_TABLE+OHT_GDT_OFFSET], gdt_descriptor
@@ -8,6 +8,7 @@ mov DWORD [OS_HINT_TABLE+OHT_CHKSM_OFFSET], 0x4a6b7900
 mov DWORD [OS_HINT_TABLE+OHT_BDA_OFFSET], 0x400
 mov WORD [OS_HINT_TABLE+OHT_DISKNUM_OFFSET], 0x0
 mov [OS_HINT_TABLE+OHT_DISKNUM_OFFSET], dl
+mov DWORD [OS_HINT_TABLE+OHT_NOVO_OFFSET], 0x4f564f4e
 
 ; setup stack pointer, allowing 2kb for stack immediately (almost immediately) after this bootloader
 align 4
@@ -42,7 +43,7 @@ memory_query:
     mov [OS_HINT_TABLE+OHT_LOWMEM_OFFSET], ax
 
     ; query high memory, in 24 byte entries
-    mov ax, 0x50
+    mov ax, MMAP_TABLE_ADDR / 16
     mov es, ax          ; memory map table starts here
     mov di, 0x0         ; start at zero
     mov bp, 0           ; count number of entries here
@@ -70,10 +71,46 @@ mmap_failed:
     mov cl, 'M'
     jmp show_error
 
-; TODO: load the next 512 sectors (each 512b) REMEMBER ABOUT THE STACK
+; load the next 127 sectors (each 512b)
 load_kernel_bootstrapper:
-    mov cl, 'T'
+    mov bx, KERNEL_LOAD_ADDR / 16
+    mov es, bx      ; kernel will be loaded at es:bx, so we set that to be 0:KERNEL_LOAD_ADDR
+    mov bx, 0x0
+    mov ah, 2
+    mov ch, 0       ; cylinder number
+    mov cl, 2       ; start at sector 1 (CHS sector index starts at 1 because of course it does)
+    mov dl, [OS_HINT_TABLE+OHT_DISKNUM_OFFSET] ; disk number
+    mov bp, 0       ; used to keep track of retries
+continue_kernel_loading:
+    mov ah, 2
+    mov al, 1       ; load 1 sector
+    mov dh, 0       ; head number (this gets clobbered)
+    int 0x13        ; actually do the interrupt this time
+    jc kernel_end_check
+    cmp ah, 0       ; if we failed, just try again
+    jne retry_load_kernel
+    add bx, 0x200   ; increment bx by 512
+    inc cl          ; move to next sector
+    cmp cl, 126
+    jge kernel_load_finished
+    mov bp, 0       ; reset retry counter
+    jmp continue_kernel_loading
+
+retry_load_kernel:
+    cmp bp, 3
+    jge kernel_load_failed
+    inc bp
+
+kernel_end_check:
+    cmp bx, 0x0     ; if zero, then there were no sectors to load, and thus no kernel to jump to (so dont do that)
+    je kernel_load_failed
+    jmp kernel_load_finished
+
+kernel_load_failed:
+    mov cl, 'D'
     jmp show_error
+
+kernel_load_finished:
 
 ; set graphics to pixel based
 screen_mode_setup:
@@ -86,9 +123,8 @@ screen_mode_setup:
     mov cl, 'G'
     jmp show_error
 
-; TODO: load disk sectors
+; TODO: parse ELF
 ; TODO: then jump to main
-; TODO: project build structure
 ; TODO: keyboard/mouse IO?
 
 ; prepare for the jump to protected mode
@@ -98,12 +134,13 @@ protected_mode_setup:
     mov eax, cr0            ; copy out cr0
     or eax, 0x1             ; turn on bit 0 (protected mode)
     mov cr0, eax            ; copy back into cr0
+    mov ax, GDT_DATA_SEGMENT_OFFSET
+    mov es, ax
+    mov ds, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
     jmp GDT_CODE_SEGMENT_OFFSET:protected_mode_arrival  ; perform the far jump to protected mode entry point
-
-[bits 32]
-protected_mode_arrival:
-    mov BYTE [0xb8000], 'N'
-    jmp $
 
 [bits 16]
 align 4
@@ -134,11 +171,13 @@ gdt_end:
 
 GDT_CODE_SEGMENT_OFFSET equ gdt_code - gdt_start
 GDT_DATA_SEGMENT_OFFSET equ gdt_data - gdt_start
-OS_HINT_TABLE equ 0x500
-MMAP_TABLE_ADDR equ 0x900
-BOOTLOADER_ADDR equ 0x7c00
-STACK_BASE_ADDR equ BOOTLOADER_ADDR + 0x200 + 0x800
-KERNEL_LOAD_ADDR equ STACK_BASE_ADDR + 0x100
+
+BOOTLOADER_ADDR equ 0x7c00      ; address where the bootloader (this fucker) starts
+STACK_BASE_ADDR equ BOOTLOADER_ADDR + 0x200 + 0x800 ; address where the stack base starts (the stack grows down toward the bootloader, oh boy i sure do hope that doesnt cause any problems)
+KERNEL_LOAD_ADDR equ 0x10000    ; address where the kernel will be loaded (i.e. 128 sectors of raw executable)
+KERNEL_FINAL_ADDR equ 0x100000  ; address where the kernel code should actually be (something something ELF relocation ill do it later)
+OS_HINT_TABLE equ STACK_BASE_ADDR + 0x200   ; address where the hint table for the OS will be placed, just on top of the stack (with some padding)
+MMAP_TABLE_ADDR equ STACK_BASE_ADDR + 0x600 ; address where the memory map will be placed, on top of the hint table
 
 OHT_GDT_OFFSET equ 0            ; 4 byte GDT pointer
 OHT_LOWMEM_OFFSET equ 4         ; 4 byte number of 1k memory blocks
@@ -149,6 +188,7 @@ OHT_HIGHMEM_OFFSET equ 20       ; 2 byte number of memory map table entries
 OHT_DISKNUM_OFFSET equ 22       ; 2 byte boot disk number
 OHT_BDA_OFFSET equ 24           ; 4 byte pointer to the BIOS data area
 OHT_CHKSM_OFFSET equ 28         ; 4 byte checksum
+OHT_NOVO_OFFSET equ 32          ; 4 byte secondary checksum because i'm stupid apparently
 
 show_error:             ; places the character in cl as an error code on the screen
     mov ax, 0xb800
@@ -157,6 +197,13 @@ show_error:             ; places the character in cl as an error code on the scr
     mov BYTE [es:di+1], 0x47
     mov BYTE [es:di], cl
     jmp $
+
+[bits 32]
+protected_mode_arrival:
+    mov BYTE [0xb8000], 'N'
+    mov eax, 0x4a6b7900
+    push OS_HINT_TABLE
+    jmp 0x10000                 ; geronimo!
 
 times 510-($-$$) db 0   ; fill with zeros
 dw 0xaa55               ; define bootable signature byte

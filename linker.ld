@@ -1,16 +1,11 @@
+ENTRY(_start)
+
 SECTIONS
 {
-    . = 0x7c00;
-    .text.boot: 
+    . = 1M;
+    .text :
     {
-        *(.text.boot)
-    }
-    .text.prekernel:
-    {
-        *(.text.prekernel)
-    }
-    .text:
-    {
+        *(.prekernel)
         *(.text)
     }
 }
