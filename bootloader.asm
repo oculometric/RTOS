@@ -5,10 +5,11 @@ section .text.boot
 mov DWORD [OS_HINT_TABLE+OHT_GDT_OFFSET], gdt_descriptor
 mov DWORD [OS_HINT_TABLE+OHT_MEMTBL_OFFSET], MMAP_TABLE_ADDR
 mov DWORD [OS_HINT_TABLE+OHT_CHKSM_OFFSET], 0x4a6b7900
+mov DWORD [OS_HINT_TABLE+OHT_BDA_OFFSET], 0x400
 
-; setup stack pointer
+; setup stack pointer, allowing 2kb for stack immediately (almost immediately) after this bootloader
 align 4
-mov bp, $+0x400
+mov bp, $+0x200+0x800
 mov sp, bp
 
 ; get CPU info
@@ -62,9 +63,14 @@ no_carry:
     jne next_mmap_entry ; if EBX is zero, we've reached the end, otherwise go back for another entry
 mmap_complete:
     mov [OS_HINT_TABLE+OHT_HIGHMEM_OFFSET], bp
-    jmp screen_mode_setup
+    jmp load_kernel_bootstrapper
 mmap_failed:
     mov cl, 'M'
+    jmp show_error
+
+; TODO: load the next 512 sectors (each 512b) REMEMBER ABOUT THE STACK
+load_kernel_bootstrapper:
+    mov cl, 'T'
     jmp show_error
 
 ; set graphics to pixel based
@@ -81,7 +87,6 @@ screen_mode_setup:
 ; TODO: load disk sectors
 ; TODO: then jump to main
 ; TODO: project build structure
-; TODO: relocate stack?
 ; TODO: keyboard/mouse IO?
 
 ; prepare for the jump to protected mode
@@ -136,7 +141,8 @@ OHT_CPUID_ECX equ 8
 OHT_CPUID_EDX equ 12
 OHT_HIGHMEM_OFFSET equ 16
 OHT_MEMTBL_OFFSET equ 20
-OHT_CHKSM_OFFSET equ 24
+OHT_CHKSM_OFFSET equ 28
+OHT_BDA_OFFSET equ 24
 
 ;os_hint_table:          ; define a table of useful info to pass to the OS when we eventually jump to kernel main. this table is now defined at 0x500 for safety
 ;    dd gdt_descriptor   ; pointer to the GDT
