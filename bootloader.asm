@@ -6,18 +6,20 @@ mov DWORD [OS_HINT_TABLE+OHT_GDT_OFFSET], gdt_descriptor
 mov DWORD [OS_HINT_TABLE+OHT_MEMTBL_OFFSET], MMAP_TABLE_ADDR
 mov DWORD [OS_HINT_TABLE+OHT_CHKSM_OFFSET], 0x4a6b7900
 mov DWORD [OS_HINT_TABLE+OHT_BDA_OFFSET], 0x400
+mov WORD [OS_HINT_TABLE+OHT_DISKNUM_OFFSET], 0x0
+mov [OS_HINT_TABLE+OHT_DISKNUM_OFFSET], dl
 
 ; setup stack pointer, allowing 2kb for stack immediately (almost immediately) after this bootloader
 align 4
-mov bp, $+0x200+0x800
+mov bp, STACK_BASE_ADDR
 mov sp, bp
 
 ; get CPU info
 cpu_check:
     mov eax, 1
     cpuid
-    mov DWORD [OS_HINT_TABLE+OHT_CPUID_ECX], ecx        ; store in hint structure
-    mov DWORD [OS_HINT_TABLE+OHT_CPUID_EDX], edx       ; store in hint structure
+    mov DWORD [OS_HINT_TABLE+OHT_CPUID_ECX_OFFSET], ecx        ; store in hint structure
+    mov DWORD [OS_HINT_TABLE+OHT_CPUID_EDX_OFFSET], edx       ; store in hint structure
     and edx, 0b10000000000000000000000000   ; check that we have have SSE instructions available
     cmp edx, 0
     jne sse_config                          ; noo SSE, no game
@@ -134,24 +136,19 @@ GDT_CODE_SEGMENT_OFFSET equ gdt_code - gdt_start
 GDT_DATA_SEGMENT_OFFSET equ gdt_data - gdt_start
 OS_HINT_TABLE equ 0x500
 MMAP_TABLE_ADDR equ 0x900
+BOOTLOADER_ADDR equ 0x7c00
+STACK_BASE_ADDR equ BOOTLOADER_ADDR + 0x200 + 0x800
+KERNEL_LOAD_ADDR equ STACK_BASE_ADDR + 0x100
 
-OHT_GDT_OFFSET equ 0
-OHT_LOWMEM_OFFSET equ 4
-OHT_CPUID_ECX equ 8
-OHT_CPUID_EDX equ 12
-OHT_HIGHMEM_OFFSET equ 16
-OHT_MEMTBL_OFFSET equ 20
-OHT_CHKSM_OFFSET equ 28
-OHT_BDA_OFFSET equ 24
-
-;os_hint_table:          ; define a table of useful info to pass to the OS when we eventually jump to kernel main. this table is now defined at 0x500 for safety
-;    dd gdt_descriptor   ; pointer to the GDT
-;    dd 0x0              ; number of available 1k blocks
-;    dd 0x0              ; contents of ECX after CPUID
-;    dd 0x0              ; contents of EDX after CPUID
-;    dd 0x0              ; number of memory map table entries
-;    dd MMAP_TABLE_ADDR  ; pointer to first entry in memory map table
-;    dd 0x4a6b7900       ; checksum
+OHT_GDT_OFFSET equ 0            ; 4 byte GDT pointer
+OHT_LOWMEM_OFFSET equ 4         ; 4 byte number of 1k memory blocks
+OHT_CPUID_ECX_OFFSET equ 8      ; 4 byte contents of ECX after CPUID
+OHT_CPUID_EDX_OFFSET equ 12     ; 4 byte contents of EDX after CPUID
+OHT_MEMTBL_OFFSET equ 16        ; 4 byte pointer to memory map table
+OHT_HIGHMEM_OFFSET equ 20       ; 2 byte number of memory map table entries
+OHT_DISKNUM_OFFSET equ 22       ; 2 byte boot disk number
+OHT_BDA_OFFSET equ 24           ; 4 byte pointer to the BIOS data area
+OHT_CHKSM_OFFSET equ 28         ; 4 byte checksum
 
 show_error:             ; places the character in cl as an error code on the screen
     mov ax, 0xb800
