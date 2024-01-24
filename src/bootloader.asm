@@ -179,16 +179,7 @@ KERNEL_FINAL_ADDR equ 0x100000  ; address where the kernel code should actually 
 OS_HINT_TABLE equ STACK_BASE_ADDR + 0x200   ; address where the hint table for the OS will be placed, just on top of the stack (with some padding)
 MMAP_TABLE_ADDR equ STACK_BASE_ADDR + 0x600 ; address where the memory map will be placed, on top of the hint table
 
-OHT_GDT_OFFSET equ 0            ; 4 byte GDT pointer
-OHT_LOWMEM_OFFSET equ 4         ; 4 byte number of 1k memory blocks
-OHT_CPUID_ECX_OFFSET equ 8      ; 4 byte contents of ECX after CPUID
-OHT_CPUID_EDX_OFFSET equ 12     ; 4 byte contents of EDX after CPUID
-OHT_MEMTBL_OFFSET equ 16        ; 4 byte pointer to memory map table
-OHT_HIGHMEM_OFFSET equ 20       ; 2 byte number of memory map table entries
-OHT_DISKNUM_OFFSET equ 22       ; 2 byte boot disk number
-OHT_BDA_OFFSET equ 24           ; 4 byte pointer to the BIOS data area
-OHT_CHKSM_OFFSET equ 28         ; 4 byte checksum
-OHT_NOVO_OFFSET equ 32          ; 4 byte secondary checksum because i'm stupid apparently
+%include "src/os_hint_table.mac"
 
 show_error:             ; places the character in cl as an error code on the screen
     mov ax, 0xb800
