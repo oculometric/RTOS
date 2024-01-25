@@ -110,6 +110,7 @@ program_headers_read:
     ; TODO: read sections
     ; fuck it, geronimo part two!!!
     mov eax, [ELF_HEADER_USEFUL+EHU_PROGENT_OFFSET]
+    push DWORD [OS_HINT_TABLE]
     jmp eax
 
 elf_load_error:
