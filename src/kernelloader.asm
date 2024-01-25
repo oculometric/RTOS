@@ -45,8 +45,72 @@ populate_EHU:
     mov WORD [ELF_HEADER_USEFUL+EHU_SECTHEADNUM_OFFSET], ax
     mov WORD ax, [ebp+50]
     mov WORD [ELF_HEADER_USEFUL+EHU_SECTHEADNAMESIND_OFFSET], ax
-    hlt
-    jmp $
+
+read_program_header_table:
+    mov ebp, 0          ; use ebp to keep count of how many program headers we've loaded
+    mov edx, [ELF_HEADER_USEFUL+EHU_PROGHEADTBL_OFFSET] ; start at the first entry
+    add edx, [ELF_HEADER_USEFUL+EHU_FILESTART_OFFSET]   ; offset it from the start of the file
+read_program_header:
+    ; check this is a loadable program section
+    mov DWORD eax, [edx]
+    cmp eax, 1
+    jne step_to_next_program_header
+    
+    ; we need to copy the whole program segment into the right place in memory
+    ; eax will be our working register
+    ; ebx will be the place we're copying from
+    ; ecx will be the place we're copying to
+    ; edx will be where we stop copying
+    ; first we clear bytes
+    push edx
+
+    mov ebx, [edx+EPHT_OFFSET_OFFSET]
+    add ebx, [ELF_HEADER_USEFUL+EHU_FILESTART_OFFSET]
+    mov ecx, [edx+EPHT_VADDR_OFFSET]
+    mov eax, ecx
+    add eax, [edx+EPHT_MEMSZ_OFFSET]
+    mov edx, eax
+clear_program_byte:
+    mov BYTE [ecx], 0
+    inc ebx
+    inc ecx
+    cmp ecx, edx
+    jne clear_program_byte
+
+    ; then we do the actual copying
+    pop edx
+    push edx
+
+    mov ebx, [edx+EPHT_OFFSET_OFFSET]
+    add ebx, [ELF_HEADER_USEFUL+EHU_FILESTART_OFFSET]
+    mov ecx, [edx+EPHT_VADDR_OFFSET]
+    mov eax, ecx
+    add eax, [edx+EPHT_FILESZ_OFFSET]
+    mov edx, eax
+copy_program_byte:
+    mov BYTE al, [ebx]
+    mov BYTE [ecx], al
+    inc ebx
+    inc ecx
+    cmp ecx, edx
+    jne copy_program_byte
+
+    pop edx
+
+step_to_next_program_header:
+    inc ebp             ; add 1 to the entry counter
+    cmp bp, [ELF_HEADER_USEFUL+EHU_PROGHEADNUM_OFFSET] ; exit if we've now seen enough entries
+    jge program_headers_read
+    mov eax, 0
+    mov ax, [ELF_HEADER_USEFUL+EHU_PROGHEADSZ_OFFSET]
+    add edx, eax        ; otherwise, move onto the next entry
+    jmp read_program_header
+
+program_headers_read:
+    ; TODO: read sections
+    ; fuck it, geronimo part two!!!
+    mov eax, [ELF_HEADER_USEFUL+EHU_PROGENT_OFFSET]
+    jmp eax
 
 elf_load_error:
     mov ebx, 0xffffffff
@@ -57,7 +121,6 @@ elf_load_error:
 OS_HINT_TABLE:
     dd 0x00000000
 
-align 4
 EHU_FILESTART_OFFSET equ 0          ; 4-byte memory address where the ELF file starts
 EHU_PROGENT_OFFSET equ 4            ; 4-byte memory address where the program entry should end up
 EHU_PROGHEADTBL_OFFSET equ 8        ; 4-byte offset into the file where the program header table starts
@@ -68,6 +131,7 @@ EHU_SECTHEADSZ_OFFSET equ 20        ; 2-byte number describing the size of each 
 EHU_SECTHEADNUM_OFFSET equ 22       ; 2-byte number describing how many section headers to expect in the section header table
 EHU_SECTHEADNAMESIND_OFFSET equ 24  ; 2-byte something something blah blah blah
 
+align 4
 ELF_HEADER_USEFUL:
     dd 0
     dd 0
@@ -78,6 +142,16 @@ ELF_HEADER_USEFUL:
     dw 0
     dw 0
     dw 0
+
+EPHT_TYPE_OFFSET equ 0
+EPHT_OFFSET_OFFSET equ 4
+EPHT_VADDR_OFFSET equ 8
+EPHT_PADDR_OFFSET equ 12
+EPHT_FILESZ_OFFSET equ 16
+EPHT_MEMSZ_OFFSET equ 20
+EPHT_FLAGS_OFFSET equ 24
+EPHT_ALIGN_OFFSET equ 28
+
 
 %include "src/os_hint_table.mac"
 

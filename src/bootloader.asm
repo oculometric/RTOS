@@ -111,6 +111,7 @@ kernel_load_failed:
     jmp show_error
 
 kernel_load_finished:
+    jmp protected_mode_setup ; FIXME: skip graphics for now
 
 ; set graphics to pixel based
 screen_mode_setup:
@@ -122,10 +123,6 @@ screen_mode_setup:
     je protected_mode_setup
     mov cl, 'G'
     jmp show_error
-
-; TODO: parse ELF
-; TODO: then jump to main
-; TODO: keyboard/mouse IO?
 
 ; prepare for the jump to protected mode
 protected_mode_setup:

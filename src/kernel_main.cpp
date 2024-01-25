@@ -1,6 +1,6 @@
 
 extern "C" void main()
 {
-    *(char*)0xb8000 = 'K';
+    *(char*)0xb8000 = 'R';
     return;
 }
