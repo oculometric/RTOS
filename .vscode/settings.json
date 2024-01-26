@@ -1,9 +1,11 @@
 {
     "C_Cpp.default.includePath": [
-        "src/h"
+        "src/h",
+        "src"
     ],
     "files.associations": {
         "efi.h": "c",
         "efilib.h": "c"
-    }
+    },
+    "C_Cpp.default.compilerPath": "/home/oculometric/opt/cross/bin/i386-elf-gcc"
 }

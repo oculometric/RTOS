@@ -5,6 +5,10 @@ AS			:= nasm
 CC			:= $(PREFIX)gcc
 LD			:= $(PREFIX)ld
 
+AS_FLAGS	:= -f elf
+CC_FLAGS	:= -ffreestanding -m32 -g -masm=intel -Wall -Wextra -Wpedantic
+LD_FLAGS	:= -T linker.ld
+
 BIN			:= bin
 SRC			:= src
 
@@ -14,13 +18,14 @@ build:
 	mkdir -p bin
 	$(AS) -f bin $(SRC)/bootloader.asm -o $(BIN)/bootloader.bin
 	$(AS) -f bin $(SRC)/kernelloader.asm -o $(BIN)/kernelloader.bin
-	$(AS) -f elf $(SRC)/kernel_premain.asm -o $(BIN)/kernel_premain.o
-	$(CC) -ffreestanding -m32 -g -c $(SRC)/kernel_main.cpp -o $(BIN)/kernel_main.o
-	$(LD) -T linker.ld -o $(BIN)/kernel.bin $(BIN)/kernel_premain.o $(BIN)/kernel_main.o
+	$(AS) $(AS_FLAGS) $(SRC)/kernel_premain.asm -o $(BIN)/kernel_premain.o
+	$(CC) $(CC_FLAGS) -c $(SRC)/kernel_main.cpp -o $(BIN)/kernel_main.o
+	$(CC) $(CC_FLAGS) -c $(SRC)/serial.cpp -o $(BIN)/serial.o
+	$(LD) $(LD_FLAGS) -o $(BIN)/kernel.bin $(BIN)/kernel_premain.o $(BIN)/kernel_main.o $(BIN)/serial.o
 	cat $(BIN)/bootloader.bin $(BIN)/kernelloader.bin $(BIN)/kernel.bin > $(BOOT_OUT)
 
 emulate:
-	qemu-system-x86_64 $(BOOT_OUT) -monitor stdio
+	qemu-system-x86_64 $(BOOT_OUT) -monitor stdio -serial file:output.log
 
 disassemble:
 	objdump -m i8086 -M intel -b binary -D $(BOOT_OUT)

@@ -26,3 +26,7 @@ https://www.youtube.com/playlist?list=PLm3B56ql_akNcvH8vvJRYOc7TbYhRs19M
 these two for video modes
 https://en.wikipedia.org/wiki/VESA_BIOS_Extensions
 http://www.petesqbsite.com/sections/tutorials/tuts/vbe3.pdf
+
+
+## the game
+'fantastic virtual exhibition of the cosmos'? maybe? FVEC
