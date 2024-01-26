@@ -153,7 +153,6 @@ EPHT_MEMSZ_OFFSET equ 20
 EPHT_FLAGS_OFFSET equ 24
 EPHT_ALIGN_OFFSET equ 28
 
-
 %include "src/os_hint_table.mac"
 
 ; this is where we start searching for the ELF header

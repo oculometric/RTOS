@@ -1,4 +1,4 @@
-TOOLPATH 	:= /opt/cross/bin/
+TOOLPATH 	:= $(HOME)/opt/cross/bin/
 PREFIX 		:= $(TOOLPATH)i386-elf-
 
 AS			:= nasm
@@ -11,6 +11,7 @@ SRC			:= src
 BOOT_OUT	:= $(BIN)/boot.bin
 
 build:
+	mkdir -p bin
 	$(AS) -f bin $(SRC)/bootloader.asm -o $(BIN)/bootloader.bin
 	$(AS) -f bin $(SRC)/kernelloader.asm -o $(BIN)/kernelloader.bin
 	$(AS) -f elf $(SRC)/kernel_premain.asm -o $(BIN)/kernel_premain.o
