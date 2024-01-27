@@ -6,5 +6,7 @@ OHT_MEMTBL_OFFSET equ 16        ; 4 byte pointer to memory map table
 OHT_HIGHMEM_OFFSET equ 20       ; 2 byte number of memory map table entries
 OHT_DISKNUM_OFFSET equ 22       ; 2 byte boot disk number
 OHT_BDA_OFFSET equ 24           ; 4 byte pointer to the BIOS data area
-OHT_CHKSM_OFFSET equ 28         ; 4 byte checksum
-OHT_NOVO_OFFSET equ 32          ; 4 byte secondary checksum because i'm stupid apparently
+OHT_KERN_START_OFFSET equ 28    ; 4 byte pointer to the start of the loaded kernel elf
+OHT_KERN_END_OFFSET equ 32      ; 4 byte pointer to the end of the loaded kernel elf
+OHT_CHKSM_OFFSET equ 36         ; 4 byte checksum
+OHT_NOVO_OFFSET equ 40          ; 4 byte secondary checksum because i'm stupid apparently

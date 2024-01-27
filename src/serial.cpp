@@ -266,9 +266,9 @@ void serial_dump_hex_dwrd(void* start, uint32_t length, uint32_t port, uint8_t p
  * dump a region of memory of a specified length in bytes to serial, as the raw values
  * @param start address of the first byte
  * @param length number of bytes to output
- * @param per_line number of bytes per line; set to zero for all bytes on a single line
  * @param port serial port to direct output to
- * @param separator character to separate data characters, useful for making things more readable
+ * @param per_line number of bytes per line; set to zero for all bytes on a single line
+ * @param separator character to separate data characters, useful for making things more readable; set to null for no separation
  * **/
 void serial_dump_byte(void* start, uint32_t length, uint32_t port, uint8_t per_line, char separator)
 {

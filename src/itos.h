@@ -20,8 +20,8 @@ inline void int_to_string(uint32_t i, uint8_t base, char* buffer, uint8_t paddin
     }
 
     uint16_t digits = 1;
-    uint32_t tmp = i / 16;
-    while (tmp > 0) { digits++; tmp /= 16; }
+    uint32_t tmp = i / base;
+    while (tmp > 0) { digits++; tmp /= base; }
 
     uint16_t buffer_offset = digits;
     if (buffer_offset < padding) buffer_offset = padding;

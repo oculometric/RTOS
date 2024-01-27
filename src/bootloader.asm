@@ -111,13 +111,12 @@ kernel_load_failed:
     jmp show_error
 
 kernel_load_finished:
-    jmp protected_mode_setup ; FIXME: skip graphics for now
 
 ; set graphics to pixel based
 screen_mode_setup:
     mov ah, 0x4f                ; we want to talk to the VBE controller
     mov al, 0x02                ; we want to set the video mode
-    mov bx, 0b0100000100010010  ; represents the video mode config that we want
+    mov bx, 0b1100000100010010  ; represents the video mode config that we want
     int 0x10                    ; go!
     cmp ax, 0x004f              ; check for success
     je protected_mode_setup

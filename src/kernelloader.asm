@@ -108,6 +108,7 @@ step_to_next_program_header:
 
 program_headers_read:
     ; TODO: read sections
+    ; TODO: make notes on where the kernel starts and ends
     ; fuck it, geronimo part two!!!
     mov eax, [ELF_HEADER_USEFUL+EHU_PROGENT_OFFSET]
     push DWORD [OS_HINT_TABLE]

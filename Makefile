@@ -25,7 +25,7 @@ build:
 	cat $(BIN)/bootloader.bin $(BIN)/kernelloader.bin $(BIN)/kernel.bin > $(BOOT_OUT)
 
 emulate:
-	qemu-system-x86_64 $(BOOT_OUT) -monitor stdio -serial file:output.log
+	qemu-system-x86_64 -m 2G -drive file=$(BOOT_OUT),format=raw,index=0,media=disk -monitor stdio -serial file:output.log
 
 disassemble:
 	objdump -m i8086 -M intel -b binary -D $(BOOT_OUT)
