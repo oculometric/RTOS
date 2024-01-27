@@ -119,9 +119,24 @@ screen_mode_setup:
     mov bx, 0b1100000100010010  ; represents the video mode config that we want
     int 0x10                    ; go!
     cmp ax, 0x004f              ; check for success
-    je protected_mode_setup
+    je screen_mode_infograb
     mov cl, 'G'
     jmp show_error
+screen_mode_infograb:
+    mov ah, 0x4f
+    mov al, 0x01
+    mov cx, bx
+    mov bx, VBE_MODEINFO_ADDR / 16
+    mov es, bx
+    mov di, 0
+    int 0x10
+    mov DWORD [OS_HINT_TABLE+OHT_VBE_MODE_INFO_OFFSET], 0x0
+    cmp ax, 0x004f
+    je screen_infograb_success
+    mov cl, 'G'
+    jmp show_error
+screen_infograb_success:
+    mov DWORD [OS_HINT_TABLE+OHT_VBE_MODE_INFO_OFFSET], VBE_MODEINFO_ADDR
 
 ; prepare for the jump to protected mode
 protected_mode_setup:
@@ -173,7 +188,8 @@ STACK_BASE_ADDR equ BOOTLOADER_ADDR + 0x200 + 0x800 ; address where the stack ba
 KERNEL_LOAD_ADDR equ 0x10000    ; address where the kernel will be loaded (i.e. 128 sectors of raw executable)
 KERNEL_FINAL_ADDR equ 0x100000  ; address where the kernel code should actually be (something something ELF relocation ill do it later)
 OS_HINT_TABLE equ STACK_BASE_ADDR + 0x200   ; address where the hint table for the OS will be placed, just on top of the stack (with some padding)
-MMAP_TABLE_ADDR equ STACK_BASE_ADDR + 0x600 ; address where the memory map will be placed, on top of the hint table
+VBE_MODEINFO_ADDR equ OS_HINT_TABLE + 0x400 ; address where the VBE mode info table will be placed
+MMAP_TABLE_ADDR equ VBE_MODEINFO_ADDR + 0x200 ; address where the memory map will be placed, on top of the VBE mode info block
 
 %include "src/os_hint_table.mac"
 

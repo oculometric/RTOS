@@ -10,6 +10,8 @@ struct mmap_table_entry
 };
 #pragma pack (0)
 
+struct vbe_mode_info;
+
 #pragma pack (1)
 struct os_hint_table
 {
@@ -23,6 +25,7 @@ struct os_hint_table
     void* bios_data_area_address;
     void* kernel_elf_start;
     void* kernel_elf_end;
+    vbe_mode_info* vbe_mode_info_block;
     uint32_t checksum;
     uint32_t checksum_novo;
 };

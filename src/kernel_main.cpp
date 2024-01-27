@@ -50,6 +50,14 @@ extern "C" void main(os_hint_table* os_hint_table_address)
     serial_println((char*)"starting search for PMID block", COM1);
     void* result = find_pmid_block((void*)0, 0xFFFFFFF0);
     serial_println_hex((uint32_t)result, COM1);
+    serial_println(COM1);
+    serial_dump_hex_byte(result, 20, COM1, 4);
+
+    serial_println(COM1);
+
+    serial_println_dec(os_hint_table_address->vbe_mode_info_block->x_resolution, COM1);
+    serial_println_dec(os_hint_table_address->vbe_mode_info_block->y_resolution, COM1);
+    serial_println_hex(os_hint_table_address->vbe_mode_info_block->flat_framebuffer_address, COM1);
 
     return;
 }
