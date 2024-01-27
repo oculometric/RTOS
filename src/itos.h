@@ -13,9 +13,9 @@ inline void int_to_string(uint32_t i, uint8_t base, char* buffer, uint8_t paddin
 {
     if (base > 36 || base < 2)
     {
-        buffer[0] = "E";
-        buffer[1] = "R";
-        buffer[2] = "R"; // probably shouldn't do this but oh well
+        buffer[0] = 'E';
+        buffer[1] = 'R';
+        buffer[2] = 'R'; // probably shouldn't do this but oh well
         return;
     }
 
@@ -30,11 +30,11 @@ inline void int_to_string(uint32_t i, uint8_t base, char* buffer, uint8_t paddin
     tmp = i;
     while (buffer_offset > 0)
     {
-        buffer[buffer_offset] = hex_chars[tmp % base];
+        buffer[buffer_offset] = itos_chars[tmp % base];
         buffer_offset--;
         tmp /= base;
     }
-    buffer[buffer_offset] = hex_chars[tmp % base];
+    buffer[buffer_offset] = itos_chars[tmp % base];
 }
 
 /**

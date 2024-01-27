@@ -38,8 +38,8 @@ void serial_println_dec(uint32_t val, uint32_t port);
 void serial_println_hex(uint32_t val, uint32_t port);
 void serial_println_bin(uint32_t val, uint32_t port);
 
-void serial_dump_byte(void* start, uint32_t length, uint8_t per_line, uint32_t port);
+void serial_dump_byte(void* start, uint32_t length, uint32_t port, uint8_t per_line = 0, char separator = '\0');
 
-void serial_dump_hex_byte(void* start, uint32_t length, uint8_t per_line, uint32_t port);
-void serial_dump_hex_dwrd(void* start, uint32_t length, uint8_t per_line, uint32_t port);
-void serial_dump_hex_word(void* start, uint32_t length, uint8_t per_line, uint32_t port);
+void serial_dump_hex_byte(void* start, uint32_t length, uint32_t port, uint8_t per_line = 8);
+void serial_dump_hex_word(void* start, uint32_t length, uint32_t port, uint8_t per_line = 8);
+void serial_dump_hex_dwrd(void* start, uint32_t length, uint32_t port, uint8_t per_line = 8);

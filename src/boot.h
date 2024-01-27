@@ -13,7 +13,7 @@ struct mmap_table_entry
 #pragma pack (1)
 struct os_hint_table
 {
-    void * bootloader_address;
+    void * gdt_address;
     uint32_t low_kilobyte_blocks;
     uint32_t cpuid_ecx_content;
     uint32_t cpuid_edx_content;

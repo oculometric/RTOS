@@ -38,6 +38,23 @@ extern "C" void main(os_hint_table* os_hint_table_address)
     hex_to_string(0xffccdd, test, 10);
     serial_println(test, 12, COM1);
 
+    serial_println(COM1);
+
+    serial_dump_hex_byte((void*)0x7c00, 512, COM1, 16);
+    serial_dump_hex_word((void*)0x7c00, 256, COM1, 8);
+    serial_dump_hex_dwrd((void*)0x7c00, 128, COM1, 8);
+
+    serial_println(COM1);
+
+    serial_dump_hex_dwrd((void*)os_hint_table_address, 10, COM1, 4);
+
+    serial_println(COM1);
+    serial_println(COM1);
+
+    serial_dump_byte((void*)greeting, 32, COM1, 4, '.');
+    //char demo[32] = {'\0'};
+    //hex_to_string(0xff, demo, 2);
+    //serial_println(demo, COM1);
 
     return;
 }
