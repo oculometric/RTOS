@@ -1,7 +1,7 @@
 #include "boot.h"
 #include "serial.h"
 #include "itos.h"
-#include "screen.h"
+#include "vbe.h"
 
 
 // TODO: serial
