@@ -2,7 +2,8 @@
 #include "serial.h"
 #include "itos.h"
 #include "vbe.h"
-
+#include "graphics.h"
+#include "colour.h"
 
 // TODO: serial
 // TODO: keyboard
@@ -58,6 +59,39 @@ extern "C" void main(os_hint_table* os_hint_table_address)
     serial_println_dec(os_hint_table_address->vbe_mode_info_block->x_resolution, COM1);
     serial_println_dec(os_hint_table_address->vbe_mode_info_block->y_resolution, COM1);
     serial_println_hex(os_hint_table_address->vbe_mode_info_block->flat_framebuffer_address, COM1);
+
+    nov_graphics_manager g (os_hint_table_address->vbe_mode_info_block);
+    serial_dump_hex_byte((uint8_t*)os_hint_table_address->vbe_mode_info_block->flat_framebuffer_address, 30, COM1, 3);
+
+    g.draw_pixel(nov_uvector2{0,0}, nov_colour{1,0,0});
+
+    g.draw_box(nov_uvector2{50,50}, nov_uvector2{200,200}, nov_colour_vapor);
+
+    nov_colour c;
+    float l;
+    bool s = false;
+    while (true)
+    {
+        uint32_t i = 0;
+        for (int y = 0; y < 480; y++)
+        {
+            for (int x = 0; x < 640; x++)
+            {
+                c = hsv_to_rgb(nov_colour{x/640.0f,1.0f,y/480.0f});
+                l = luminance(c);
+                if (s)
+                    g.draw_pixel(nov_uvector2{x,y}, nov_colour{l,l,l});
+                else
+                    g.draw_pixel(i*3, c);
+                i++;
+            }
+        }
+        s = !s;
+    }
+
+    serial_println(COM1);
+    serial_println(COM1);
+    serial_dump_hex_byte((uint8_t*)os_hint_table_address->vbe_mode_info_block->flat_framebuffer_address, 30, COM1, 3);
 
     return;
 }

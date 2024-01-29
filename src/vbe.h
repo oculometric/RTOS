@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h>
 
 #pragma pack (1)
@@ -73,12 +75,9 @@ struct vbe_mode_info
 
     uint8_t reserved_3;
 };
-
 #pragma pack (0)
 
-
-
-void* find_pmid_block(void* start, uint32_t length)
+static void* find_pmid_block(void* start, uint32_t length)
 {
     uint8_t* ptr = (uint8_t*)start;
     vbe_pm_info_block* block;

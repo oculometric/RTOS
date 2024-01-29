@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h>
 
 static inline void outb(uint32_t p, uint8_t b) { asm volatile ("outb %0, %1" : : "dN" (p), "a" (b)); }

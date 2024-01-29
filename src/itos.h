@@ -1,4 +1,6 @@
-#include "stdint.h"
+#pragma once
+
+#include <stdint.h>
 
 static const char * itos_chars = "0123456789abcdefghijklmnopqrstuvwxyz";
 
