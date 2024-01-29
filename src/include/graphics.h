@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vbe.h"
-#include "vector.h"
+#include <vbe.h>
+#include <vector.h>
 
 class nov_graphics_manager
 {

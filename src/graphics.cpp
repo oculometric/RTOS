@@ -1,5 +1,5 @@
-#include "graphics.h"
-#include "serial.h"
+#include <graphics.h>
+#include <serial.h>
 
 inline uint32_t nov_graphics_manager::get_offset(const nov_uvector2& co)
 {

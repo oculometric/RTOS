@@ -1,12 +1,13 @@
-#include "boot.h"
-#include "serial.h"
-#include "itos.h"
-#include "vbe.h"
-#include "graphics.h"
-#include "colour.h"
-#include "memory.h"
+#include <boot.h>
+#include <serial.h>
+#include <itos.h>
+#include <vbe.h>
+#include <graphics.h>
+#include <colour.h>
+#include <memory.h>
 
 // TODO: keyboard
+// TODO: interrupts
 // TODO: memory stuff (memcpy, etc)
 
 extern "C" void main(os_hint_table* os_hint_table_address)

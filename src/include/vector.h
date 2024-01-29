@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-#include "math.h"
+#include <math.h>
 
 // represents a mathematical vector with 3 components
 template<typename T>

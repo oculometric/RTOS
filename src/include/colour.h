@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vector.h"
+#include <vector.h>
 
 #define nov_colour_red nov_colour{ 1,0,0 }
 #define nov_colour_green nov_colour{ 0,1,0 }

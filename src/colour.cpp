@@ -1,4 +1,4 @@
-#include "colour.h"
+#include <colour.h>
 
 nov_colour rgb_to_hsv(const nov_colour& rgb)
 {
