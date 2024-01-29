@@ -16,8 +16,7 @@ nov_graphics_manager::nov_graphics_manager(vbe_mode_info* vbe_mode_info_block)
 
 void nov_graphics_manager::draw_pixel(const nov_uvector2& at, const nov_colour& col)
 {
-    uint32_t offset = get_offset(at);
-    draw_pixel(offset, col);
+    draw_pixel(get_offset(at), col);
 }
 
 void nov_graphics_manager::draw_pixel(uint32_t at, const nov_colour& col)

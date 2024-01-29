@@ -4,10 +4,10 @@
 #include "vbe.h"
 #include "graphics.h"
 #include "colour.h"
+#include "memory.h"
 
-// TODO: serial
 // TODO: keyboard
-// TODO: pixel graphics
+// TODO: memory stuff (memcpy, etc)
 
 extern "C" void main(os_hint_table* os_hint_table_address)
 {
@@ -67,31 +67,40 @@ extern "C" void main(os_hint_table* os_hint_table_address)
 
     g.draw_box(nov_uvector2{50,50}, nov_uvector2{200,200}, nov_colour_vapor);
 
+
+    uint8_t* buffer_a = (uint8_t*)0x200000;
+    uint8_t* buffer_b = (uint8_t*)0x300000;
+    uint8_t* real_buffer = (uint8_t*)os_hint_table_address->vbe_mode_info_block->flat_framebuffer_address;
+
     nov_colour c;
     float l;
-    bool s = false;
-    while (true)
+    uint32_t d = 0;
+    for (int y = 0; y < 480; y++)
     {
-        uint32_t i = 0;
-        for (int y = 0; y < 480; y++)
+        for (int x = 0; x < 640; x++)
         {
-            for (int x = 0; x < 640; x++)
-            {
-                c = hsv_to_rgb(nov_colour{x/640.0f,1.0f,y/480.0f});
-                l = luminance(c);
-                if (s)
-                    g.draw_pixel(nov_uvector2{x,y}, nov_colour{l,l,l});
-                else
-                    g.draw_pixel(i*3, c);
-                i++;
-            }
+            c = hsv_to_rgb(nov_colour{x/640.0f,y/480.0f,1.0f});
+            l = luminance(c);
+            buffer_a[(d*3)+0] = (uint8_t)(l*255);
+            buffer_a[(d*3)+1] = (uint8_t)(l*255);
+            buffer_a[(d*3)+2] = (uint8_t)(l*255);
+
+            buffer_b[(d*3)+0] = (uint8_t)(c.z*255);
+            buffer_b[(d*3)+1] = (uint8_t)(c.y*255);
+            buffer_b[(d*3)+2] = (uint8_t)(c.x*255);
+            d++;
         }
-        s = !s;
     }
 
     serial_println(COM1);
     serial_println(COM1);
     serial_dump_hex_byte((uint8_t*)os_hint_table_address->vbe_mode_info_block->flat_framebuffer_address, 30, COM1, 3);
+
+    while (true)
+    {
+        memcpy(buffer_a, real_buffer, 640*480*3);
+        memcpy(buffer_b, real_buffer, 640*480*3);
+    }
 
     return;
 }

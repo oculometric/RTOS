@@ -10,6 +10,10 @@ struct nov_vector3
 {
     T x, y, z;
 
+    constexpr nov_vector3<T>(const nov_vector3<T>& o) { this->x = o.x; this->y = o.y; this->z = o.z; }
+    constexpr nov_vector3<T>(const T _x, const T _y, const T _z) { this->x = _x; this->y = _y; this->z = _z; }
+    constexpr nov_vector3<T>() { this->x = 0; this->y = 0; this->z = 0; }
+
     inline void operator=(const nov_vector3<T> & a) { this->x = a.x; this->y = a.y; this->z = a.z; }
     inline void operator+=(const nov_vector3<T> & a) { this->x += a.x; this->y += a.y; this->z += a.z; }
     inline void operator-=(const nov_vector3<T> & a) { this->x -= a.x; this->y -= a.y; this->z -= a.z; }
@@ -66,6 +70,10 @@ template<typename T>
 struct nov_vector2
 {
     T u,v;
+
+    constexpr nov_vector2<T>(const nov_vector2<T>& o) { this->u = o.u; this->v = o.v; }
+    constexpr nov_vector2<T>(const T _u, const T _v) { this->u = _u; this->v = _v; }
+    constexpr nov_vector2<T>() { this->u = 0; this->v = 0; }
 
     inline void operator=(const nov_vector2<T> & a) { this->u = a.u; this->v = a.v; }
     inline void operator+=(const nov_vector2<T> & a) { this->u += a.u; this->v += a.v; }
