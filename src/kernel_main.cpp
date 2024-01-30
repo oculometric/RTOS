@@ -99,8 +99,9 @@ extern "C" void main(os_hint_table* os_hint_table_address)
 
     while (true)
     {
-        memcpy(buffer_a, real_buffer, 640*480*3);
-        memcpy(buffer_b, real_buffer, 640*480*3);
+        bytecpy(buffer_a, real_buffer, 640*480*3);
+        bytecpy(buffer_b, real_buffer, 640*480*3);
+        // TODO: test this with different copy types
     }
 
     return;
