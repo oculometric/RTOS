@@ -39,7 +39,7 @@ sse_config:
 
 memory_query:
     ; query low memory
-    int 12
+    int 0x12
     mov [OS_HINT_TABLE+OHT_LOWMEM_OFFSET], ax
 
     ; query high memory, in 24 byte entries
