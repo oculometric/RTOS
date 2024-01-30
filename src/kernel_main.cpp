@@ -102,23 +102,6 @@ extern "C" void main(os_hint_table* os_hint_table_address)
     serial_println(COM1);
 
     serial_println((char*)"testing screen", COM1);
-    serial_println((char*)"starting phase 1", COM1);
-
-    for (uint32_t t = 0; t < 10; t++)
-    {
-        dwrdcpy((uint32_t*)buffer_a, (uint32_t*)real_buffer, 640*120*3);
-        dwrdcpy((uint32_t*)buffer_b, (uint32_t*)real_buffer, 640*120*3);
-    }
-
-    serial_println((char*)"starting phase 2", COM1);
-
-    for (uint32_t t = 0; t < 10; t++)
-    {
-        bytecpy(buffer_a, real_buffer, 640*480*3);
-        bytecpy(buffer_b, real_buffer, 640*480*3);
-    }
-
-    serial_println((char*)"starting phase 3", COM1);
 
     for (uint32_t t = 0; t < 10; t++)
     {
