@@ -188,4 +188,13 @@ const uint8_t sliced_window[WINDOW_SLICE_SIZE*WINDOW_SLICE_SIZE*WINDOW_SLICE_NUM
     1, 1, 1, 1, 2
 };
 
-void draw_window(const nov_uvector2& origin, const nov_uvector2& size, uint8_t* buffer);
+const nov_colour colour_palette[5] =
+{
+    nov_colour{ 0,0,0 },
+    nov_colour{ 0.8f,0.8f,0.8f },
+    nov_colour{ 0.5f,0.5f,0.5f },
+    nov_colour{ 0.1f,0.1f,0.1f },
+    nov_colour{ 0.01f,0.01f,0.01f }
+};
+
+void draw_window(const nov_uvector2& origin, const nov_uvector2& size, uint8_t* buffer, const nov_uvector2& buffer_size);

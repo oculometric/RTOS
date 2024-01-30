@@ -5,6 +5,7 @@
 #include <graphics.h>
 #include <colour.h>
 #include <memory.h>
+#include <window.h>
 
 // TODO: keyboard
 // TODO: interrupts
@@ -97,12 +98,37 @@ extern "C" void main(os_hint_table* os_hint_table_address)
     serial_println(COM1);
     serial_dump_hex_byte((uint8_t*)os_hint_table_address->vbe_mode_info_block->flat_framebuffer_address, 30, COM1, 3);
 
-    while (true)
+    serial_println(COM1);
+
+    serial_println((char*)"testing screen", COM1);
+    serial_println((char*)"starting phase 1", COM1);
+
+    for (uint32_t t = 0; t < 10; t++)
+    {
+        dwrdcpy((uint32_t*)buffer_a, (uint32_t*)real_buffer, 640*120*3);
+        dwrdcpy((uint32_t*)buffer_b, (uint32_t*)real_buffer, 640*120*3);
+    }
+
+    serial_println((char*)"starting phase 2", COM1);
+
+    for (uint32_t t = 0; t < 10; t++)
     {
         bytecpy(buffer_a, real_buffer, 640*480*3);
         bytecpy(buffer_b, real_buffer, 640*480*3);
-        // TODO: test this with different copy types
     }
+
+    serial_println((char*)"starting phase 3", COM1);
+
+    for (uint32_t t = 0; t < 10; t++)
+    {
+        memcpy((uint32_t*)buffer_a, (uint32_t*)real_buffer, 640*120*3);
+        memcpy((uint32_t*)buffer_b, (uint32_t*)real_buffer, 640*120*3);
+    }
+
+    serial_println((char*)"done", COM1);
+
+    serial_println((char*)"for my next trick, i will draw a window", COM1);
+    draw_window(nov_uvector2{20, 40}, nov_uvector2{100, 100}, real_buffer, nov_uvector2{640,480});
 
     return;
 }
