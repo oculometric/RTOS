@@ -5,7 +5,7 @@
             "includePath": [
                 "${default}",
                 "/usr/include/efi",
-                "src/h"
+                "src/include"
             ],
             "defines": [],
             "cStandard": "c17",

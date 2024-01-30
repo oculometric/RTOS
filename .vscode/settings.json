@@ -1,6 +1,6 @@
 {
     "C_Cpp.default.includePath": [
-        "src/h",
+        "src/include",
         "src"
     ],
     "files.associations": {
