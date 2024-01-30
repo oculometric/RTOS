@@ -10,9 +10,9 @@ struct nov_vector3
 {
     T x, y, z;
 
-    constexpr nov_vector3<T>(const nov_vector3<T>& o) { this->x = o.x; this->y = o.y; this->z = o.z; }
-    constexpr nov_vector3<T>(const T _x, const T _y, const T _z) { this->x = _x; this->y = _y; this->z = _z; }
-    constexpr nov_vector3<T>() { this->x = 0; this->y = 0; this->z = 0; }
+    constexpr nov_vector3<T>(const nov_vector3<T>& o) : x(o.x), y(o.y), z(o.z) { }
+    constexpr nov_vector3<T>(const T _x, const T _y, const T _z) : x(_x), y(_y), z(_z) { }
+    constexpr nov_vector3<T>() : x(0), y(0), z(0) { }
 
     inline void operator=(const nov_vector3<T> & a) { this->x = a.x; this->y = a.y; this->z = a.z; }
     inline void operator+=(const nov_vector3<T> & a) { this->x += a.x; this->y += a.y; this->z += a.z; }

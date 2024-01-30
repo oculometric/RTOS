@@ -8,4 +8,9 @@ SECTIONS
         *(.prekernel)
         *(.text)
     }
+
+    .data :
+    {
+        *(.data)
+    }
 }

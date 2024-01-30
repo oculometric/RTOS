@@ -6,7 +6,7 @@ CC			:= $(PREFIX)g++
 LD			:= $(PREFIX)ld
 
 AS_FLAGS		:= -f elf
-CC_FLAGS		:= -ffreestanding -m32 -g -masm=intel -Wall -Wextra -Wpedantic
+CC_FLAGS		:= -ffreestanding -m32 -g -masm=intel -Wall -Wextra -Wpedantic -mno-red-zone
 LD_FLAGS		:= -T linker.ld
 
 BIN				= bin

@@ -52,7 +52,7 @@ inline void wordset(uint16_t value, uint16_t* dest, uint32_t words)
     }
 }
 
-inline void dwrdset(uint8_t value, uint8_t* dest, uint32_t dwrds)
+inline void dwrdset(uint32_t value, uint8_t* dest, uint32_t dwrds)
 {
     uint32_t offset = 0;
     while (offset < dwrds)

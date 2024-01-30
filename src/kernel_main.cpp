@@ -27,6 +27,7 @@ extern "C" void main(os_hint_table* os_hint_table_address)
 
     init_serial(COM1);
     serial_println((char*)"hello from kernel main.", COM1);
+    serial_println_dec(os_hint_table_address->low_kilobyte_blocks, COM1);
 
     serial_println((char*)"reading high memory map...", COM1);
 

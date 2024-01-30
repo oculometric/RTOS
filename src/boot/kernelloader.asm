@@ -52,7 +52,7 @@ read_program_header_table:
     add edx, [ELF_HEADER_USEFUL+EHU_FILESTART_OFFSET]   ; offset it from the start of the file
 read_program_header:
     ; check this is a loadable program section
-    mov DWORD eax, [edx]
+    mov DWORD eax, [edx+EPHT_TYPE_OFFSET]
     cmp eax, 1
     jne step_to_next_program_header
     
@@ -61,6 +61,7 @@ read_program_header:
     ; ebx will be the place we're copying from
     ; ecx will be the place we're copying to
     ; edx will be where we stop copying
+
     ; first we clear bytes
     push edx
 
@@ -100,15 +101,83 @@ copy_program_byte:
 step_to_next_program_header:
     inc ebp             ; add 1 to the entry counter
     cmp bp, [ELF_HEADER_USEFUL+EHU_PROGHEADNUM_OFFSET] ; exit if we've now seen enough entries
-    jge program_headers_read
+    jge read_section_header_table
     mov eax, 0
     mov ax, [ELF_HEADER_USEFUL+EHU_PROGHEADSZ_OFFSET]
     add edx, eax        ; otherwise, move onto the next entry
     jmp read_program_header
 
-program_headers_read:
-    ; TODO: read sections
+read_section_header_table:
+    mov ebp, 0          ; use ebp to keep track of how many sections we've looked at
+    mov edx, [ELF_HEADER_USEFUL+EHU_SECTHEADTBL_OFFSET] ; edx holds the offset of the first section header from the file start
+    add edx, [ELF_HEADER_USEFUL+EHU_FILESTART_OFFSET]   ; calculate it's address in memory
+read_section_header:
+    mov DWORD eax, [edx+ESHT_FLAGS_OFFSET]
+    and ecx, 0x4    ; if the section is flagged as executable, skip it
+    jnz step_to_next_section_header
+    mov DWORD eax, [edx+ESHT_FLAGS_OFFSET]
+    and ecx, 0x2    ; if the section is not flagged for allocation, skip it
+    jz step_to_next_section_header
+
+    ; determine what kind of section we're looking at
+    mov DWORD eax, [edx+ESHT_TYPE_OFFSET]
+    cmp eax, 1
+    je read_progbits_header
+    cmp eax, 8
+    je read_nobits_header
+    jmp step_to_next_program_header
+
+read_progbits_header:
+    ; setting ourselves up for more copying
+    push edx
+
+    mov ebx, [edx+ESHT_OFFSET_OFFSET]
+    add ebx, [ELF_HEADER_USEFUL+EHU_FILESTART_OFFSET]
+    mov ecx, [edx+ESHT_VADDR_OFFSET]
+    mov eax, ecx
+    add eax, [edx+ESHT_FILESZ_OFFSET]
+    mov edx, eax
+copy_progbits_byte:
+    mov BYTE al, [ebx]
+    mov BYTE [ecx], al
+    inc ebx
+    inc ecx
+    cmp ecx, edx
+    jne copy_progbits_byte
+
+    pop edx
+    jmp step_to_next_section_header
+
+read_nobits_header:
+    push edx
+
+    ; we only need our destination start and stop point
+
+    mov ecx, [edx+ESHT_VADDR_OFFSET]
+    mov eax, ecx
+    mov eax, [edx+ESHT_FILESZ_OFFSET]
+    mov edx, eax
+    mov al, 0
+write_nobits_byte:
+    mov BYTE [ecx], al
+    inc ecx
+    cmp ecx, edx
+    jne write_nobits_byte
+
+    pop edx
+    jmp step_to_next_section_header
+
+step_to_next_section_header:
+    inc ebp             ; add 1 to the entry counter
+    cmp bp, [ELF_HEADER_USEFUL+EHU_SECTHEADNUM_OFFSET] ; exit if we've now seen enough entries
+    jge section_headers_read
+    mov eax, 0
+    mov ax, [ELF_HEADER_USEFUL+EHU_SECTHEADSZ_OFFSET]
+    add edx, eax        ; otherwise, move onto the next entry
+    jmp read_section_header
     ; TODO: make notes on where the kernel starts and ends
+
+section_headers_read:
     ; fuck it, geronimo part two!!!
     mov eax, [ELF_HEADER_USEFUL+EHU_PROGENT_OFFSET]
     push DWORD [OS_HINT_TABLE]
@@ -154,8 +223,19 @@ EPHT_MEMSZ_OFFSET equ 20
 EPHT_FLAGS_OFFSET equ 24
 EPHT_ALIGN_OFFSET equ 28
 
+ESHT_NAME_OFFSET equ 0
+ESHT_TYPE_OFFSET equ 4
+ESHT_FLAGS_OFFSET equ 8
+ESHT_VADDR_OFFSET equ 12
+ESHT_OFFSET_OFFSET equ 16
+ESHT_FILESZ_OFFSET equ 20
+ESHT_LINK_OFFSET equ 24
+ESHT_INFO_OFFSET equ 28
+ESHT_ADDRALIGN_OFFSET equ 32
+ESHT_ENTSIZE_OFFSET equ 36
+
 %include "src/os_hint_table.mac"
 
-; this is where we start searching for the ELF header
+; this is where we start searching for the ELF header, so add some padding
 kernelloader_end:
     dd 0x00000000
