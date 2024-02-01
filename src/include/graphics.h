@@ -2,12 +2,16 @@
 
 #include <vbe.h>
 #include <vector.h>
+#include <serial.h>
+
+inline void serial_println_uvector2(const nov_uvector2& v, uint32_t port) { serial_print((char*)"point(x:", port); serial_print_dec(v.u, port); serial_print((char*)",y:", port); serial_print_dec(v.v, port); serial_println((char*)")", port); }
 
 class nov_graphics_manager
 {
 private:
     uint8_t* real_framebuffer;
     nov_uvector2 screen_size;
+    uint32_t buffer_length;
     uint8_t bytes_per_pixel;
     inline uint32_t get_offset(const nov_uvector2& co);
 

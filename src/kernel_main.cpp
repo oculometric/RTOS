@@ -6,6 +6,7 @@
 #include <colour.h>
 #include <memory.h>
 #include <window.h>
+#include <random.h>
 
 // TODO: keyboard
 // TODO: interrupts
@@ -113,6 +114,23 @@ extern "C" void main(os_hint_table* os_hint_table_address)
 
     serial_println((char*)"for my next trick, i will draw a window", COM1);
     draw_window(nov_uvector2{20, 40}, nov_uvector2{100, 100}, real_buffer, nov_uvector2{640,480});
+
+    nov_uvector2 left {480,240};
+    nov_uvector2 right {640, 0};
+    nov_colour col = nov_colour_vapor;
+
+    while (true)
+    {
+        g.draw_line(left, right, col);
+        left.u = random_uint32_t() % 640;
+        left.v = random_uint32_t() % 480;
+        right.u = random_uint32_t() % 640;
+        right.v = random_uint32_t() % 480;
+        uint32_t r = random_uint32_t() & 0xFFFFF;
+        col = nov_colour{ col.y, (float)r/0xFFFF, col.x };
+        
+        //for (uint32_t i = 0; i < 42000; i++) {}
+    }
 
     return;
 }
