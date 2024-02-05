@@ -11,21 +11,10 @@
 // TODO: keyboard
 // TODO: interrupts
 // TODO: memory stuff (memcpy, etc)
+// TODO: output streams
 
 extern "C" void main(os_hint_table* os_hint_table_address)
 {
-    const char* greeting = "Hello, World!\0";
-
-
-    *(char*)0xb8000 = 'R';
-    char* pointer = (char*)0xb8000;
-    int i = 0;
-    while (greeting[i] != '\0')
-    {
-        pointer[i*2] = greeting[i];
-        i++;
-    }
-
     init_serial(COM1);
     serial_println((char*)"hello from kernel main.", COM1);
     serial_println_dec(os_hint_table_address->low_kilobyte_blocks, COM1);
