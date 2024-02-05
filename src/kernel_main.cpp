@@ -13,6 +13,31 @@
 // TODO: memory stuff (memcpy, etc)
 // TODO: output streams
 
+void describe_memory_map()
+{
+    nov_memory_frame* current_block = head_frame;
+    nov_memory_frame* next_block;
+    uint32_t block_size;
+
+    serial_println((char*)"=== MMAP START ===", COM1);
+    while (current_block != 0x0)
+    {
+        next_block = current_block->next;
+        if (next_block == 0x0) { serial_print((char*)"end block found at ", COM1); serial_println_hex((uint32_t)current_block, COM1); return; }
+
+        block_size = (uint32_t)next_block-(uint32_t)current_block;
+        serial_print((char*)"block at     ", COM1); serial_println_hex((uint32_t)current_block, COM1);
+        serial_print((char*)"   size w/h  ", COM1); serial_print_dec(block_size, COM1); serial_print((char*)"/", COM1); serial_println_hex(block_size, COM1);
+        serial_print((char*)"   size wo/h ", COM1); serial_print_dec(block_size-sizeof(nov_memory_frame), COM1); serial_print((char*)"/", COM1); serial_println_hex(block_size-sizeof(nov_memory_frame), COM1);
+        serial_print((char*)"   next      ", COM1); serial_println_hex((uint32_t)current_block->next, COM1);
+        serial_print((char*)"   is free?  ", COM1); serial_println_dec(current_block->is_free, COM1);
+    
+        current_block = next_block;
+    }
+    serial_println("=== MMAP END ===", COM1);
+}
+
+
 extern "C" void main(os_hint_table* os_hint_table_address)
 {
     init_serial(COM1);
@@ -62,18 +87,37 @@ extern "C" void main(os_hint_table* os_hint_table_address)
     // FIXME: this makes big assumptions (32/64 bit and also memory map entry order)
     uint32_t mmap_start = os_hint_table_address->memory_map_table_address[selected_map_entry].region_base;
     uint32_t mmap_size = os_hint_table_address->memory_map_table_address[selected_map_entry].region_size;
+    
+    describe_memory_map();
+    
     init_memory_manager((void*)mmap_start, mmap_size);
+
+    describe_memory_map();
     void* kernel_address = malloc((uint32_t)os_hint_table_address->kernel_elf_end-(uint32_t)os_hint_table_address->kernel_elf_start);
+    describe_memory_map();
+    //serial_println_hex((uint32_t)kernel_address, COM1);
 
-    serial_println_hex((uint32_t)kernel_address, COM1);
-
-    serial_println_hex((uint32_t)head_frame, COM1);
-    serial_println_hex((uint32_t)head_frame->next, COM1);
+    //serial_println_hex((uint32_t)head_frame, COM1);
+    //serial_println_hex((uint32_t)head_frame->next, COM1);
 
     void* my_memory_block = malloc (0xabcd);
-    serial_println_hex((uint32_t)head_frame->next->next, COM1);
+    describe_memory_map();
+    void* my_memory_other_block = malloc (0xff00);
+    describe_memory_map();
+
+    //serial_println_hex((uint32_t)head_frame->next->next, COM1);
 
     serial_println((char*)"woo!", COM1);
+
+    mfree(my_memory_block);
+    mfree(my_memory_other_block);
+    describe_memory_map();
+
+    mfree (0x0);
+    describe_memory_map();
+
+    mconsolidate();
+    describe_memory_map();
 
     /*
     serial_println(COM1);

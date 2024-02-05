@@ -117,6 +117,54 @@ inline void* malloc(uint32_t size)
     return 0x0;
 }
 
-// TODO: free
-// TODO: consolidate
+/**
+ * free some memory starting at a given pointer. attempts to merge the newly freed block
+ * with the following block if the following block is already free.
+ * 
+ * @param ptr pointer to be freed
+ * @attention kind of tries to check if the pointer is valid but this is pretty likely
+ * to fail. please don't call this with an invalid pointer (i.e. not something generated
+ * by malloc) otherwise bad things will almost certainly happen
+ * 
+ * **/
+inline void mfree(void* ptr)
+{
+    // step back to the metadata of the block
+    nov_memory_frame* block = (nov_memory_frame*)((uint32_t)ptr-sizeof(nov_memory_frame));
+    // if this block is already free, um, cry
+    if (block->is_free) return;
+    // mark as free
+    block->is_free = true;
+
+    // check next block to see if it is free
+    if (block->next == 0x0) return;
+    if (!block->next->is_free) return;
+    block->next = block->next->next;
+
+    // TODO: possibly add a checksum
+    // TODO: add a last pointer? so blocks can be merged backwards
+}
+
+/**
+ * consolidate the memory map to merge adjacent free blocks.
+ * 
+ * **/
+inline void mconsolidate()
+{
+    // keep track of the current and next blocks
+    nov_memory_frame* current_block = head_frame;
+    nov_memory_frame* next_block;
+    uint32_t block_size;
+
+    while (current_block != 0x0)
+    {
+        next_block = current_block->next;
+        if (next_block == 0x0) return;
+        if (!current_block->is_free) { current_block = next_block; continue; }
+
+        if (next_block->is_free) current_block->next = next_block->next;
+        else current_block = next_block;
+    }
+}
+
 // TODO: view
