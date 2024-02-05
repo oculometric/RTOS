@@ -4,6 +4,11 @@
 
 #include <math.h>
 
+namespace nov
+{
+namespace vector
+{
+
 // represents a mathematical vector with 3 components
 template<typename T>
 struct nov_vector3
@@ -137,3 +142,6 @@ typedef nov_vector3<int32_t> nov_ivector3;
 typedef nov_vector2<float> nov_fvector2;
 typedef nov_vector2<uint32_t> nov_uvector2;
 typedef nov_vector2<int32_t> nov_ivector2;
+
+}
+}

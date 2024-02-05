@@ -60,7 +60,5 @@ void draw_window(const nov_uvector2& origin, const nov_uvector2& size, uint8_t* 
         }
         mod_index++;
         mod_index = mod_index%5;
-        //global_index = (global_position.v*buffer_size.u)+global_position.u;
-        //serial_print((char*)"global pos: ", COM1); serial_print_dec(global_position.u, COM1); serial_print((char*)", ", COM1); serial_println_dec(global_position.v, COM1);
     }
 }

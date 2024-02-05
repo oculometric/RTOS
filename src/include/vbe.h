@@ -2,8 +2,13 @@
 
 #include <stdint.h>
 
+namespace nov
+{
+namespace vbe
+{
+
 #pragma pack (1)
-struct vbe_pm_info_block
+struct nov_vbe_pm_info_block
 {
     uint8_t p;
     uint8_t m;
@@ -22,7 +27,7 @@ struct vbe_pm_info_block
 #pragma pack (0)
 
 #pragma pack (1)
-struct vbe_mode_info
+struct nov_vbe_mode_info
 {
     uint16_t mode_attributes;
     uint8_t window_a_attributes;
@@ -80,12 +85,12 @@ struct vbe_mode_info
 static void* find_pmid_block(void* start, uint32_t length)
 {
     uint8_t* ptr = (uint8_t*)start;
-    vbe_pm_info_block* block;
+    nov_vbe_pm_info_block* block;
 
     uint32_t offset = 0;
     while (offset < length)
     {
-        block = (vbe_pm_info_block*)(ptr+offset);
+        block = (nov_vbe_pm_info_block*)(ptr+offset);
         if (block->p == 'P' && block->m == 'M' && block->i == 'I' && block->d == 'D')
         {
             return (void*)(ptr+offset);
@@ -93,4 +98,7 @@ static void* find_pmid_block(void* start, uint32_t length)
         offset++;
     }
     return (void*)0x0;
+}
+
+}
 }

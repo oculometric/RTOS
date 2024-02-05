@@ -188,6 +188,8 @@ const uint8_t sliced_window[WINDOW_SLICE_SIZE*WINDOW_SLICE_SIZE*WINDOW_SLICE_NUM
     1, 1, 1, 1, 2
 };
 
+using namespace nov::vector;
+
 static const nov_uvector3 colour_palette[5] =
 {
     nov_uvector3{ 0,0,0 },

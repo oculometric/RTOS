@@ -1,12 +1,14 @@
 #include <graphics.h>
 #include <serial.h>
 
+using namespace nov::graphics;
+
 inline uint32_t nov_graphics_manager::get_offset(const nov_uvector2& co)
 {
     return (this->screen_size.u*co.v)+co.u;
 }
 
-nov_graphics_manager::nov_graphics_manager(vbe_mode_info* vbe_mode_info_block)
+nov_graphics_manager::nov_graphics_manager(nov::vbe::nov_vbe_mode_info* vbe_mode_info_block)
 {
     screen_size = nov_uvector2{ vbe_mode_info_block->x_resolution, vbe_mode_info_block->y_resolution };
     real_framebuffer = (uint8_t*)(vbe_mode_info_block->flat_framebuffer_address);

@@ -1,5 +1,10 @@
 #include <colour.h>
 
+namespace nov
+{
+namespace colour
+{
+
 nov_colour rgb_to_hsv(const nov_colour& rgb)
 {
     nov_colour hsv { 0,0,0 };
@@ -42,4 +47,5 @@ nov_colour hsv_to_rgb(const nov_colour& hsv)
     return nov_colour { 0,0,0 };
 }
 
-
+}
+}

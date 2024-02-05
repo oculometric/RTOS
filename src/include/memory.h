@@ -2,6 +2,11 @@
 
 #include <stdint.h>
 
+namespace nov
+{
+namespace memory
+{
+
 template <typename T>
 inline void memcpy(T* src, T* dest, uint32_t length)
 {
@@ -57,7 +62,7 @@ static nov_memory_frame* head_frame = 0x0;
  * @param block_start pointer to the start of the available block
  * @param size size of the available block
  * **/
-inline void init_memory_manager(void* block_start, uint32_t size)
+inline void minit(void* block_start, uint32_t size)
 {
     if (size < sizeof(nov_memory_frame) || block_start == 0x0) return;
 
@@ -167,4 +172,33 @@ inline void mconsolidate()
     }
 }
 
-// TODO: view
+/**
+ * send a summary of the memory map to the serial console
+ * 
+ * **/
+void mview()
+{
+    nov_memory_frame* current_block = head_frame;
+    nov_memory_frame* next_block;
+    uint32_t block_size;
+
+    serial_println((char*)"=== MMAP START ===", COM1);
+    while (current_block != 0x0)
+    {
+        next_block = current_block->next;
+        if (next_block == 0x0) { serial_print((char*)"end block found at ", COM1); serial_println_hex((uint32_t)current_block, COM1); return; }
+
+        block_size = (uint32_t)next_block-(uint32_t)current_block;
+        serial_print((char*)"block at     ", COM1); serial_println_hex((uint32_t)current_block, COM1);
+        serial_print((char*)"   size w/h  ", COM1); serial_print_dec(block_size, COM1); serial_print((char*)"/", COM1); serial_println_hex(block_size, COM1);
+        serial_print((char*)"   size wo/h ", COM1); serial_print_dec(block_size-sizeof(nov_memory_frame), COM1); serial_print((char*)"/", COM1); serial_println_hex(block_size-sizeof(nov_memory_frame), COM1);
+        serial_print((char*)"   next      ", COM1); serial_println_hex((uint32_t)current_block->next, COM1);
+        serial_print((char*)"   is free?  ", COM1); serial_println_dec(current_block->is_free, COM1);
+    
+        current_block = next_block;
+    }
+    serial_println("=== MMAP END ===", COM1);
+}
+
+}
+}
