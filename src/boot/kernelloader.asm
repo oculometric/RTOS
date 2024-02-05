@@ -46,7 +46,9 @@ populate_EHU:
     mov WORD ax, [ebp+50]
     mov WORD [ELF_HEADER_USEFUL+EHU_SECTHEADNAMESIND_OFFSET], ax
 
-    mov DWORD [OS_HINT_TABLE+OHT_KERN_END_OFFSET], 0
+    mov DWORD eax, [OS_HINT_TABLE]
+    mov DWORD [eax+OHT_KERN_START_OFFSET], 0x100000
+    mov DWORD [eax+OHT_KERN_END_OFFSET], 1
 
 read_program_header_table:
     mov ebp, 0          ; use ebp to keep count of how many program headers we've loaded
@@ -75,9 +77,10 @@ read_program_header:
     mov edx, eax
 
     ; check if this is the furthest point so far
-    cmp edx, [OS_HINT_TABLE+OHT_KERN_END_OFFSET]
+    mov DWORD eax, [OS_HINT_TABLE]
+    cmp edx, [eax+OHT_KERN_END_OFFSET]
     jle clear_program_byte
-    mov [OS_HINT_TABLE+OHT_KERN_END_OFFSET], edx
+    mov [eax+OHT_KERN_END_OFFSET], edx
 clear_program_byte:
     mov BYTE [ecx], 0
     inc ebx
@@ -146,9 +149,10 @@ read_progbits_header:
     mov edx, eax
 
     ; check if this is the furthest point so far
-    cmp edx, [OS_HINT_TABLE+OHT_KERN_END_OFFSET]
+    mov DWORD eax, [OS_HINT_TABLE]
+    cmp edx, [eax+OHT_KERN_END_OFFSET]
     jle copy_progbits_byte
-    mov [OS_HINT_TABLE+OHT_KERN_END_OFFSET], edx
+    mov [eax+OHT_KERN_END_OFFSET], edx
 
 copy_progbits_byte:
     mov BYTE al, [ebx]
@@ -173,9 +177,10 @@ read_nobits_header:
     mov al, 0
 
     ; check if this is the furthest point so far
-    cmp edx, [OS_HINT_TABLE+OHT_KERN_END_OFFSET]
+    mov DWORD eax, [OS_HINT_TABLE]
+    cmp edx, [eax+OHT_KERN_END_OFFSET]
     jle write_nobits_byte
-    mov [OS_HINT_TABLE+OHT_KERN_END_OFFSET], edx
+    mov [eax+OHT_KERN_END_OFFSET], edx
 
 write_nobits_byte:
     mov BYTE [ecx], al

@@ -206,7 +206,7 @@ protected_mode_arrival:
     mov BYTE [0xb8000], 'N'
     mov eax, 0x4a6b7900
     push OS_HINT_TABLE
-    jmp 0x10000                 ; geronimo!
+    jmp KERNEL_LOAD_ADDR                 ; geronimo!
 
 times 510-($-$$) db 0   ; fill with zeros
 dw 0xaa55               ; define bootable signature byte

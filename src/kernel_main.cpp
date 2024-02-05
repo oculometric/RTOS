@@ -17,7 +17,22 @@ extern "C" void main(os_hint_table* os_hint_table_address)
 {
     init_serial(COM1);
     serial_println((char*)"hello from kernel main.", COM1);
-    serial_println_dec(os_hint_table_address->low_kilobyte_blocks, COM1);
+    serial_println((char*)"reading the os hint table...", COM1);
+    serial_print((char*)"   gdt address     : ", COM1); serial_println_hex((uint32_t)os_hint_table_address->gdt_address, COM1);
+    serial_print((char*)"   1kib lows blocks: ", COM1); serial_println_dec(os_hint_table_address->low_kilobyte_blocks, COM1);
+    serial_print((char*)"   CPUID ecx       : ", COM1); serial_println_bin(os_hint_table_address->cpuid_ecx_content, COM1);
+    serial_print((char*)"   CPUID edx       : ", COM1); serial_println_bin(os_hint_table_address->cpuid_edx_content, COM1);
+    serial_print((char*)"   memory map table: ", COM1); serial_println_hex((uint32_t)os_hint_table_address->memory_map_table_address, COM1);
+    serial_print((char*)"   table entries   : ", COM1); serial_println_dec(os_hint_table_address->memory_map_table_entries, COM1);
+    serial_print((char*)"   boot disk       : ", COM1); serial_println_dec(os_hint_table_address->boot_disk_number, COM1);
+    serial_print((char*)"   BDA address     : ", COM1); serial_println_hex((uint32_t)os_hint_table_address->bios_data_area_address, COM1);
+    serial_print((char*)"   kernel elf start: ", COM1); serial_println_hex((uint32_t)os_hint_table_address->kernel_elf_start, COM1);
+    serial_print((char*)"   kernel elf end  : ", COM1); serial_println_hex((uint32_t)os_hint_table_address->kernel_elf_end, COM1);
+    serial_print((char*)"   kernel elf size : ", COM1); serial_println_dec((uint32_t)os_hint_table_address->kernel_elf_end-(uint32_t)os_hint_table_address->kernel_elf_start, COM1);
+    serial_print((char*)"   checksum        : ", COM1); serial_println_hex((uint32_t)os_hint_table_address->checksum, COM1);
+    serial_print((char*)"   novo checksum   : ", COM1); serial_println_hex((uint32_t)os_hint_table_address->checksum_novo, COM1);
+
+    serial_println(COM1);
 
     serial_println((char*)"reading high memory map...", COM1);
 
@@ -41,6 +56,27 @@ extern "C" void main(os_hint_table* os_hint_table_address)
     }
 
     serial_println(COM1);
+
+    serial_println((char*)"configuring memory manager", COM1);
+    uint8_t selected_map_entry = 3;
+    // FIXME: this makes big assumptions (32/64 bit and also memory map entry order)
+    uint32_t mmap_start = os_hint_table_address->memory_map_table_address[selected_map_entry].region_base;
+    uint32_t mmap_size = os_hint_table_address->memory_map_table_address[selected_map_entry].region_size;
+    init_memory_manager((void*)mmap_start, mmap_size);
+    void* kernel_address = malloc((uint32_t)os_hint_table_address->kernel_elf_end-(uint32_t)os_hint_table_address->kernel_elf_start);
+
+    serial_println_hex((uint32_t)kernel_address, COM1);
+
+    serial_println_hex((uint32_t)head_frame, COM1);
+    serial_println_hex((uint32_t)head_frame->next, COM1);
+
+    void* my_memory_block = malloc (0xabcd);
+    serial_println_hex((uint32_t)head_frame->next->next, COM1);
+
+    serial_println((char*)"woo!", COM1);
+
+    /*
+    serial_println(COM1);
     serial_println((char*)"starting search for PMID block", COM1);
     void* result = find_pmid_block((void*)0, 0xFFFFFFF0);
     serial_println_hex((uint32_t)result, COM1);
@@ -53,8 +89,10 @@ extern "C" void main(os_hint_table* os_hint_table_address)
     serial_println_dec(os_hint_table_address->vbe_mode_info_block->y_resolution, COM1);
     serial_println_hex(os_hint_table_address->vbe_mode_info_block->flat_framebuffer_address, COM1);
 
+    
+    */
+
     nov_graphics_manager g (os_hint_table_address->vbe_mode_info_block);
-    serial_dump_hex_byte((uint8_t*)os_hint_table_address->vbe_mode_info_block->flat_framebuffer_address, 30, COM1, 3);
 
     g.draw_pixel(nov_uvector2{0,0}, nov_colour{1,0,0});
 
@@ -85,9 +123,6 @@ extern "C" void main(os_hint_table* os_hint_table_address)
         }
     }
 
-    serial_println(COM1);
-    serial_println(COM1);
-    serial_dump_hex_byte((uint8_t*)os_hint_table_address->vbe_mode_info_block->flat_framebuffer_address, 30, COM1, 3);
 
     serial_println(COM1);
 

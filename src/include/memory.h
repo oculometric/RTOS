@@ -36,7 +36,7 @@ inline void memset(T value, T* dest, uint32_t length)
 #pragma pack (1)
 struct nov_memory_frame
 {
-    nov_memory_frame* next = NULL;
+    nov_memory_frame* next = 0x0;
     bool is_free = false;
 };
 #pragma pack (0)
@@ -47,7 +47,7 @@ struct nov_memory_frame
  * @attention ABSOLUTELY NEVER EVER EVER MODIFY THIS OUTSIDE THE MEMORY INITIALISER
  * 
  * **/
-static nov_memory_frame* head_frame = NULL;
+static nov_memory_frame* head_frame = 0x0;
 
 /**
  * configure the memory manager by initialising the head frame to cover the memory
@@ -59,7 +59,7 @@ static nov_memory_frame* head_frame = NULL;
  * **/
 inline void init_memory_manager(void* block_start, uint32_t size)
 {
-    if (size < sizeof(nov_memory_frame) || block_start == NULL) return;
+    if (size < sizeof(nov_memory_frame) || block_start == 0x0) return;
 
     // place a memory frame at the start of the provided block
     head_frame = (nov_memory_frame*)block_start;
@@ -68,7 +68,7 @@ inline void init_memory_manager(void* block_start, uint32_t size)
     head_frame->next = (nov_memory_frame*)(((uint32_t)block_start+size)-sizeof(nov_memory_frame));
 
     // initialise the end frame to be a blank (size-zero) frame
-    head_frame->next->next = NULL;
+    head_frame->next->next = 0x0;
     head_frame->next->is_free = false;
 }
 
@@ -86,13 +86,13 @@ inline void* malloc(uint32_t size)
     nov_memory_frame* next_block;
     uint32_t block_size;
 
-    while (current_block != NULL)
+    while (current_block != 0x0)
     {
         // if this block isnt free, skip it
         if (!current_block->is_free) { current_block = current_block->next; continue; }
         next_block = current_block->next;
         // if the next block is NULL, then current_block is actually the blank end frame
-        if (next_block == NULL) return NULL;
+        if (next_block == 0x0) return 0x0;
 
         // find the block size (i.e. the distance between the current frame and the next)
         block_size = (uint32_t)next_block-(uint32_t)current_block;
@@ -114,7 +114,7 @@ inline void* malloc(uint32_t size)
         current_block = next_block;
     }
 
-    return NULL;
+    return 0x0;
 }
 
 // TODO: free
