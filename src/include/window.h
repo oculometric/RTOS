@@ -193,10 +193,10 @@ using namespace nov::vector;
 static const nov_uvector3 colour_palette[5] =
 {
     nov_uvector3{ 0,0,0 },
-    nov_uvector3{ 204,204,204 },
-    nov_uvector3{ 128,128,128 },
-    nov_uvector3{ 26,26,26 },
-    nov_uvector3{ 3,3,3 }
+    nov_uvector3{ 238,211,0 },
+    nov_uvector3{ 3,2,0 },
+    nov_uvector3{ 184,103,0 },
+    nov_uvector3{ 238,211,0 }
 };
 
 void draw_window(const nov_uvector2& origin, const nov_uvector2& size, uint8_t* buffer, const nov_uvector2& buffer_size);

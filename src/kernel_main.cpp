@@ -162,7 +162,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     nov_uvector2 left {480,240};
     nov_uvector2 right {640, 0};
     nov_colour col = nov_colour_vapor;
-
+return;
     while (true)
     {
         g.draw_line(left, right, col);
