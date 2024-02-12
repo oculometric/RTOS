@@ -186,7 +186,7 @@ inline void mview()
     while (current_block != 0x0)
     {
         next_block = current_block->next;
-        if (next_block == 0x0) { serial_print((char*)"end block found at ", COM1); serial_println_hex((uint32_t)current_block, COM1); return; }
+        if (next_block == 0x0) { serial_print((char*)"end block found at ", COM1); serial_println_hex((uint32_t)current_block, COM1); serial_println((char*)"=== MMAP END ===", COM1); return; }
 
         block_size = (uint32_t)next_block-(uint32_t)current_block;
         serial_print((char*)"block at     ", COM1); serial_println_hex((uint32_t)current_block, COM1);

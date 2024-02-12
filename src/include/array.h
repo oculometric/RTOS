@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <memory.h>
+#include <panic.h>
 
 namespace nov
 {
@@ -10,11 +11,10 @@ template <typename T>
 struct nov_array_container
 {
     //nov_array_container<T>* last;
-    T& data;
-    bool is_allocation_head;
+    T data;
     nov_array_container<T>* next;
+    bool is_allocation_head;
 };
-
 
 template <typename T>
 class nov_array
@@ -74,7 +74,7 @@ public:
      * **/
     inline T& operator[](uint32_t index)
     {
-        if (index >= length) return 0x0; // FIXME: UHHHHHH???? does this work?
+        if (index >= length) panic(); // crashes the kernel
         // step over the linked list until we reach the right index
         nov_array_container<T>* current = first;
         for (uint32_t i = 0; i < index; i++)
@@ -85,7 +85,47 @@ public:
         return current->data;
     }
 
-    void push(T& element);
+    /**
+     * insert an element into the back of the list
+     * 
+     * @param element element data to insert
+     * 
+     * **/
+    inline void push(T& element)
+    {
+        // if we're at the limit, resize
+        if (length == capacity)
+        {
+            resize(capacity+4);
+        }
+        // if we have size now, increase length and insert
+        if (capacity > length)
+        {
+            length++;
+            (*this)[length-1] = element;
+        }
+    }
+
+    /**
+     * insert an element into the back of the list
+     * 
+     * @param element element data to insert
+     * 
+     * **/
+    inline void push(T element)
+    {
+        // if we're at the limit, resize
+        if (length == capacity)
+        {
+            resize(capacity+4);
+        }
+        // if we have size now, increase length and insert
+        if (capacity > length)
+        {
+            length++;
+            (*this)[length-1] = element;
+        }
+    }
 
     /**
      * remove an item from the end of the array, and return its value
@@ -95,9 +135,10 @@ public:
      * **/
     inline T pop()
     {
-        if (length == 0) return 0x0;
+        if (length == 0) panic(); // crashes the kernel
+        T value = (*this)[length-1];
         length--;
-        return this[length];
+        return value;
     }
 
     /**

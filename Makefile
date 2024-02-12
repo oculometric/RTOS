@@ -32,20 +32,26 @@ BL_FILES_IN		= $(wildcard $(BL_DIR)/*.asm)
 BL_FILES_OUT	= $(patsubst $(BL_DIR)/%.asm, $(OBJ_DIR)/%.bin, $(BL_FILES_IN))
 
 $(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
+	@mkdir -p $(OBJ_DIR)
 
 $(OBJ_DIR)/%.o: $(CC_DIR)/%.cpp $(OBJ_DIR)
-	$(CC) $(CC_FLAGS) -I$(CC_INCLUDE) -c $< -o $@
+	@echo "Compiling " $<
+	@$(CC) $(CC_FLAGS) -I$(CC_INCLUDE) -c $< -o $@
 
 $(OBJ_DIR)/%.o: $(AS_DIR)/%.asm $(OBJ_DIR)
-	$(AS) $(AS_FLAGS) $< -o $@
+	@echo "Assembling " $<
+	@$(AS) $(AS_FLAGS) $< -o $@
 
 $(OBJ_DIR)/%.bin: $(BL_DIR)/%.asm $(OBJ_DIR)
-	$(AS) -f bin $< -o $@
+	@echo "Assembling " $<
+	@$(AS) -f bin $< -o $@
 
 build: $(BL_FILES_OUT) $(CC_FILES_OUT) $(AS_FILES_OUT)
-	$(LD) $(LD_FLAGS) -o $(KERN_OUT) $(AS_FILES_OUT) $(CC_FILES_OUT)
-	cat $(BL_FILES_OUT) $(KERN_OUT) > $(BOOT_OUT)
+	@echo "Linking " $(KERN_OUT)
+	@$(LD) $(LD_FLAGS) -o $(KERN_OUT) $(AS_FILES_OUT) $(CC_FILES_OUT)
+	@echo "Stupid concatenation hack " $(BOOT_OUT)
+	@cat $(BL_FILES_OUT) $(KERN_OUT) > $(BOOT_OUT)
+	@echo "Done"
 
 emulate:
 	qemu-system-x86_64 -drive file=$(BOOT_OUT),format=raw,index=0,media=disk -monitor stdio -serial file:log/output.log

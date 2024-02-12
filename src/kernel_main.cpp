@@ -66,12 +66,39 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     uint32_t mmap_size = os_hint_table->memory_map_table_address[selected_map_entry].region_size;
     
     memory::minit((void*)mmap_start, mmap_size);
-    void* kernel_address = memory::malloc((uint32_t)os_hint_table->kernel_elf_end-(uint32_t)os_hint_table->kernel_elf_start);
-
-
+    const void* kernel_address = memory::malloc((uint32_t)os_hint_table->kernel_elf_end-(uint32_t)os_hint_table->kernel_elf_start);
+    memory::mview();
 
     nov_array<char> arr;
 
+    arr.push('x');
+    arr.push('y');
+    arr.push('z');
+
+    serial_println_dec(arr.get_length(), COM1);
+
+    memory::mview();
+
+    serial_println(arr.pop(), COM1);
+    serial_println(arr.pop(), COM1);
+
+    arr.push('a');
+    arr.push('b');
+    arr.push('c');
+    arr.push('d');
+    arr.push('e');
+    serial_println_dec(arr.get_length(), COM1);
+    serial_println_dec(arr.get_capacity(), COM1);
+
+    serial_println(arr.pop(), COM1); 
+    serial_println(arr.pop(), COM1);
+    serial_println(arr[0], COM1);
+
+    memory::mview();
+
+    arr.~nov_array();
+
+    memory::mview();
 
     graphics::nov_graphics_manager g (os_hint_table->vbe_mode_info_block);
 
