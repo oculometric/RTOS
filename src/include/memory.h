@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <serial.h>
 
 namespace nov
 {
@@ -159,7 +160,6 @@ inline void mconsolidate()
     // keep track of the current and next blocks
     nov_memory_frame* current_block = head_frame;
     nov_memory_frame* next_block;
-    uint32_t block_size;
 
     while (current_block != 0x0)
     {
@@ -176,7 +176,7 @@ inline void mconsolidate()
  * send a summary of the memory map to the serial console
  * 
  * **/
-void mview()
+inline void mview()
 {
     nov_memory_frame* current_block = head_frame;
     nov_memory_frame* next_block;
@@ -197,7 +197,7 @@ void mview()
     
         current_block = next_block;
     }
-    serial_println("=== MMAP END ===", COM1);
+    serial_println((char*)"=== MMAP END ===", COM1);
 }
 
 }

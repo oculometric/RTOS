@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include <vector.h>
+#include <array.h>
 
 #define WINDOW_SLICE_SIZE 5
 #define WINDOW_SLICE_AREA WINDOW_SLICE_SIZE*WINDOW_SLICE_SIZE
@@ -189,6 +190,7 @@ const uint8_t sliced_window[WINDOW_SLICE_SIZE*WINDOW_SLICE_SIZE*WINDOW_SLICE_NUM
 };
 
 using namespace nov::vector;
+using namespace nov;
 
 static const nov_uvector3 colour_palette[5] =
 {
@@ -200,3 +202,56 @@ static const nov_uvector3 colour_palette[5] =
 };
 
 void draw_window(const nov_uvector2& origin, const nov_uvector2& size, uint8_t* buffer, const nov_uvector2& buffer_size);
+
+struct nov_framebuffer
+{
+    uint8_t* address;
+    nov_uvector2 size;
+    uint32_t length;
+    uint8_t bytes_per_pixel;
+};
+
+
+class nov_panel
+{
+private:
+    nov_framebuffer& framebuffer;
+
+    nov_ivector2 panel_origin;
+    nov_ivector2 panel_origin_local;
+    nov_uvector2 panel_size;
+
+    nov_array<nov_panel*> children;
+    nov_panel* parent;
+
+    // iterates over children and redraws all of them
+    void redraw_children();
+    // iterates over children and recalculates their global positions
+    void recalculate_child_positions();
+
+    // flag determining if this panel is waiting to be redrawn (after translation or other property change)
+    bool needs_redraw;
+
+public:
+    // draws the panel and its contents to the screen.
+    virtual void draw();
+    
+    // translate this panel by a value, recalculating all positions of all child panels
+    void translate(nov_ivector2& delta);
+    // set the position of this panel, either globally or local to its parent panel, recalculating all positions of children
+    void set_position(nov_ivector2& new_position, bool local);
+    // set the size of this panel
+    void set_size(nov_uvector2& new_size);
+    // sets a flag which marks this panel as needing to be redrawn
+    void set_dirty();
+
+    
+    nov_panel(nov_framebuffer& _framebuffer, nov_ivector2& local_origin, nov_uvector2& size);
+};
+
+class nov_boxed_text : nov_panel
+{
+public:
+    char* text_to_draw;
+    nov_colour text_colour;
+};

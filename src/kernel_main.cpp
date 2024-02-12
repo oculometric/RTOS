@@ -7,6 +7,7 @@
 #include <memory.h>
 #include <window.h>
 #include <random.h>
+#include <array.h>
 
 // TODO: keyboard
 // TODO: interrupts
@@ -64,53 +65,13 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     uint32_t mmap_start = os_hint_table->memory_map_table_address[selected_map_entry].region_base;
     uint32_t mmap_size = os_hint_table->memory_map_table_address[selected_map_entry].region_size;
     
-    memory::mview();
-    
     memory::minit((void*)mmap_start, mmap_size);
-
-    memory::mview();
     void* kernel_address = memory::malloc((uint32_t)os_hint_table->kernel_elf_end-(uint32_t)os_hint_table->kernel_elf_start);
-    memory::mview();
-    //serial_println_hex((uint32_t)kernel_address, COM1);
 
-    //serial_println_hex((uint32_t)head_frame, COM1);
-    //serial_println_hex((uint32_t)head_frame->next, COM1);
 
-    void* my_memory_block = memory::malloc (0xabcd);
-    memory::mview();
-    void* my_memory_other_block = memory::malloc (0xff00);
-    memory::mview();
 
-    //serial_println_hex((uint32_t)head_frame->next->next, COM1);
+    nov_array<char> arr;
 
-    serial_println((char*)"woo!", COM1);
-
-    memory::mfree(my_memory_block);
-    memory::mfree(my_memory_other_block);
-    memory::mview();
-
-    memory::mfree (0x0);
-    memory::mview();
-
-    memory::mconsolidate();
-    memory::mview();
-
-    /*
-    serial_println(COM1);
-    serial_println((char*)"starting search for PMID block", COM1);
-    void* result = find_pmid_block((void*)0, 0xFFFFFFF0);
-    serial_println_hex((uint32_t)result, COM1);
-    serial_println(COM1);
-    serial_dump_hex_byte(result, 20, COM1, 4);
-
-    serial_println(COM1);
-
-    serial_println_dec(os_hint_table_address->vbe_mode_info_block->x_resolution, COM1);
-    serial_println_dec(os_hint_table_address->vbe_mode_info_block->y_resolution, COM1);
-    serial_println_hex(os_hint_table_address->vbe_mode_info_block->flat_framebuffer_address, COM1);
-
-    
-    */
 
     graphics::nov_graphics_manager g (os_hint_table->vbe_mode_info_block);
 
@@ -162,7 +123,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     nov_uvector2 left {480,240};
     nov_uvector2 right {640, 0};
     nov_colour col = nov_colour_vapor;
-return;
+
     while (true)
     {
         g.draw_line(left, right, col);

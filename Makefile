@@ -6,7 +6,7 @@ CC			:= $(PREFIX)g++
 LD			:= $(PREFIX)ld
 
 AS_FLAGS		:= -f elf
-CC_FLAGS		:= -ffreestanding -m32 -g -masm=intel -Wall -Wextra -Wpedantic -mno-red-zone
+CC_FLAGS		:= -ffreestanding -m32 -g -masm=intel -Wall -Wextra -Wpedantic -mno-red-zone -std=c++20 -fno-exceptions
 LD_FLAGS		:= -T linker.ld
 
 BIN				= bin
@@ -48,7 +48,7 @@ build: $(BL_FILES_OUT) $(CC_FILES_OUT) $(AS_FILES_OUT)
 	cat $(BL_FILES_OUT) $(KERN_OUT) > $(BOOT_OUT)
 
 emulate:
-	qemu-system-x86_64 -m 2G -drive file=$(BOOT_OUT),format=raw,index=0,media=disk -monitor stdio -serial file:log/output.log
+	qemu-system-x86_64 -drive file=$(BOOT_OUT),format=raw,index=0,media=disk -monitor stdio -serial file:log/output.log
 
 disassemble:
 	objdump -m i8086 -M intel -b binary -D $(BOOT_OUT)
