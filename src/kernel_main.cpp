@@ -145,7 +145,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     serial_println((char*)"done", COM1);
 
     serial_println((char*)"for my next trick, i will draw a window", COM1);
-    draw_window(nov_uvector2{20, 40}, nov_uvector2{100, 100}, real_buffer, nov_uvector2{640,480});
+    nov::gui::draw_window(nov_uvector2{20, 40}, nov_uvector2{100, 100}, real_buffer, nov_uvector2{640,480});
 
     nov_uvector2 left {480,240};
     nov_uvector2 right {640, 0};

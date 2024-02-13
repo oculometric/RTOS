@@ -2,7 +2,12 @@
 
 #include <serial.h>
 
-static inline uint16_t get_slice_offset(const nov_uvector2& local_position, const nov_uvector2& size)
+namespace nov
+{
+namespace gui
+{
+
+static inline uint16_t get_slice_offset(const vector::nov_uvector2& local_position, const vector::nov_uvector2& size)
 {
     uint8_t bitpacked = // in order from lowest bit to highest bit
         ((local_position.u < WINDOW_SLICE_SIZE)) |
@@ -61,4 +66,47 @@ void draw_window(const nov_uvector2& origin, const nov_uvector2& size, uint8_t* 
         mod_index++;
         mod_index = mod_index%5;
     }
+}
+
+/**
+ * causes immediate children to be redrawn, then calls redraw_children recursively on those children
+ * 
+ * **/
+void nov_panel::redraw_children()
+{
+    for (uint32_t i = 0; i < children.get_length(); i++)
+    {
+        if (children[i] == 0x0) continue;
+        children[i]->draw();
+        children[i]->redraw_children();
+    }
+}
+
+/**
+ * recalculates the positions of immediate children, then recursively calls recalculate_child_positions
+ * on thse children
+ * 
+ * @param preserve_global whether to preserve the global position of the children. if this is false,
+ * then global positions are recalculated according to the parent's global position; if this is true,
+ * then local positions are recalculated to fit with the parent's global position
+ * 
+ * **/
+void nov_panel::recalculate_child_positions(bool preserve_global)
+{
+    for (uint32_t i = 0; i < children.get_length(); i++)
+    {
+        if (children[i] == 0x0) continue;
+        if (preserve_global)
+        {
+            children[i]->panel_origin_local = children[i]->panel_origin - panel_origin;
+        }
+        else
+        {
+            children[i]->panel_origin = children[i]->panel_origin_local + panel_origin;
+        }
+        children[i]->recalculate_child_positions(preserve_global);
+    }
+}
+
+}
 }

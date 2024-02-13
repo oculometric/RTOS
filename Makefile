@@ -35,21 +35,21 @@ $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
 $(OBJ_DIR)/%.o: $(CC_DIR)/%.cpp $(OBJ_DIR)
-	@echo "Compiling " $<
+	@echo "Compiling" $<
 	@$(CC) $(CC_FLAGS) -I$(CC_INCLUDE) -c $< -o $@
 
 $(OBJ_DIR)/%.o: $(AS_DIR)/%.asm $(OBJ_DIR)
-	@echo "Assembling " $<
+	@echo "Assembling" $<
 	@$(AS) $(AS_FLAGS) $< -o $@
 
 $(OBJ_DIR)/%.bin: $(BL_DIR)/%.asm $(OBJ_DIR)
-	@echo "Assembling " $<
+	@echo "Assembling raw" $<
 	@$(AS) -f bin $< -o $@
 
 build: $(BL_FILES_OUT) $(CC_FILES_OUT) $(AS_FILES_OUT)
-	@echo "Linking " $(KERN_OUT)
+	@echo "Linking" $(KERN_OUT)
 	@$(LD) $(LD_FLAGS) -o $(KERN_OUT) $(AS_FILES_OUT) $(CC_FILES_OUT)
-	@echo "Stupid concatenation hack " $(BOOT_OUT)
+	@echo "Stupid concatenation hack" $(BOOT_OUT)
 	@cat $(BL_FILES_OUT) $(KERN_OUT) > $(BOOT_OUT)
 	@echo "Done"
 

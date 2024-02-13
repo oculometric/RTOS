@@ -35,6 +35,11 @@
 #define WINDOW_SYMBOL_7 23
 #define WINDOW_SYMBOL_8 24
 
+namespace nov
+{
+namespace gui
+{
+
 const uint8_t sliced_window[WINDOW_SLICE_SIZE*WINDOW_SLICE_SIZE*WINDOW_SLICE_NUM] =
 {
     // top left corner
@@ -220,14 +225,19 @@ private:
     nov_ivector2 panel_origin;
     nov_ivector2 panel_origin_local;
     nov_uvector2 panel_size;
+    nov_uvector2 panel_visible_size;
 
     nov_array<nov_panel*> children;
     nov_panel* parent;
 
     // iterates over children and redraws all of them
     void redraw_children();
-    // iterates over children and recalculates their global positions
-    void recalculate_child_positions();
+    // iterates over children and recalculates their global/local positions
+    void recalculate_child_positions(bool preserve_global = false);
+
+    void recalculate_visibility();
+
+    inline bool is_valid_point(nov_ivector2& global_position);
 
     // flag determining if this panel is waiting to be redrawn (after translation or other property change)
     bool needs_redraw;
@@ -255,3 +265,6 @@ public:
     char* text_to_draw;
     nov_colour text_colour;
 };
+   
+}
+}

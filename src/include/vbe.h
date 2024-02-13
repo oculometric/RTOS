@@ -82,7 +82,7 @@ struct nov_vbe_mode_info
 };
 #pragma pack (0)
 
-static void* find_pmid_block(void* start, uint32_t length)
+static inline void* find_pmid_block(void* start, uint32_t length)
 {
     uint8_t* ptr = (uint8_t*)start;
     nov_vbe_pm_info_block* block;
