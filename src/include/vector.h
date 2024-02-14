@@ -134,7 +134,7 @@ inline nov_vector2<T> lerp(const nov_vector2<T> & a, const nov_vector2<T> & b, c
 template<typename T>
 inline nov_vector3<T> reflect(const nov_vector3<T> & a, const nov_vector3<T> & b) { return a-(b*(a^b)*2); }
 
-typedef nov_vector3<float> nov_colour;
+typedef nov_vector3<uint8_t> nov_colour;
 typedef nov_vector3<float> nov_fvector3;
 typedef nov_vector3<uint32_t> nov_uvector3;
 typedef nov_vector3<int32_t> nov_ivector3;

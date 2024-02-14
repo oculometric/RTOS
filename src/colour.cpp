@@ -5,9 +5,9 @@ namespace nov
 namespace colour
 {
 
-nov_colour rgb_to_hsv(const nov_colour& rgb)
+nov_fvector3 rgb_to_hsv(const nov_fvector3& rgb)
 {
-    nov_colour hsv { 0,0,0 };
+    nov_fvector3 hsv { 0,0,0 };
     float mx = max(rgb.x, rgb.y, rgb.z);
     float mn = min(rgb.x, rgb.y, rgb.z);
 
@@ -27,9 +27,9 @@ nov_colour rgb_to_hsv(const nov_colour& rgb)
     return hsv;
 }
 
-nov_colour hsv_to_rgb(const nov_colour& hsv)
+nov_fvector3 hsv_to_rgb(const nov_fvector3& hsv)
 {
-    if (hsv.y == 0) return nov_colour{ hsv.z,hsv.z,hsv.z };
+    if (hsv.y == 0) return nov_fvector3{ hsv.z,hsv.z,hsv.z };
     uint8_t sextant = (uint8_t)(hsv.x*6.0f);
     float fraction = (hsv.x*6.0f)-sextant;
     float p = hsv.z*(1.0f-hsv.y);
@@ -44,7 +44,7 @@ nov_colour hsv_to_rgb(const nov_colour& hsv)
     case 4: return { t,p,hsv.z };
     case 5: return { hsv.z,p,q };
     }
-    return nov_colour { 0,0,0 };
+    return nov_fvector3 { 0,0,0 };
 }
 
 }

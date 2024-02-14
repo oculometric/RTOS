@@ -27,9 +27,9 @@ void nov_graphics_manager::draw_pixel(const nov_uvector2& at, const nov_colour& 
 void nov_graphics_manager::draw_pixel(uint32_t at, const nov_colour& col)
 {
     if (at > buffer_length) return;
-    real_framebuffer[(at*bytes_per_pixel)] = (uint8_t)(col.z*255);
-    real_framebuffer[(at*bytes_per_pixel)+1] = (uint8_t)(col.y*255);
-    real_framebuffer[(at*bytes_per_pixel)+2] = (uint8_t)(col.x*255);
+    real_framebuffer[(at*bytes_per_pixel)] = col.z;
+    real_framebuffer[(at*bytes_per_pixel)+1] = col.y;
+    real_framebuffer[(at*bytes_per_pixel)+2] = col.x;
 }
 
 void nov_graphics_manager::draw_line(const nov_uvector2& a, const nov_uvector2& b, const nov_colour& col)

@@ -39,7 +39,7 @@ void draw_window(const nov_uvector2& origin, const nov_uvector2& size, uint8_t* 
     uint16_t mod_index = 0;
     uint16_t slice_offset = 0;
     uint8_t value = 0;
-    nov_uvector3 colour;
+    nov_colour colour;
     while (local_position.u < size.u && local_position.v < size.v)
     {
         slice_offset = get_slice_offset(local_position, size);
@@ -68,46 +68,6 @@ void draw_window(const nov_uvector2& origin, const nov_uvector2& size, uint8_t* 
     }
 }
 
-/**
- * causes immediate children to be redrawn, then calls redraw_children recursively on those children
- * 
- * **/
-// void nov_panel::redraw_children()
-// {
-//     for (uint32_t i = 0; i < children.get_length(); i++)
-//     {
-//         if (children[i] == 0x0) continue;
-//         children[i]->draw();
-//         children[i]->redraw_children();
-//     }
-// }
-
-/**
- * recalculates the positions of immediate children, then recursively calls recalculate_child_positions
- * on thse children
- * 
- * @param preserve_global whether to preserve the global position of the children. if this is false,
- * then global positions are recalculated according to the parent's global position; if this is true,
- * then local positions are recalculated to fit with the parent's global position
- * 
- * **/
-// void nov_panel::recalculate_child_positions(bool preserve_global)
-// {
-//     for (uint32_t i = 0; i < children.get_length(); i++)
-//     {
-//         if (children[i] == 0x0) continue;
-//         if (preserve_global)
-//         {
-//             children[i]->panel_origin_local = children[i]->panel_origin - panel_origin;
-//         }
-//         else
-//         {
-//             children[i]->panel_origin = children[i]->panel_origin_local + panel_origin;
-//         }
-//         children[i]->recalculate_child_positions(preserve_global);
-//     }
-// }
-
 #include <colour.h>
 
 void nov_boxed_text::draw()
@@ -115,9 +75,9 @@ void nov_boxed_text::draw()
     if (panel_size.u < 3 || panel_size.v < 3) return;
 
     nov_vector3<uint8_t> col;
-    col.x = (uint8_t)(nov_colour_nearblack.x * 255);
-    col.y = (uint8_t)(nov_colour_nearblack.y * 255);
-    col.z = (uint8_t)(nov_colour_nearblack.z * 255);
+    col.x = nov_colour_nearblack.x;
+    col.y = nov_colour_nearblack.y;
+    col.z = nov_colour_nearblack.z;
 
     // fill box with black
     uint32_t top_left = (panel_origin.v * framebuffer.size.u) + panel_origin.u;
@@ -134,9 +94,9 @@ void nov_boxed_text::draw()
         top_left = (top_left - panel_size.u) + framebuffer.size.u;
     }
 
-    col.x = (uint8_t)(nov_colour_gold.x * 255);
-    col.y = (uint8_t)(nov_colour_gold.y * 255);
-    col.z = (uint8_t)(nov_colour_gold.z * 255);
+    col.x = nov_colour_gold.x;
+    col.y = nov_colour_gold.y;
+    col.z = nov_colour_gold.z;
 
     // draw a box outline of size starting at origin
 
@@ -184,7 +144,7 @@ nov_boxed_text::nov_boxed_text(nov_framebuffer& _framebuffer, nov_ivector2& orig
     panel_size = size;
 }
 
-void nov_panel::set_position(nov_ivector2 &new_position, bool local)
+void nov_boxed_text::set_position(nov_ivector2 &new_position, bool local)
 {
     panel_origin = new_position;
 }

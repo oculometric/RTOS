@@ -197,13 +197,13 @@ const uint8_t sliced_window[WINDOW_SLICE_SIZE*WINDOW_SLICE_SIZE*WINDOW_SLICE_NUM
 using namespace nov::vector;
 using namespace nov;
 
-static const nov_uvector3 colour_palette[5] =
+static const nov_colour colour_palette[5] =
 {
-    nov_uvector3{ 0,0,0 },
-    nov_uvector3{ 238,211,0 },
-    nov_uvector3{ 3,2,0 },
-    nov_uvector3{ 184,103,0 },
-    nov_uvector3{ 238,211,0 }
+    nov_colour{ 0,0,0 },
+    nov_colour{ 238,211,0 },
+    nov_colour{ 3,2,0 },
+    nov_colour{ 184,103,0 },
+    nov_colour{ 238,211,0 }
 };
 
 void draw_window(const nov_uvector2& origin, const nov_uvector2& size, uint8_t* buffer, const nov_uvector2& buffer_size);
@@ -216,57 +216,50 @@ struct nov_framebuffer
     uint8_t bytes_per_pixel;
 };
 
-
-class nov_panel
+class nov_boxed_text
 {
-protected:
-    nov_framebuffer framebuffer;
-
     nov_ivector2 panel_origin;
-    nov_ivector2 panel_origin_local;
     nov_uvector2 panel_size;
     nov_uvector2 panel_visible_size;
-
-    nov_array<nov_panel*> children;
-    nov_panel* parent;
-
-    // iterates over children and redraws all of them
-    //void redraw_children();
-    // iterates over children and recalculates their global/local positions
-    //void recalculate_child_positions(bool preserve_global = false);
-
-    //void recalculate_visibility();
-
-    //inline bool is_valid_point(nov_ivector2& global_position);
-
-    // flag determining if this panel is waiting to be redrawn (after translation or other property change)
-    //bool needs_redraw;
-
-public:
-    // draws the panel and its contents to the screen.
-    void draw();
-    
-    // translate this panel by a value, recalculating all positions of all child panels
-    //void translate(nov_ivector2& delta);
-    // set the position of this panel, either globally or local to its parent panel, recalculating all positions of children
-    void set_position(nov_ivector2& new_position, bool local);
-    // set the size of this panel
-    //void set_size(nov_uvector2& new_size);
-    // sets a flag which marks this panel as needing to be redrawn
-    //void set_dirty();
-
-    
-    //nov_panel(nov_framebuffer& _framebuffer, nov_ivector2& local_origin, nov_uvector2& size);
-};
-
-class nov_boxed_text : public nov_panel
-{
+    nov_ivector2 panel_origin_local;
+    nov_framebuffer framebuffer;
 public:
     char* text_to_draw;
 
     void draw();
+    void set_position(nov_ivector2& new_position, bool local);
 
     nov_boxed_text(nov_framebuffer& _framebuffer, nov_ivector2& origin, nov_uvector2& size);
+};
+
+struct nov_frame_data
+{
+    nov_uvector2 origin;
+    nov_uvector2 size;
+    uint8_t* framebuffer_address;
+};
+
+class nov_panel
+{
+
+};
+
+class nov_container
+{
+protected:
+    nov_container* child_a;
+    nov_container* child_b;
+
+    nov_panel* panel;
+
+    nov_fvector2 division;
+public:
+    void draw(nov_frame_data*);
+};
+
+class nov_gui_manager
+{
+
 };
    
 }

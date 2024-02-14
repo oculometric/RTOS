@@ -111,14 +111,14 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     uint8_t* buffer_b = (uint8_t*)0x300000;
     uint8_t* real_buffer = (uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address;
 
-    nov_colour c;
+    nov_fvector3 c;
     float l;
     uint32_t d = 0;
     for (int y = 0; y < 480; y++)
     {
         for (int x = 0; x < 640; x++)
         {
-            c = colour::hsv_to_rgb(nov_colour{x/640.0f,y/480.0f,1.0f});
+            c = colour::hsv_to_rgb(nov_fvector3{x/640.0f,y/480.0f,1});
             l = colour::luminance(c);
             buffer_a[(d*3)+0] = (uint8_t)(l*255);
             buffer_a[(d*3)+1] = (uint8_t)(l*255);
@@ -186,7 +186,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
         right.u = random_uint32_t() % 640;
         right.v = random_uint32_t() % 480;
         uint32_t r = random_uint32_t() & 0xFFFFF;
-        col = nov_colour{ col.y, (float)r/0xFFFF, col.x };
+        col = nov_colour{ col.y * 255, (float)r/255, col.x * 255 };
         
         //for (uint32_t i = 0; i < 42000; i++) {}
     }
