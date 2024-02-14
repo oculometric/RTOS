@@ -151,6 +151,33 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     nov_uvector2 right {640, 0};
     nov_colour col = nov_colour_vapor;
 
+    gui::nov_framebuffer framebuffer
+    {
+        real_buffer,
+        nov_uvector2{ 640, 480 },
+        640*480,
+        3
+    };
+
+    nov_ivector2 box_position = nov_ivector2{10,10};
+    nov_uvector2 box_size = nov_uvector2{100,100};
+    nov_ivector2 box_direction = nov_ivector2{4,4};
+
+    gui::nov_boxed_text textbox = gui::nov_boxed_text(framebuffer, box_position, box_size);
+    while (true)
+    {
+        textbox.draw();
+        for (uint32_t _t = 0; _t < 4096000; _t++) {}
+        box_position += box_direction;
+        if (box_position.u <= 0) { box_position.u = 0; box_direction.u = 4; }
+        if (box_position.u >= framebuffer.size.u - box_size.u) { box_position.u = framebuffer.size.u - box_size.u; box_direction.u = -4;}
+        if (box_position.v <= 0) { box_position.v = 0; box_direction.v = 4; }
+        if (box_position.v >= framebuffer.size.v - box_size.v) { box_position.v = framebuffer.size.v - box_size.v; box_direction.v = -4;}
+        textbox.set_position(box_position, false);
+    }
+
+
+    return;
     while (true)
     {
         g.draw_line(left, right, col);

@@ -72,15 +72,15 @@ void draw_window(const nov_uvector2& origin, const nov_uvector2& size, uint8_t* 
  * causes immediate children to be redrawn, then calls redraw_children recursively on those children
  * 
  * **/
-void nov_panel::redraw_children()
-{
-    for (uint32_t i = 0; i < children.get_length(); i++)
-    {
-        if (children[i] == 0x0) continue;
-        children[i]->draw();
-        children[i]->redraw_children();
-    }
-}
+// void nov_panel::redraw_children()
+// {
+//     for (uint32_t i = 0; i < children.get_length(); i++)
+//     {
+//         if (children[i] == 0x0) continue;
+//         children[i]->draw();
+//         children[i]->redraw_children();
+//     }
+// }
 
 /**
  * recalculates the positions of immediate children, then recursively calls recalculate_child_positions
@@ -91,21 +91,102 @@ void nov_panel::redraw_children()
  * then local positions are recalculated to fit with the parent's global position
  * 
  * **/
-void nov_panel::recalculate_child_positions(bool preserve_global)
+// void nov_panel::recalculate_child_positions(bool preserve_global)
+// {
+//     for (uint32_t i = 0; i < children.get_length(); i++)
+//     {
+//         if (children[i] == 0x0) continue;
+//         if (preserve_global)
+//         {
+//             children[i]->panel_origin_local = children[i]->panel_origin - panel_origin;
+//         }
+//         else
+//         {
+//             children[i]->panel_origin = children[i]->panel_origin_local + panel_origin;
+//         }
+//         children[i]->recalculate_child_positions(preserve_global);
+//     }
+// }
+
+#include <colour.h>
+
+void nov_boxed_text::draw()
 {
-    for (uint32_t i = 0; i < children.get_length(); i++)
+    if (panel_size.u < 3 || panel_size.v < 3) return;
+
+    nov_vector3<uint8_t> col;
+    col.x = (uint8_t)(nov_colour_nearblack.x * 255);
+    col.y = (uint8_t)(nov_colour_nearblack.y * 255);
+    col.z = (uint8_t)(nov_colour_nearblack.z * 255);
+
+    // fill box with black
+    uint32_t top_left = (panel_origin.v * framebuffer.size.u) + panel_origin.u;
+    for (uint32_t y = 0; y < panel_size.v; y++)
     {
-        if (children[i] == 0x0) continue;
-        if (preserve_global)
+        for (uint32_t x = 0; x < panel_size.u; x++)
         {
-            children[i]->panel_origin_local = children[i]->panel_origin - panel_origin;
+            framebuffer.address[(top_left * 3) + 0] = col.z;
+            framebuffer.address[(top_left * 3) + 1] = col.y;
+            framebuffer.address[(top_left * 3) + 2] = col.x;
+
+            top_left++;
         }
-        else
-        {
-            children[i]->panel_origin = children[i]->panel_origin_local + panel_origin;
-        }
-        children[i]->recalculate_child_positions(preserve_global);
+        top_left = (top_left - panel_size.u) + framebuffer.size.u;
     }
+
+    col.x = (uint8_t)(nov_colour_gold.x * 255);
+    col.y = (uint8_t)(nov_colour_gold.y * 255);
+    col.z = (uint8_t)(nov_colour_gold.z * 255);
+
+    // draw a box outline of size starting at origin
+
+    top_left = ((panel_origin.v + 1) * framebuffer.size.u) + (panel_origin.u + 1);
+    uint32_t top_right = top_left + (panel_size.u - 3);
+    uint32_t bottom_left = top_left;
+    uint32_t bottom_right = top_right;
+
+    for (uint32_t t = 0; t < panel_size.v - 2; t++)
+    {
+        framebuffer.address[(bottom_left * 3) + 0] = col.z;
+        framebuffer.address[(bottom_left * 3) + 1] = col.y;
+        framebuffer.address[(bottom_left * 3) + 2] = col.x;
+
+        framebuffer.address[(bottom_right * 3) + 0] = col.z;
+        framebuffer.address[(bottom_right * 3) + 1] = col.y;
+        framebuffer.address[(bottom_right * 3) + 2] = col.x;
+
+        bottom_left += framebuffer.size.u;
+        bottom_right += framebuffer.size.u;
+    }
+
+    top_right = top_left;
+    bottom_left -= framebuffer.size.u;
+
+    for (uint32_t t = 0; t < panel_size.u - 2; t++)
+    {
+        framebuffer.address[(top_right * 3) + 0] = col.z;
+        framebuffer.address[(top_right * 3) + 1] = col.y;
+        framebuffer.address[(top_right * 3) + 2] = col.x;
+
+        framebuffer.address[(bottom_left * 3) + 0] = col.z;
+        framebuffer.address[(bottom_left * 3) + 1] = col.y;
+        framebuffer.address[(bottom_left * 3) + 2] = col.x;
+
+        top_right++;
+        bottom_left++;
+    }
+}
+
+nov_boxed_text::nov_boxed_text(nov_framebuffer& _framebuffer, nov_ivector2& origin, nov_uvector2& size)
+{
+    framebuffer = _framebuffer;
+    panel_origin = origin;
+    panel_size = size;
+}
+
+void nov_panel::set_position(nov_ivector2 &new_position, bool local)
+{
+    panel_origin = new_position;
 }
 
 }
