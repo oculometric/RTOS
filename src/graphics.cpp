@@ -2,7 +2,7 @@
 #include <serial.h>
 
 using namespace nov::graphics;
-
+// TODO: reimplement/restore drawline, make minimal x/y axis line version
 // void nov_graphics_manager::draw_line(const nov_uvector2& a, const nov_uvector2& b, const nov_colour& col)
 // {
 //     nov_uvector2 minimum = a;

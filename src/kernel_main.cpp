@@ -76,30 +76,28 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
 
     gui::draw_window(nov_uvector2{20, 40}, nov_uvector2{100, 100}, real_buffer, nov_uvector2{640,480});
 
-    serial_println((char*)"here",COM1);
     uint8_t* backbuffer = new uint8_t[640*480*3];
-    memory::mview();
-    //if (backbuffer == 0x0) panic();
-    serial_println((char*)"here2",COM1);
+    if (backbuffer == 0x0) { serial_println((char*)"unable to allocate memory for GUI backbuffer. panic!", COM1); panic(); }
 
     graphics::nov_framebuffer framebuffer{ backbuffer, nov_uvector2{ 640, 480 }, 3 };
     gui::nov_gui_manager man (framebuffer);
-    serial_println((char*)"here3",COM1);
 
     auto root = man.get_root();
-    serial_println((char*)"here4",COM1);
-    serial_println_hex((uint32_t)backbuffer, COM1);
     man.draw_root();
-    serial_println((char*)"here5",COM1);
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-    serial_println((char*)"here6",COM1);
 
     for (int s = 0; s < 10; s++)
     {
-        for (uint32_t t = 0; t < 204800000; t++) {}
+        for (uint32_t t = 0; t < 102400000; t++) {}
 
         man.frame_outline_colour = nov_colour{ random_uint32_t() & 0xFF, random_uint32_t() & 0xFF, random_uint32_t() && 0xFF };
-        gui::split_container(root, nov_fvector2{ s % 2 ? 0 : 0.5f, s % 2 ? 0.5f : 0 });
+        float div;
+        do
+        {
+            div = (float)random_uint32_t() / (float)0xFFFFFFFF;
+        } while (div < 0.2f || div > 0.8f);
+
+        gui::split_container(root, nov_fvector2{ s % 2 ? 0 : div, s % 2 ? div : 0 });
         man.draw_specific(root);
         memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
         root = random_bool() ? root->child_b : root->child_a;

@@ -252,20 +252,14 @@ bool nov_gui_manager::draw_specific(nov_container* container)
     nov_array<nov_container*> container_chain;
     nov_container* current = container;
 
-    serial_print((char*)"finding path to ", COM1); serial_println_hex((uint32_t)container, COM1);
 
     // now we need to find this container in the tree
     while (current != root_container && current->parent != 0x0)
     {
-        serial_print((char*)"pushing current to chain: ", COM1); serial_println_hex((uint32_t)current, COM1);
         container_chain.push(current);
         current = current->parent;
-        serial_print((char*)"parent of current: ", COM1); serial_println_hex((uint32_t)current, COM1);
     } 
 
-    serial_println((char*)"ok, we have the chain.", COM1);
-    serial_println_dec(container_chain.get_length(), COM1);
-    
     // if we had to break before finding the root, return
     if (current != root_container) return false;
 
@@ -274,20 +268,16 @@ bool nov_gui_manager::draw_specific(nov_container* container)
     nov_frame_data next_frame_data;
 
     nov_container* next = 0x0;
-    serial_println((char*)"walking down the chain: ", COM1);
     while (container_chain.get_length() > 0)
     {
         // get the next container in the chain
         next = container_chain.pop();
-        serial_println_hex((uint32_t)current, COM1);
         // calculate the frame data, choosing which child we want based on whether the next container is the a or b child
         calculate_frame_data(&current_frame_data, current->division, next == current->child_a ? &next_frame_data : 0x0, next == current->child_b ? &next_frame_data : 0x0);
         // copy the data from this container into the current one
         current_frame_data = next_frame_data;
         current = next;
     }
-
-    serial_println((char*)"all done.", COM1);
 
     // now, draw current container and all children
     draw_container(current, &current_frame_data);

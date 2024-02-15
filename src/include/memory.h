@@ -1,8 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <serial.h>
-#include <panic.h>
 
 namespace nov
 {

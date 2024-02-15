@@ -71,7 +71,6 @@ public:
             last->is_allocation_head = false;
         }
         last->next = 0x0;
-        serial_print((char*)"last is now ",COM1); serial_println_hex((uint32_t)last,COM1);
 
         // update capacity
         capacity = new_capacity;

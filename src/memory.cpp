@@ -1,5 +1,8 @@
 #include <memory.h>
 
+#include <serial.h>
+#include <panic.h>
+
 void* operator new(uint32_t size)
 {
     return nov::memory::malloc(size);
@@ -71,8 +74,7 @@ void* malloc(uint32_t size)
     nov_memory_frame* current_block = head_frame;
     nov_memory_frame* next_block;
     uint32_t block_size;
-    serial_print((char*)"attempting to allocate block of size ", COM1); serial_println_hex(size, COM1);
-    serial_println_hex((uint32_t)head_frame, COM1);
+
     while (current_block != 0x0)
     {
         // if this block isnt free, skip it
@@ -103,7 +105,6 @@ void* malloc(uint32_t size)
         current_block = next_block;
     }
 
-    serial_println("uh oh",COM1);
     return 0x0;
 }
 
