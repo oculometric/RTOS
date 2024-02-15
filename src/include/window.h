@@ -230,7 +230,7 @@ class nov_panel
 public:
     nov_colour fill_colour; // demo property
 
-    void draw(nov_frame_data* frame, const graphics::nov_framebuffer& framebuffer);
+    void draw(const nov_frame_data& frame, const graphics::nov_framebuffer& framebuffer);
 };
 
 /**
@@ -263,8 +263,8 @@ struct nov_container
  * to the a frame versus the b frame (0 = frame a fills parent, 1 = frame b fills parent)
  * @param frame_a pointer to the frame data struct where the left/top frame will be described
  * @param frame_b pointer to the frame data struct where the bottom/right frame will be described
- * **/ // TODO: remove unecessarry division
-void calculate_frame_data(nov_frame_data* parent, const nov_fvector2& division, nov_frame_data* frame_a, nov_frame_data* frame_b);
+ * **/
+void calculate_frame_data(const nov_frame_data& parent, const nov_fvector2& division, nov_frame_data* frame_a, nov_frame_data* frame_b);
 
 /**
  * splits a container into two halves with the given division. panel contents are moved into
@@ -296,7 +296,7 @@ private:
      * @param container pointer to the container to draw
      * @param frame pointer to the frame in which to draw the container
      * **/
-    void draw_container(nov_container* container, nov_frame_data* frame);
+    void draw_container(nov_container* container, const nov_frame_data& frame);
 
 public:
     nov_colour frame_outline_colour = nov_colour_gold;
@@ -306,7 +306,7 @@ public:
     /**
      * redraw the entire GUI tree
      * **/
-    inline void draw_root() { draw_container(root_container, &root_container_frame); }
+    inline void draw_root() { draw_container(root_container, root_container_frame); }
     /**
      * redraw a specific container and all children of it. useful if you only want to cause an update of
      * a specific area of the GUI without redrawing everything
