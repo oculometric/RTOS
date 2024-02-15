@@ -6,7 +6,7 @@ SECTIONS
     .text :
     {
         *(.prekernel)
-        *(.text)
+        *(.text.*)
     }
 
     .data :
