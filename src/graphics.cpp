@@ -3,113 +3,112 @@
 
 using namespace nov::graphics;
 
-inline uint32_t nov_graphics_manager::get_offset(const nov_uvector2& co)
-{
-    return (this->screen_size.u*co.v)+co.u;
-}
+// void nov_graphics_manager::draw_line(const nov_uvector2& a, const nov_uvector2& b, const nov_colour& col)
+// {
+//     nov_uvector2 minimum = a;
+//     nov_uvector2 maximum = b;
 
-nov_graphics_manager::nov_graphics_manager(nov::vbe::nov_vbe_mode_info* vbe_mode_info_block)
-{
-    screen_size = nov_uvector2{ vbe_mode_info_block->x_resolution, vbe_mode_info_block->y_resolution };
-    real_framebuffer = (uint8_t*)(vbe_mode_info_block->flat_framebuffer_address);
-    bytes_per_pixel = vbe_mode_info_block->bits_per_pixel/8;
-    buffer_length = screen_size.u * screen_size.v;
-    serial_print((char*)"graphics manager inited with framebuffer located at ", COM1); serial_println_hex((uint32_t)real_framebuffer, COM1);
-    serial_println_dec(buffer_length, COM1);
-}
+//     if (a.u > b.u)
+//     {
+//         minimum = b;
+//         maximum = a;
+//     }
 
-void nov_graphics_manager::draw_pixel(const nov_uvector2& at, const nov_colour& col)
-{
-    if (at.u > screen_size.u || at.v > screen_size.v) return;
-    draw_pixel(get_offset(at), col);
-}
+//     nov_uvector2 current = minimum;
+//     nov_uvector2 offset = nov_uvector2{0,0};
 
-void nov_graphics_manager::draw_pixel(uint32_t at, const nov_colour& col)
-{
-    if (at > buffer_length) return;
-    real_framebuffer[(at*bytes_per_pixel)] = col.z;
-    real_framebuffer[(at*bytes_per_pixel)+1] = col.y;
-    real_framebuffer[(at*bytes_per_pixel)+2] = col.x;
-}
+//     float m = ((float)maximum.v-(float)minimum.v)/((float)maximum.u-(float)minimum.u);
 
-void nov_graphics_manager::draw_line(const nov_uvector2& a, const nov_uvector2& b, const nov_colour& col)
-{
-    nov_uvector2 minimum = a;
-    nov_uvector2 maximum = b;
+//     if (m >= 1.0f)
+//     {
+//         while (current.u < maximum.u)
+//         {
+//             draw_pixel(current, col);
+//             current.v++;
+//             offset.v++;
+//             current.u = (uint32_t)(((float)minimum.u)+((float)offset.v/m));
+//             if (current.u > screen_size.u || current.v > screen_size.v) break;
+//         }
+//     } else if (m >= 0)
+//     {
+//         while (current.u < maximum.u)
+//         {
+//             draw_pixel(current, col);
+//             current.u++;
+//             offset.u++;
+//             current.v = (uint32_t)(((float)minimum.v)+((float)offset.u*m));
+//             if (current.u > screen_size.u || current.v > screen_size.v) break;
+//         }
+//     } else if (m >= -1.0f)
+//     {
+//         while (current.u < maximum.u)
+//         {
+//             draw_pixel(current, col);
+//             current.u++;
+//             offset.u++;
+//             current.v = (uint32_t)(((float)minimum.v)+((float)offset.u*m));
+//             if (current.u > screen_size.u || current.v > screen_size.v) break;
+//         }
+//     }
+//     else if (m < -1.0f)
+//     {
+//         while (current.u < maximum.u)
+//         {
+//             draw_pixel(current, col);
+//             current.v--;
+//             offset.v++;
+//             current.u = (uint32_t)(((float)minimum.u)-((float)offset.v/m));
+//             if (current.u > screen_size.u || current.v > screen_size.v) break;
+//         }
+//     }
+//     return;
+// }
 
-    if (a.u > b.u)
+void nov::graphics::draw_box(const nov_uvector2& origin, const nov_uvector2& size, const nov_colour& col, const nov_framebuffer& framebuffer)
+{
+    uint32_t top_left = get_offset(origin, framebuffer.size);
+    uint32_t top_right = (top_left + size.u) - 1;
+    uint32_t bottom_left = top_left;
+    uint32_t bottom_right = top_right;
+
+    for (uint32_t t = 0; t < size.v; t++)
     {
-        minimum = b;
-        maximum = a;
+        set_pixel(bottom_left, col, framebuffer);
+        set_pixel(bottom_right, col, framebuffer);
+
+        bottom_left += framebuffer.size.u;
+        bottom_right += framebuffer.size.u;
     }
 
-    nov_uvector2 current = minimum;
-    nov_uvector2 offset = nov_uvector2{0,0};
+    top_right = top_left;
+    bottom_left -= framebuffer.size.u;
 
-    float m = ((float)maximum.v-(float)minimum.v)/((float)maximum.u-(float)minimum.u);
+    for (uint32_t t = 0; t < size.u; t++)
+    {
+        set_pixel(top_right, col, framebuffer);
+        set_pixel(bottom_left, col, framebuffer);
 
-    if (m >= 1.0f)
-    {
-        while (current.u < maximum.u)
-        {
-            draw_pixel(current, col);
-            current.v++;
-            offset.v++;
-            current.u = (uint32_t)(((float)minimum.u)+((float)offset.v/m));
-            if (current.u > screen_size.u || current.v > screen_size.v) break;
-        }
-    } else if (m >= 0)
-    {
-        while (current.u < maximum.u)
-        {
-            draw_pixel(current, col);
-            current.u++;
-            offset.u++;
-            current.v = (uint32_t)(((float)minimum.v)+((float)offset.u*m));
-            if (current.u > screen_size.u || current.v > screen_size.v) break;
-        }
-    } else if (m >= -1.0f)
-    {
-        while (current.u < maximum.u)
-        {
-            draw_pixel(current, col);
-            current.u++;
-            offset.u++;
-            current.v = (uint32_t)(((float)minimum.v)+((float)offset.u*m));
-            if (current.u > screen_size.u || current.v > screen_size.v) break;
-        }
+        top_right++;
+        bottom_left++;
     }
-    else if (m < -1.0f)
-    {
-        while (current.u < maximum.u)
-        {
-            draw_pixel(current, col);
-            current.v--;
-            offset.v++;
-            current.u = (uint32_t)(((float)minimum.u)-((float)offset.v/m));
-            if (current.u > screen_size.u || current.v > screen_size.v) break;
-        }
-    }
-    return;
 }
 
-void nov_graphics_manager::draw_box(const nov_uvector2& tl, const nov_uvector2& br, const nov_colour& col)
+void nov::graphics::fill_box(const nov_uvector2& origin, const nov_uvector2& size, const nov_colour& col, const nov_framebuffer& framebuffer)
 {
-    uint32_t offset = get_offset(tl);
-    uint32_t br_offset = get_offset(br);
-    nov_uvector2 tracker = tl;
+    uint32_t offset = get_offset(origin, framebuffer.size);
+    uint32_t end_offset = get_offset(origin+size-nov_uvector2{ 1,1 }, framebuffer.size);
+    uint32_t x = 0;
 
-    while (offset < br_offset)
+    while (offset <= end_offset)
     {
-        draw_pixel(offset, col);
+        set_pixel(offset, col, framebuffer);
         offset++;
-        tracker.u++;
-        if (tracker.u > br.u)
+        x++;
+        if (x >= size.u)
         {
-            tracker.u = tl.u;
-            tracker.v++;
-            offset = get_offset(tracker);
+            x = 0;
+            offset -= size.u;
+            offset += framebuffer.size.u;
         }
     }
-
 }

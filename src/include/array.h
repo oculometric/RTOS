@@ -21,9 +21,9 @@ class nov_array
 {
 private:
     // pointer to first allocated element slot in the linked list. may or may not actually contain list data
-    nov_array_container<T>* first;
+    nov_array_container<T>* first = 0x0;
     // pointer to last allocated element slot in the linked list. may or may not actually contain list data
-    nov_array_container<T>* last;
+    nov_array_container<T>* last = 0x0;
     // number of consumed element slots in the linked list
     uint32_t length;
     // number of allocated element slots
@@ -47,11 +47,23 @@ public:
         nov_array_container<T>* first_fresh = (nov_array_container<T>*)memory::malloc(sizeof(nov_array_container<T>)*(extra_capacity));
         if (first_fresh == 0x0) return;
 
+        // check if the array is uninitialised
+        if (first == 0x0)
+        {
+            // if so, set the first and last to point to this block
+            first = first_fresh;
+            last = first_fresh;
+        }
+        else
+        {
+            // otherwise, tell the existing block to point to this new one
+            last->next = first_fresh;
+            last = last->next;
+        }
+
         // start populating this block of memory with array containers (slots for elements)
-        last->next = first_fresh;
-        last = last->next;
         last->is_allocation_head = true;
-        for (uint32_t i = extra_capacity; i < extra_capacity-1; i++)
+        for (uint32_t i = 0; i < extra_capacity-1; i++)
         {
             // repeatedly place an array container after the last one, filling the allocated space
             last->next = last+1;
@@ -59,6 +71,7 @@ public:
             last->is_allocation_head = false;
         }
         last->next = 0x0;
+        serial_print((char*)"last is now ",COM1); serial_println_hex((uint32_t)last,COM1);
 
         // update capacity
         capacity = new_capacity;
@@ -85,26 +98,26 @@ public:
         return current->data;
     }
 
-    /**
-     * insert an element into the back of the list
-     * 
-     * @param element element data to insert
-     * 
-     * **/
-    inline void push(T& element)
-    {
-        // if we're at the limit, resize
-        if (length == capacity)
-        {
-            resize(capacity+4);
-        }
-        // if we have size now, increase length and insert
-        if (capacity > length)
-        {
-            length++;
-            (*this)[length-1] = element;
-        }
-    }
+    // /**
+    //  * insert an element into the back of the list
+    //  * 
+    //  * @param element element data to insert
+    //  * 
+    //  * **/
+    // inline void push(T& element)
+    // {
+    //     // if we're at the limit, resize
+    //     if (length == capacity)
+    //     {
+    //         resize(capacity+4);
+    //     }
+    //     // if we have size now, increase length and insert
+    //     if (capacity > length)
+    //     {
+    //         length++;
+    //         (*this)[length-1] = element;
+    //     }
+    // }
 
     /**
      * insert an element into the back of the list
@@ -153,7 +166,7 @@ public:
     inline uint32_t get_length() { return length; }
     inline uint32_t get_capacity() { return capacity; }
 
-    inline nov_array(uint32_t _capacity = 0)
+    inline nov_array(uint32_t _capacity = 1)
     {
         // clear all values, then request a resize to the desired capacity
         first = 0x0;
@@ -175,6 +188,7 @@ public:
             // step onto the next
             current = current->next;
         }
+        memory::mconsolidate();
     }
 };
 

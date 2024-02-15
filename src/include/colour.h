@@ -32,7 +32,7 @@ inline float luminance(const nov_fvector3& col)
 
 inline float luminance(const nov_colour& col)
 {
-    nov_fvector3 fcol = nov_fvector3{ col.x, col.y, col.z };
+    nov_fvector3 fcol = nov_fvector3{ col.x/255.0f, col.y/255.0f, col.z/255.0f };
     return fcol^luminance_vector;
 }
 

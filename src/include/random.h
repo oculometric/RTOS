@@ -33,7 +33,7 @@ static inline uint32_t rotl(uint32_t x, int k)
 	return (x << k) | (x >> (32-k));
 }
 
-uint32_t random_uint32_t()
+inline uint32_t random_uint32_t()
 {
     uint32_t result = rotl(state[1]*5, 7)*9;
 	uint32_t t = state[1] << 9;
@@ -47,3 +47,5 @@ uint32_t random_uint32_t()
 
 	return result;
 }
+
+inline bool random_bool() { return random_uint32_t() & (1 << 10); }

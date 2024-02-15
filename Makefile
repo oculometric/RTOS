@@ -6,7 +6,7 @@ CC			:= $(PREFIX)g++
 LD			:= $(PREFIX)ld
 
 AS_FLAGS		:= -f elf
-CC_FLAGS		:= -ffreestanding -m32 -g -masm=intel -Wall -Wextra -Wpedantic -mno-red-zone -std=c++20 -fno-exceptions
+CC_FLAGS		:= -ffreestanding -m32 -g -masm=intel -Wall -Wextra -Wpedantic -mno-red-zone -std=c++20 -fno-exceptions -s
 LD_FLAGS		:= -T linker.ld
 
 BIN				= bin
@@ -51,7 +51,8 @@ build: $(BL_FILES_OUT) $(CC_FILES_OUT) $(AS_FILES_OUT)
 	@$(LD) $(LD_FLAGS) -o $(KERN_OUT) $(AS_FILES_OUT) $(CC_FILES_OUT)
 	@echo "Stupid concatenation hack" $(BOOT_OUT)
 	@cat $(BL_FILES_OUT) $(KERN_OUT) > $(BOOT_OUT)
-	@echo "Done"
+	@echo "Done, size in bytes:"
+	stat -c%s $(BOOT_OUT)
 
 emulate:
 	qemu-system-x86_64 -drive file=$(BOOT_OUT),format=raw,index=0,media=disk -monitor stdio -serial file:log/output.log
@@ -63,4 +64,4 @@ dump:
 	hd $(BOOT_OUT)
 
 clean:
-	rm -fr $(BIN)
+	@rm -fr $(BIN)

@@ -3,13 +3,14 @@
         {
             "name": "Linux",
             "includePath": [
-                "${default}",
                 "/usr/include/efi",
-                "src/include"
+                "src/include",
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/src/include"
             ],
             "defines": [],
             "cStandard": "c17",
-            "cppStandard": "c++14",
+            "cppStandard": "c++17",
             "intelliSenseMode": "linux-gcc-x64"
         }
     ],
