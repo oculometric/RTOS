@@ -73,9 +73,6 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     memory::mview();
     
     uint8_t* real_buffer = (uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address;
-
-    gui::draw_window(nov_uvector2{20, 40}, nov_uvector2{100, 100}, real_buffer, nov_uvector2{640,480});
-
     uint8_t* backbuffer = new uint8_t[640*480*3];
     if (backbuffer == 0x0) { serial_println((char*)"unable to allocate memory for GUI backbuffer. panic!", COM1); panic(); }
 
