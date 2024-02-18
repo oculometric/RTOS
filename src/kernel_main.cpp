@@ -98,10 +98,10 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     
     man.draw_root();
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-
+    serial_println((char*)"starting speedtest",COM1);
     bool x_increasing = false;
     bool y_increasing = false;
-    while (true)
+    for (uint32_t tmp = 0; tmp < 512; tmp++)
     {
         pan_star->foreground = nov_colour{ (uint8_t)(pan_star->uv.u * 255),(uint8_t)((1 - pan_star->uv.v) * 255), 21 };
         pan_star->uv.u += x_increasing ? 0.05f : -0.05f;
@@ -114,6 +114,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
         man.draw_root();
         memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
     }
+    serial_println((char*)"speedtest done",COM1);
 
     // for (int s = 0; s < 10; s++)
     // {
