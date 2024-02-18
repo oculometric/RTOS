@@ -1,4 +1,4 @@
-#include <window.h>
+#include <gui/gui.h>
 
 #include <serial.h>
 #include <memory.h>
@@ -10,11 +10,6 @@ namespace nov
 {
 namespace gui
 {
-
-void nov_panel::draw(const nov_frame_data& frame, const graphics::nov_framebuffer& framebuffer)
-{
-    // TODO: virtual?
-}
 
 void calculate_frame_data(const nov_frame_data& parent, const nov_fvector2& division, nov_frame_data* frame_a, nov_frame_data* frame_b)
 {
@@ -66,11 +61,17 @@ void split_container(nov_container* parent, const nov_fvector2& division)
 void nov_gui_manager::draw_container(nov_container* container, const nov_frame_data& frame)
 {
     // fill with black
-    graphics::fill_box(frame.origin, frame.size, frame_fill_colour, framebuffer);
+    if ((container->panel != 0x0 && container->panel->wants_clear()) || container->panel == 0x0)
+    {
+        graphics::fill_box(frame.origin, frame.size, frame_fill_colour, framebuffer);
+    }
 
-    if (frame.size.u < 8 || frame.size.v < 12) return;
+    bool large_enough_for_frame = (frame.size.u >= 8 && frame.size.v > 12);
 
-    if (container->panel != 0x0 || (container->child_a == 0x0 && container->child_b == 0x0))
+    if (large_enough_for_frame
+        && ((container->panel != 0x0 && container->panel->wants_border())
+         || (container->child_a == 0x0 && container->child_b == 0x0))
+       )
     {
         // TODO: text label/title
         // draw the top bar
@@ -83,9 +84,18 @@ void nov_gui_manager::draw_container(nov_container* container, const nov_frame_d
     if (container->panel != 0x0)
     {
         nov_frame_data clipped = frame;
-        clipped.origin += nov_uvector2{ 3,3 };
-        clipped.size -= nov_uvector2{ 6,6 };
-        container->panel->draw(frame, framebuffer);
+        if (container->panel->wants_border())
+        {
+            if (!large_enough_for_frame) return;
+            clipped.origin += nov_uvector2{ 3,11 };
+            clipped.size -= nov_uvector2{ 6,14 };
+        }
+        else
+        {
+            clipped.origin += nov_uvector2{ 1,1 };
+            clipped.size -= nov_uvector2{ 2,2 };
+        }
+        container->panel->draw(clipped, framebuffer);
     }
     else
     {

@@ -15,6 +15,8 @@ namespace colour
 #define nov_colour_yellow nov_colour{ 255,255,0 }
 #define nov_colour_cyan nov_colour{ 0,255,255 }
 #define nov_colour_magenta nov_colour{ 255,0,255 }
+#define nov_colour_white nov_colour{ 255,255,255 }
+#define nov_colour_black nov_colour{ 0,0,0 }
 
 #define nov_colour_vapor nov_colour{ 255,191,38 }
 #define nov_colour_gold nov_colour{ 232,144,2 }

@@ -1,16 +1,19 @@
 #pragma once
 
 template <typename T>
-inline T max (T a, T b) { if (a > b) return a; return b; }
+inline T max(T a, T b) { if (a > b) return a; return b; }
 
 template <typename T>
-inline T min (T a, T b) { if (a < b) return a; return b; }
+inline T min(T a, T b) { if (a < b) return a; return b; }
 
 template <typename T>
-inline T max (T a, T b, T c) { if (a > b && a > c) return a; if (b > a && b > c) return b; return c; }
+inline T max(T a, T b, T c) { if (a > b && a > c) return a; if (b > a && b > c) return b; return c; }
 
 template <typename T>
-inline T min (T a, T b, T c) { if (a < b && a < c) return a; if (b < a && b < c) return b; return c; }
+inline T min(T a, T b, T c) { if (a < b && a < c) return a; if (b < a && b < c) return b; return c; }
+
+template <typename T>
+inline T abs(T a) { return a < 0 ? -a : a; }
 
 // TODO: move these functions to calling assembly instructions
 inline float inv_sqrt(float number)

@@ -6,7 +6,7 @@ CC			:= $(PREFIX)g++
 LD			:= $(PREFIX)ld
 
 AS_FLAGS		:= -f elf
-CC_FLAGS		:= -ffreestanding -m32 -g -masm=intel -Wall -Wextra -Wpedantic -mno-red-zone -std=c++20 -fno-exceptions -s -fno-ident -fno-asynchronous-unwind-tables
+CC_FLAGS		:= -ffreestanding -m32 -g -masm=intel -Wall -Wextra -Wpedantic -mno-red-zone -std=c++20 -fno-exceptions -s -fno-ident -fno-asynchronous-unwind-tables -O3
 LD_FLAGS		:= -T linker.ld -s
 
 BIN				= bin

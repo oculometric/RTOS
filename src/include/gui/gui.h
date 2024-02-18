@@ -6,6 +6,8 @@
 #include <colour.h>
 #include <graphics.h>
 
+#define draw_function_stub (const nov_frame_data& frame, const graphics::nov_framebuffer& framebuffer, nov_panel* panel)
+
 namespace nov
 {
 namespace gui
@@ -27,14 +29,29 @@ struct nov_frame_data
  * represents an area in the GUI which can be drawn into. must be contained within a container,
  * and draw is called by a nov_gui_manager. this class can be extended to customise behaviour and
  * display different things. this is where the GUI actually lives. draw calls MUST respect the bounds
- * passed to them
+ * passed to them.
+ * 
+ * extending this class is done by publicly subclassing it, creating your own `private static void` 
+ * function to perform drawing,and writing a constructor which assigns that function as a pointer
+ * to the `draw_function_ptr` variable. do NOT override the `draw` function directly.
+ * 
+ * subclasses may also use this opportunity to set the `show_border` and `clear_on_draw` properties
  * **/
 class nov_panel
 {
+protected:
+    void (*draw_function_ptr)draw_function_stub;
+    bool show_border = true;
+    bool clear_on_draw = true;
 public:
-    nov_colour fill_colour; // demo property
+    inline void draw(const nov_frame_data& frame, const graphics::nov_framebuffer& framebuffer)
+    {
+        if (draw_function_ptr == 0x0) { serial_println((char*)"invalid draw pointer", COM1); return; }
+        else draw_function_ptr(frame, framebuffer, this);
+    }
 
-    void draw(const nov_frame_data& frame, const graphics::nov_framebuffer& framebuffer);
+    inline bool wants_border() { return show_border; }
+    inline bool wants_clear() { return clear_on_draw; }
 };
 
 /**

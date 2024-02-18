@@ -5,7 +5,8 @@
 #include <graphics.h>
 #include <colour.h>
 #include <memory.h>
-#include <window.h>
+#include <gui/gui.h>
+#include <gui/panel_graphicsdemos.h>
 #include <random.h>
 #include <array.h>
 
@@ -80,25 +81,56 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     gui::nov_gui_manager man (framebuffer);
 
     auto root = man.get_root();
+    gui::split_container(root, nov_fvector2{ 0.7f, 0.0f });
     man.draw_root();
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
-    for (int s = 0; s < 10; s++)
+    gui::nov_panel_cuberender* pan_cube = new gui::nov_panel_cuberender();
+    pan_cube->line_colour = nov_colour{ 1,1,1 };
+    pan_cube->radius = nov_fvector3{ 1,1,1 };
+    pan_cube->rotation = nov_fvector3{ 33,0, 45 };
+
+    gui::nov_panel_star* pan_star = new gui::nov_panel_star();
+    pan_star->background = nov_colour_nearblack;
+
+    root->child_a->panel = pan_cube;
+    root->child_b->panel = pan_star;
+    
+    man.draw_root();
+    memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+
+    bool x_increasing = false;
+    bool y_increasing = false;
+    while (true)
     {
-        for (uint32_t t = 0; t < 102400000; t++) {}
+        pan_star->foreground = nov_colour{ (uint8_t)(pan_star->uv.u * 255),(uint8_t)((1 - pan_star->uv.v) * 255), 21 };
+        pan_star->uv.u += x_increasing ? 0.05f : -0.05f;
+        pan_star->uv.v += y_increasing ? 0.08f : -0.08f;
+        if (pan_star->uv.u <= 0.05f) x_increasing = true;
+        if (pan_star->uv.u >= 1.0f) x_increasing = false;
+        if (pan_star->uv.v <= 0.08f) y_increasing = true;
+        if (pan_star->uv.v >= 1.0f) y_increasing = false;
 
-        man.frame_outline_colour = nov_colour{ random_uint32_t() & 0xFF, random_uint32_t() & 0xFF, random_uint32_t() && 0xFF };
-        float div;
-        do
-        {
-            div = (float)random_uint32_t() / (float)0xFFFFFFFF;
-        } while (div < 0.2f || div > 0.8f);
-
-        gui::split_container(root, nov_fvector2{ s % 2 ? 0 : div, s % 2 ? div : 0 });
-        man.draw_specific(root);
+        man.draw_root();
         memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-        root = random_bool() ? root->child_b : root->child_a;
     }
+
+    // for (int s = 0; s < 10; s++)
+    // {
+    //     for (uint32_t t = 0; t < 102400000; t++) {}
+
+    //     man.frame_outline_colour = nov_colour{ random_uint32_t() & 0xFF, random_uint32_t() & 0xFF, random_uint32_t() && 0xFF };
+    //     float div;
+    //     do
+    //     {
+    //         div = (float)random_uint32_t() / (float)0xFFFFFFFF;
+    //     } while (div < 0.2f || div > 0.8f);
+
+    //     gui::split_container(root, nov_fvector2{ s % 2 ? 0 : div, s % 2 ? div : 0 });
+    //     man.draw_specific(root);
+    //     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+    //     root = random_bool() ? root->child_b : root->child_a;
+    // }
 
     return;
 }
