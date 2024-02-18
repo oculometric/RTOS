@@ -104,17 +104,22 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     for (uint32_t tmp = 0; tmp < 512; tmp++)
     {
         pan_star->foreground = nov_colour{ (uint8_t)(pan_star->uv.u * 255),(uint8_t)((1 - pan_star->uv.v) * 255), 21 };
-        pan_star->uv.u += x_increasing ? 0.05f : -0.05f;
-        pan_star->uv.v += y_increasing ? 0.08f : -0.08f;
-        if (pan_star->uv.u <= 0.05f) x_increasing = true;
+        pan_star->uv.u += x_increasing ? 0.025f : -0.025f;
+        pan_star->uv.v += y_increasing ? 0.04f : -0.04f;
+        if (pan_star->uv.u <= 0.025f) x_increasing = true;
         if (pan_star->uv.u >= 1.0f) x_increasing = false;
-        if (pan_star->uv.v <= 0.08f) y_increasing = true;
+        if (pan_star->uv.v <= 0.04f) y_increasing = true;
         if (pan_star->uv.v >= 1.0f) y_increasing = false;
 
         man.draw_root();
         memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
     }
     serial_println((char*)"speedtest done",COM1);
+
+    pan_star->foreground = nov_colour_gold;
+    pan_star->uv = nov_fvector2{ 0.9, 0.9 };
+    man.draw_root();
+    memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
     // for (int s = 0; s < 10; s++)
     // {
