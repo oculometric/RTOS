@@ -7,6 +7,7 @@
 #include <memory.h>
 #include <gui/gui.h>
 #include <gui/panel_graphicsdemos.h>
+#include <gui/panel_textbox.h>
 #include <random.h>
 #include <array.h>
 
@@ -71,17 +72,20 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     uint32_t kernel_size = (uint32_t)os_hint_table->kernel_elf_end-(uint32_t)os_hint_table->kernel_elf_start;
     
     memory::minit((void*)(mmap_start+kernel_size), (mmap_size-kernel_size));
-    memory::mview();
     
     uint8_t* real_buffer = (uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address;
     uint8_t* backbuffer = new uint8_t[640*480*3];
     if (backbuffer == 0x0) { serial_println((char*)"unable to allocate memory for GUI backbuffer. panic!", COM1); panic(); }
+    
+    memory::mview();
 
     graphics::nov_framebuffer framebuffer{ backbuffer, nov_uvector2{ 640, 480 }, 3 };
     gui::nov_gui_manager man (framebuffer);
 
     auto root = man.get_root();
     gui::split_container(root, nov_fvector2{ 0.7f, 0.0f });
+    gui::split_container(root->child_a, nov_fvector2{ 0.0f, 0.8f });
+    gui::split_container(root->child_a->child_b, nov_fvector2{ 0.25f, 0.0f });
     man.draw_root();
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
@@ -93,25 +97,31 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     gui::nov_panel_star* pan_star = new gui::nov_panel_star();
     pan_star->background = nov_colour_nearblack;
 
-    root->child_a->panel = pan_cube;
+    gui::nov_panel_textbox* pan_text = new gui::nov_panel_textbox();
+    pan_text->text_colour = nov_colour_red;
+    pan_text->text = (char*)"Hello, World!";
+
+    root->child_a->child_a->panel = pan_cube;
+    root->child_a->child_b->child_b->panel = pan_text;
     root->child_b->panel = pan_star;
     
     man.draw_root();
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+
     serial_println((char*)"starting speedtest",COM1);
     bool x_increasing = false;
     bool y_increasing = false;
     for (uint32_t tmp = 0; tmp < 512; tmp++)
     {
         pan_star->foreground = nov_colour{ (uint8_t)(pan_star->uv.u * 255),(uint8_t)((1 - pan_star->uv.v) * 255), 21 };
-        pan_star->uv.u += x_increasing ? 0.025f : -0.025f;
-        pan_star->uv.v += y_increasing ? 0.04f : -0.04f;
-        if (pan_star->uv.u <= 0.025f) x_increasing = true;
+        pan_star->uv.u += x_increasing ? 0.005f : -0.005f;
+        pan_star->uv.v += y_increasing ? 0.02f : -0.02f;
+        if (pan_star->uv.u <= 0.005f) x_increasing = true;
         if (pan_star->uv.u >= 1.0f) x_increasing = false;
-        if (pan_star->uv.v <= 0.04f) y_increasing = true;
+        if (pan_star->uv.v <= 0.02f) y_increasing = true;
         if (pan_star->uv.v >= 1.0f) y_increasing = false;
 
-        man.draw_root();
+        man.draw_specific(root->child_b);
         memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
     }
     serial_println((char*)"speedtest done",COM1);

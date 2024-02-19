@@ -33,7 +33,7 @@ inline float inv_sqrt(float number)
     return y;
 }
 
-inline float sqrt(float number) { return 1.0f/number; }
+inline float sqrt(float number) { return 1.0f/inv_sqrt(number); }
 
 inline float modf(float a, float b)
 {
