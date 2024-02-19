@@ -3,14 +3,14 @@
         {
             "name": "Linux",
             "includePath": [
-                "${default}",
                 "/usr/include/efi",
-                "src/h"
+                "src/include",
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/src/include"
             ],
             "defines": [],
-            "compilerPath": "/opt/cross/i686-elf/bin/i686-elf-gcc",
             "cStandard": "c17",
-            "cppStandard": "c++14",
+            "cppStandard": "c++17",
             "intelliSenseMode": "linux-gcc-x64"
         }
     ],

@@ -1,1 +1,0 @@
-jmp [eax*2 + ebx]

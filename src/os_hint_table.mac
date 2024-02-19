@@ -1,0 +1,13 @@
+OHT_GDT_OFFSET equ 0            ; 4 byte GDT pointer
+OHT_LOWMEM_OFFSET equ 4         ; 4 byte number of 1k memory blocks
+OHT_CPUID_ECX_OFFSET equ 8      ; 4 byte contents of ECX after CPUID
+OHT_CPUID_EDX_OFFSET equ 12     ; 4 byte contents of EDX after CPUID
+OHT_MEMTBL_OFFSET equ 16        ; 4 byte pointer to memory map table
+OHT_HIGHMEM_OFFSET equ 20       ; 2 byte number of memory map table entries
+OHT_DISKNUM_OFFSET equ 22       ; 2 byte boot disk number
+OHT_BDA_OFFSET equ 24           ; 4 byte pointer to the BIOS data area
+OHT_KERN_START_OFFSET equ 28    ; 4 byte pointer to the start of the loaded kernel elf
+OHT_KERN_END_OFFSET equ 32      ; 4 byte pointer to the end of the loaded kernel elf
+OHT_VBE_MODE_INFO_OFFSET equ 36 ; 4 byte pointer to VBE mode info struct
+OHT_CHKSM_OFFSET equ 40         ; 4 byte checksum
+OHT_NOVO_OFFSET equ 44          ; 4 byte secondary checksum because i'm stupid apparently
