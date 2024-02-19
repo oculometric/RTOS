@@ -24,25 +24,6 @@ namespace memory
 {
 
 /**
- * represents a block of heap memory which may be either free or occupied.
- * 
- * the size of a block can be calculated from its distance between it and
- * its `next` pointer. if `next` is `NULL` then the block should be considered
- * as being size zero.
- * 
- * `is_free` represents whether or not the block is empty and able to be allocated within
- * **/
-#pragma pack (1)
-struct nov_memory_frame
-{
-    nov_memory_frame* next = 0x0;
-    uint16_t signature = 0x4a6b;
-    uint8_t signature_end = 0x79;
-    bool is_free = false;
-};
-#pragma pack (0)
-
-/**
  * holds the start of the conceptual linked-list for memory management.
  * 
  * @attention ABSOLUTELY NEVER EVER EVER MODIFY THIS OUTSIDE THE MEMORY INITIALISER
@@ -66,6 +47,10 @@ void minit(void* block_start, uint32_t size)
     // initialise the end frame to be a blank (size-zero) frame
     head_frame->next->next = 0x0;
     head_frame->next->is_free = false;
+
+    // initialise the memory information struct
+    memory_information.head = head_frame;
+    memory_information.size = size;
 }
 
 void* malloc(uint32_t size)
@@ -167,6 +152,8 @@ void mview()
     }
     serial_println((char*)"=== MMAP END ===", COM1);
 }
+
+nov_memory_information memory_information;
 
 }
 }

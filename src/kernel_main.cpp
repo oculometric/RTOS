@@ -8,6 +8,7 @@
 #include <gui/gui.h>
 #include <gui/panel_graphicsdemos.h>
 #include <gui/panel_textbox.h>
+#include <gui/panel_memorymonitor.h>
 #include <random.h>
 #include <array.h>
 
@@ -16,6 +17,8 @@
 // TODO: output streams
 // TODO: GUI
 // TODO: timing
+// TODO: textbox panel
+// TODO: memory manager panel
 
 using namespace nov;
 
@@ -76,7 +79,6 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     uint8_t* real_buffer = (uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address;
     uint8_t* backbuffer = new uint8_t[640*480*3];
     if (backbuffer == 0x0) { serial_println((char*)"unable to allocate memory for GUI backbuffer. panic!", COM1); panic(); }
-    
     memory::mview();
 
     graphics::nov_framebuffer framebuffer{ backbuffer, nov_uvector2{ 640, 480 }, 3 };
@@ -101,9 +103,14 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     pan_text->text_colour = nov_colour_red;
     pan_text->text = (char*)"Hello, World!";
 
+    gui::nov_panel_memorymonitor* pan_mem = new gui::nov_panel_memorymonitor();
+
     root->child_a->child_a->panel = pan_cube;
     root->child_a->child_b->child_b->panel = pan_text;
+    root->child_a->child_b->child_a->panel = pan_mem;
     root->child_b->panel = pan_star;
+
+    memory::mview();
     
     man.draw_root();
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);

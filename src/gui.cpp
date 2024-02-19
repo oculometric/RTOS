@@ -87,8 +87,8 @@ void nov_gui_manager::draw_container(nov_container* container, const nov_frame_d
         if (container->panel->wants_border())
         {
             if (!large_enough_for_frame) return;
-            clipped.origin += nov_uvector2{ 3,11 };
-            clipped.size -= nov_uvector2{ 6,14 };
+            clipped.origin += nov_uvector2{ 3,12 };
+            clipped.size -= nov_uvector2{ 6,15 };
         }
         else
         {

@@ -72,5 +72,32 @@ void mconsolidate();
  * **/
 void mview();
 
+/**
+ * represents a block of heap memory which may be either free or occupied.
+ * 
+ * the size of a block can be calculated from its distance between it and
+ * its `next` pointer. if `next` is `NULL` then the block should be considered
+ * as being size zero.
+ * 
+ * `is_free` represents whether or not the block is empty and able to be allocated within
+ * **/
+#pragma pack (1)
+struct nov_memory_frame
+{
+    nov_memory_frame* next = 0x0;
+    uint16_t signature = 0x4a6b;
+    uint8_t signature_end = 0x79;
+    bool is_free = false;
+};
+#pragma pack (0)
+
+struct nov_memory_information
+{
+    void* head = 0x0;
+    uint32_t size = 0;
+};
+
+extern nov_memory_information memory_information;
+
 }
 }
