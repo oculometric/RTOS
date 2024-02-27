@@ -1,5 +1,6 @@
 #include <gui/panel_graphicsdemos.h>
 #include <math.h>
+#include <matrix.h>
 
 using namespace nov;
 
@@ -17,6 +18,12 @@ void gui::nov_panel_cuberender::_draw draw_function_stub
     const vector::nov_fvector3 b_1{ t_1.x, t_1.y, -t_1.z };
     const vector::nov_fvector3 b_2{ t_2.x, t_2.y, -t_2.z };
     const vector::nov_fvector3 b_3{ t_3.x, t_3.y, -t_3.z };
+
+    const vector::nov_fvector3 camera_right{ 1,0,0 };
+    const vector::nov_fvector3 camera_up{ 0,0,1 };
+    const vector::nov_fvector3 camera_backward{ 0,1,0 };
+
+
 }
 
 

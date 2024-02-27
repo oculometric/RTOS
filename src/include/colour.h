@@ -19,7 +19,7 @@ namespace colour
 #define nov_colour_black nov_colour{ 0,0,0 }
 
 #define nov_colour_vapor nov_colour{ 255,191,38 }
-#define nov_colour_gold nov_colour{ 232,144,2 }
+#define nov_colour_gold nov_colour{ 252,144,2 }
 #define nov_colour_nearblack nov_colour{ 3,1,0 }
 
 const static nov_fvector3 luminance_vector{ 0.2126,0.7152,0.0722 };

@@ -18,7 +18,6 @@
 // TODO: GUI
 // TODO: timing
 // TODO: textbox panel
-// TODO: memory manager panel
 
 using namespace nov;
 
@@ -118,7 +117,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     serial_println((char*)"starting speedtest",COM1);
     bool x_increasing = false;
     bool y_increasing = false;
-    for (uint32_t tmp = 0; tmp < 512; tmp++)
+    for (uint32_t tmp = 0; tmp < 800; tmp++)
     {
         pan_star->foreground = nov_colour{ (uint8_t)(pan_star->uv.u * 255),(uint8_t)((1 - pan_star->uv.v) * 255), 21 };
         pan_star->uv.u += x_increasing ? 0.005f : -0.005f;
