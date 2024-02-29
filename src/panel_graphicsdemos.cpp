@@ -23,53 +23,14 @@ void gui::nov_panel_cuberender::_draw draw_function_stub
     const vector::nov_fvector3 camera_up{ 0,0,1 };
     const vector::nov_fvector3 camera_backward{ 0,1,0 };
 
-    const matrix::nov_matrix3_3<float> mat{ 4, 6, 7, 
-                                            3, 1, 2,
-                                            8, 5, 0 };
+    const matrix::nov_matrix4_4<float> mat{ 4, 6, 7, 1, 
+                                            3, 1, 2, 9,
+                                            8, 5, 0, 2,
+                                            2, 7, 3, 4 };
     
     auto inv = ~mat;
     auto trp = -mat;
     auto ident = mat * inv;
-
-    serial_println_dec(mat.x_0 * 1000000.0f, COM1);
-    serial_println_dec(mat.y_0 * 1000000.0f, COM1);
-    serial_println_dec(mat.z_0 * 1000000.0f, COM1);
-    serial_println_dec(mat.x_1 * 1000000.0f, COM1);
-    serial_println_dec(mat.y_1 * 1000000.0f, COM1);
-    serial_println_dec(mat.z_1 * 1000000.0f, COM1);
-    serial_println_dec(mat.x_2 * 1000000.0f, COM1);
-    serial_println_dec(mat.y_2 * 1000000.0f, COM1);
-    serial_println_dec(mat.z_2 * 1000000.0f, COM1);
-    serial_println(COM1);
-    serial_println_dec(inv.x_0 * 1000000.0f, COM1);
-    serial_println_dec(inv.y_0 * 1000000.0f, COM1);
-    serial_println_dec(inv.z_0 * 1000000.0f, COM1);
-    serial_println_dec(inv.x_1 * 1000000.0f, COM1);
-    serial_println_dec(inv.y_1 * 1000000.0f, COM1);
-    serial_println_dec(inv.z_1 * 1000000.0f, COM1);
-    serial_println_dec(inv.x_2 * 1000000.0f, COM1);
-    serial_println_dec(inv.y_2 * 1000000.0f, COM1);
-    serial_println_dec(inv.z_2 * 1000000.0f, COM1);
-    serial_println(COM1);
-    serial_println_dec(trp.x_0 * 1000000.0f, COM1);
-    serial_println_dec(trp.y_0 * 1000000.0f, COM1);
-    serial_println_dec(trp.z_0 * 1000000.0f, COM1);
-    serial_println_dec(trp.x_1 * 1000000.0f, COM1);
-    serial_println_dec(trp.y_1 * 1000000.0f, COM1);
-    serial_println_dec(trp.z_1 * 1000000.0f, COM1);
-    serial_println_dec(trp.x_2 * 1000000.0f, COM1);
-    serial_println_dec(trp.y_2 * 1000000.0f, COM1);
-    serial_println_dec(trp.z_2 * 1000000.0f, COM1);
-    serial_println(COM1);
-    serial_println_dec(ident.x_0 * 1000000.0f, COM1);
-    serial_println_dec(ident.y_0 * 1000000.0f, COM1);
-    serial_println_dec(ident.z_0 * 1000000.0f, COM1);
-    serial_println_dec(ident.x_1 * 1000000.0f, COM1);
-    serial_println_dec(ident.y_1 * 1000000.0f, COM1);
-    serial_println_dec(ident.z_1 * 1000000.0f, COM1);
-    serial_println_dec(ident.x_2 * 1000000.0f, COM1);
-    serial_println_dec(ident.y_2 * 1000000.0f, COM1);
-    serial_println_dec(ident.z_2 * 1000000.0f, COM1);
 }
 
 
