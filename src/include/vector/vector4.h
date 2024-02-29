@@ -41,7 +41,7 @@ inline nov_vector4<T> operator*(const nov_vector4<T>& a, const T f) { return nov
 template<typename T>
 inline nov_vector4<T> operator/(const nov_vector4<T>& a, const T f) { return nov_vector4<T>{ a.x/f, a.y/f, a.z/f, a.w/f }; }
 template<typename T>
-inline bool operator==(const nov_vector4<T>& a, const nov_vector4<T>& b) { return (a.x==b.x) && (a.y==b.y) && (a.z==b.z); && (a.w==b.w); }
+inline bool operator==(const nov_vector4<T>& a, const nov_vector4<T>& b) { return (a.x==b.x) && (a.y==b.y) && (a.z==b.z) && (a.w==b.w); }
 
 // dot product between two vectors. this represents the magnitude of the two vectors multiplied together,
 // multiplied by the cosine of the angle between them
