@@ -41,3 +41,14 @@ inline float modf(float a, float b)
     while (f > b) f -= b;
     return f;
 }
+
+inline float tanf(float rad)
+{
+    float f;
+    asm("fptan;"
+    "fdivr;"
+    : "=t" (f) : "0" (rad));
+    return f;
+}
+
+#define MATH_PI 3.14159265359

@@ -15,7 +15,6 @@
 // TODO: keyboard
 // TODO: interrupts
 // TODO: output streams
-// TODO: GUI
 // TODO: timing
 // TODO: textbox panel
 

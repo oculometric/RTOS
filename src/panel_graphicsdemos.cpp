@@ -9,28 +9,51 @@ void gui::nov_panel_cuberender::_draw draw_function_stub
     nov_panel_cuberender* cuberender_panel = (nov_panel_cuberender*)panel;
 
     // define vertex points
-    const vector::nov_fvector3 t_0{ -cuberender_panel->radius.x, -cuberender_panel->radius.y, cuberender_panel->radius.z };
-    const vector::nov_fvector3 t_1{ cuberender_panel->radius.x, -cuberender_panel->radius.y, cuberender_panel->radius.z };
-    const vector::nov_fvector3 t_2{ cuberender_panel->radius.x, cuberender_panel->radius.y, cuberender_panel->radius.z };
-    const vector::nov_fvector3 t_3{ -cuberender_panel->radius.x, cuberender_panel->radius.y, cuberender_panel->radius.z };
+    const vector::nov_fvector4 t_0{ -cuberender_panel->radius.x, -cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
+    const vector::nov_fvector4 t_1{ cuberender_panel->radius.x, -cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
+    const vector::nov_fvector4 t_2{ cuberender_panel->radius.x, cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
+    const vector::nov_fvector4 t_3{ -cuberender_panel->radius.x, cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
 
-    const vector::nov_fvector3 b_0{ t_0.x, t_0.y, -t_0.z };
-    const vector::nov_fvector3 b_1{ t_1.x, t_1.y, -t_1.z };
-    const vector::nov_fvector3 b_2{ t_2.x, t_2.y, -t_2.z };
-    const vector::nov_fvector3 b_3{ t_3.x, t_3.y, -t_3.z };
+    const vector::nov_fvector4 b_0{ t_0.x, t_0.y, -t_0.z, 1.0f };
+    const vector::nov_fvector4 b_1{ t_1.x, t_1.y, -t_1.z, 1.0f };
+    const vector::nov_fvector4 b_2{ t_2.x, t_2.y, -t_2.z, 1.0f };
+    const vector::nov_fvector4 b_3{ t_3.x, t_3.y, -t_3.z, 1.0f };
 
     const vector::nov_fvector3 camera_right{ 1,0,0 };
-    const vector::nov_fvector3 camera_up{ 0,0,1 };
-    const vector::nov_fvector3 camera_backward{ 0,1,0 };
+    const vector::nov_fvector3 camera_up{ 0,1,0 };
+    const vector::nov_fvector3 camera_back{ 0,0,1 };
 
-    const matrix::nov_matrix4_4<float> mat{ 4, 6, 7, 1, 
-                                            3, 1, 2, 9,
-                                            8, 5, 0, 2,
-                                            2, 7, 3, 4 };
-    
-    auto inv = ~mat;
-    auto trp = -mat;
-    auto ident = mat * inv;
+    const vector::nov_fvector3 camera_position{0,2,10};
+
+    const matrix::nov_fmatrix4 world_to_camera{ camera_right.x, camera_right.y, camera_right.z, -(camera_right ^ camera_position),
+                                                camera_up.x,    camera_up.y,    camera_up.z,    -(camera_up ^ camera_position),
+                                                camera_back.x,  camera_back.y,  camera_back.z,  -(camera_back ^ camera_position),
+                                                0.0f,           0.0f,           0.0f,           1.0f                                };
+
+
+    const float far_clip = 100.0f;
+    const float near_clip = 0.001f;
+    const float clip_rat = -far_clip / (far_clip - near_clip);
+    const float fov_deg = 90.0f;
+    const float s = 1.0f / tanf((fov_deg / 2.0f) * (MATH_PI / 180.0f));
+
+    const matrix::nov_fmatrix4 camera_to_view{ s,       0.0f,       0.0f,       0.0f,
+                                               0.0f,    s,          0.0f,       0.0f,
+                                               0.0f,    0.0f,       clip_rat,   clip_rat * near_clip,
+                                               0.0f,    0.0f,       -1.0f,      0.0f                    };
+    const matrix::nov_fmatrix4 world_to_view = camera_to_view * world_to_camera;
+    // FIXME this i snot working
+    vector::nov_fvector4 test = world_to_view * t_0;
+    serial_println_dec(test.x * 1000000.0f, COM1);
+    serial_println_dec(test.x * -1000000.0f, COM1);
+    serial_println_dec(test.y * 1000000.0f, COM1);
+    serial_println_dec(test.y * -1000000.0f, COM1);
+    serial_println_dec(test.z * 1000000.0f, COM1);
+    serial_println_dec(test.z * -1000000.0f, COM1);
+    serial_println_dec(test.w * 1000000.0f, COM1);
+    serial_println_dec(test.w * -1000000.0f, COM1);
+
+
 }
 
 

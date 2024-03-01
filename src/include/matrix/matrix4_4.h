@@ -121,6 +121,12 @@ inline nov_matrix4_4<T> operator*(const nov_matrix4_4<T>& a, const nov_matrix4_4
     };
 }
 
+template <typename T, typename U>
+inline nov_vector4<U> operator*(const nov_matrix4_4<T>& a, const nov_vector4<U>& b)
+{
+    return nov_vector4<U>{ a.row_0() ^ b, a.row_1() ^ b, a.row_2() ^ b, a.row_3() ^ b };
+}
+
 template <typename T>
 inline nov_matrix4_4<T> operator*(const nov_matrix4_4<T>& a, const T b)
 {

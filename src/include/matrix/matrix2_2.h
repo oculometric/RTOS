@@ -97,6 +97,12 @@ inline nov_matrix2_2<T> operator*(const nov_matrix2_2<T>& a, const nov_matrix2_2
     };
 }
 
+template <typename T, typename U>
+inline nov_vector2<U> operator*(const nov_matrix2_2<T>& a, const nov_vector2<U>& b)
+{
+    return nov_vector2<U>{ a.row_0() ^ b, a.row_1() ^ b };
+}
+
 template <typename T>
 inline nov_matrix2_2<T> operator*(const nov_matrix2_2<T>& a, const T b)
 {
