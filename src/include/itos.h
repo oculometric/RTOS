@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-static const char * itos_chars = "0123456789abcdefghijklmnopqrstuvwxyz";
+static const char* itos_chars = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 /**
  * convert an integer type into a string description, in a given base, and place the result into a buffer. please make sure you allocated enough buffer

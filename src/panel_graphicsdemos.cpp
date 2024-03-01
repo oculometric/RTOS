@@ -54,6 +54,10 @@ void gui::nov_panel_cuberender::_draw draw_function_stub
     serial_println_dec(test.w * -1000000.0f, COM1);
 
 
+    serial << vector::nov_vector3<uint32_t>{ 121, 446, 362 } << stream::endl;
+    serial << frame.size << stream::endl;
+    serial.flush();
+
 }
 
 

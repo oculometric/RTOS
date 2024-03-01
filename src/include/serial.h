@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include <stream.h>
 #include <io.h>
 
 #define COM1 0x3f8
@@ -45,3 +46,5 @@ void serial_dump_byte(void* start, uint32_t length, uint32_t port, uint8_t per_l
 void serial_dump_hex_byte(void* start, uint32_t length, uint32_t port, uint8_t per_line = 8);
 void serial_dump_hex_word(void* start, uint32_t length, uint32_t port, uint8_t per_line = 8);
 void serial_dump_hex_dwrd(void* start, uint32_t length, uint32_t port, uint8_t per_line = 8);
+
+static nov::stream::nov_stream serial([](char c){ serial_print(c, COM1); });

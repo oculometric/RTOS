@@ -14,38 +14,42 @@
 
 // TODO: keyboard
 // TODO: interrupts
-// TODO: output streams
 // TODO: timing
 // TODO: textbox panel
+// TODO: v-tables
+// TODO: float to string (and corresponding stream operator), fix hex and binary outputs
+// TODO: replace old serial
 
 using namespace nov;
+using namespace stream;
 
 extern "C" void main(boot::nov_os_hint_table* os_hint_table)
 {
     init_serial(COM1);
-    serial_println((char*)"hello from kernel main.", COM1);
-    serial_println((char*)"reading the os hint table...", COM1);
-    serial_print((char*)"   gdt address     : ", COM1); serial_println_hex((uint32_t)os_hint_table->gdt_address, COM1);
-    serial_print((char*)"   1kib lows blocks: ", COM1); serial_println_dec(os_hint_table->low_kilobyte_blocks, COM1);
-    serial_print((char*)"   CPUID ecx       : ", COM1); serial_println_bin(os_hint_table->cpuid_ecx_content, COM1);
-    serial_print((char*)"   CPUID edx       : ", COM1); serial_println_bin(os_hint_table->cpuid_edx_content, COM1);
-    serial_print((char*)"   memory map table: ", COM1); serial_println_hex((uint32_t)os_hint_table->memory_map_table_address, COM1);
-    serial_print((char*)"   table entries   : ", COM1); serial_println_dec(os_hint_table->memory_map_table_entries, COM1);
-    serial_print((char*)"   boot disk       : ", COM1); serial_println_dec(os_hint_table->boot_disk_number, COM1);
-    serial_print((char*)"   BDA address     : ", COM1); serial_println_hex((uint32_t)os_hint_table->bios_data_area_address, COM1);
-    serial_print((char*)"   kernel elf start: ", COM1); serial_println_hex((uint32_t)os_hint_table->kernel_elf_start, COM1);
-    serial_print((char*)"   kernel elf end  : ", COM1); serial_println_hex((uint32_t)os_hint_table->kernel_elf_end, COM1);
-    serial_print((char*)"   kernel elf size : ", COM1); serial_println_dec((uint32_t)os_hint_table->kernel_elf_end-(uint32_t)os_hint_table->kernel_elf_start, COM1);
-    serial_print((char*)"   checksum        : ", COM1); serial_println_hex((uint32_t)os_hint_table->checksum, COM1);
-    serial_print((char*)"   novo checksum   : ", COM1); serial_println_hex((uint32_t)os_hint_table->checksum_novo, COM1);
+    serial << "hello from kernel main." << endl;
+    serial << "reading the os hint table..." << endl;
+    serial << "    gdt address      : " << mode::HEX << (uint32_t)os_hint_table->gdt_address << endl;
+    serial << "    1kib low blocks  : " << mode::DEC << os_hint_table->low_kilobyte_blocks << endl;
+    serial << "    CPUID ecx        : " << mode::BIN << os_hint_table->cpuid_ecx_content << endl;
+    serial << "    CPUID edx        : " << mode::BIN << os_hint_table->cpuid_edx_content << endl;
+    serial << "    memory map table : " << mode::HEX << (uint32_t)os_hint_table->memory_map_table_address << endl;
+    serial << "    table entries    : " << mode::DEC << os_hint_table->memory_map_table_entries << endl;
+    serial << "    boot disk        : " << mode::DEC << os_hint_table->boot_disk_number << endl;
+    serial << "    BDA address      : " << mode::HEX << (uint32_t)os_hint_table->bios_data_area_address << endl;
+    serial << "    kernel elf start : " << mode::HEX << (uint32_t)os_hint_table->kernel_elf_start << endl;
+    serial << "    kernel elf end   : " << mode::HEX << (uint32_t)os_hint_table->kernel_elf_end << endl;
+    serial << "    kernel elf size  : " << mode::DEC << (uint32_t)os_hint_table->kernel_elf_end-(uint32_t)os_hint_table->kernel_elf_start << endl;
+    serial << "    checksum         : " << mode::HEX << os_hint_table->checksum << endl;
+    serial << "    novo             : " << mode::HEX << os_hint_table->checksum_novo << endl;
+    serial.flush();
 
-    serial_println(COM1);
+    serial << endl;
 
-    serial_println((char*)"reading high memory map...", COM1);
+    serial << "reading high memory map..." << endl;
 
     for (int m = 0; m < os_hint_table->memory_map_table_entries; m++)
     {
-        serial_print((char*)"memory map entry ", COM1); serial_print_dec(m, COM1); serial_println((char*)":", COM1);
+        serial << "memory map entry " << mode::DEC << m << ':' << endl;
 
         uint64_t size = os_hint_table->memory_map_table_address[m].region_size;
         const char* size_scale = "B)\0\0";
@@ -53,16 +57,17 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
         if (size > 4096) { size /= 1024; size_scale = "MiB)"; }
         if (size > 4096) { size /= 1024; size_scale = "GiB)"; }
 
-        serial_print((char*)"   base address low  : ", COM1); serial_println_hex(os_hint_table->memory_map_table_address[m].region_base & 0xFFFFFFFF, COM1);
-        serial_print((char*)"   base address high : ", COM1); serial_println_hex(os_hint_table->memory_map_table_address[m].region_base >> 32, COM1);
-        serial_print((char*)"   region size low   : ", COM1); serial_println_hex(os_hint_table->memory_map_table_address[m].region_size & 0xFFFFFFFF, COM1);
-        serial_print((char*)"   region size high  : ", COM1); serial_print_hex(os_hint_table->memory_map_table_address[m].region_size >> 32, COM1);
-        serial_print((char*)" (", COM1); serial_print_dec(size, COM1); serial_println((char*)size_scale, COM1);
-        serial_print((char*)"   region type       : ", COM1); serial_println_dec(os_hint_table->memory_map_table_address[m].region_type, COM1);
-        serial_print((char*)"   acpi data         : ", COM1); serial_println_bin(os_hint_table->memory_map_table_address[m].region_acpi, COM1);
+        serial << "    base address low   : " << mode::HEX << (uint32_t)(os_hint_table->memory_map_table_address[m].region_base & 0xFFFFFFFF) << endl;
+        serial << "    base address high  : " << mode::HEX << (uint32_t)(os_hint_table->memory_map_table_address[m].region_base >> 32) << endl;
+        serial << "    region size low    : " << mode::HEX << (uint32_t)(os_hint_table->memory_map_table_address[m].region_size & 0xFFFFFFFF) << endl;
+        serial << "    region size high   : " << mode::HEX << (uint32_t)(os_hint_table->memory_map_table_address[m].region_size >> 32);
+        serial << " (" << mode::DEC << (uint32_t)size << size_scale << endl;
+        serial << "    region type        : " << mode::DEC << (os_hint_table->memory_map_table_address[m].region_type == 1 ? "free" : "reserved") << endl;
+        serial << "    acpi data          : " << mode::BIN << os_hint_table->memory_map_table_address[m].region_acpi << endl;
     }
 
-    serial_println(COM1);
+    serial << endl;
+    serial.flush();
 
     serial_println((char*)"configuring memory manager", COM1);
     uint8_t selected_map_entry = 3;
@@ -135,6 +140,26 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     pan_star->uv = nov_fvector2{ 0.9, 0.9 };
     man.draw_root();
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+
+    serial_println("NEWSERIAL", COM1);
+    serial << 'a';
+    serial << 'b';
+    serial << 'c' << 'd' << 'e';
+    serial.flush();
+    serial << 'f' << 'g' << 'h' << 'i' << 'j' << 'k' << 'l' << 'm';
+    serial << '0' << '1' << '2' << '3' << '4' << '5' << '6' << '7';
+    serial.flush();
+
+    serial << "who's a good boy then huh? is it you? is it?";
+    serial << 33 << stream::endl;
+    serial << stream::endl;
+    serial << -53 << stream::endl;
+
+    serial << stream::mode::DEC << 201 << stream::endl;
+    serial << stream::mode::BIN << 201 << stream::endl;
+    serial << stream::mode::HEX << 201 << stream::endl;
+    serial.flush();
+    serial_println("DONE",COM1);
 
     // for (int s = 0; s < 10; s++)
     // {
