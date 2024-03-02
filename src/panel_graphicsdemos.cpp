@@ -34,7 +34,7 @@ void gui::nov_panel_cuberender::_draw draw_function_stub
     const float far_clip = 100.0f;
     const float near_clip = 0.001f;
     const float clip_rat = -far_clip / (far_clip - near_clip);
-    const float fov_deg = 90.0f;
+    const float fov_deg = 85.0f;
     const float s = 1.0f / tanf((fov_deg / 2.0f) * (MATH_PI / 180.0f));
 
     const matrix::nov_fmatrix4 camera_to_view{ s,       0.0f,       0.0f,       0.0f,
@@ -44,6 +44,8 @@ void gui::nov_panel_cuberender::_draw draw_function_stub
     const matrix::nov_fmatrix4 world_to_view = camera_to_view * world_to_camera;
     // FIXME this i snot working
     vector::nov_fvector4 test = world_to_view * t_0;
+    com_1 << stream::DEC;
+    com_1 << (int)(test.x*1000000.0f) << ' ' << (int)(test.y*1000000.0f) << ' ' << (int)(test.z*1000000.0f) << ' ' << (int)(test.w*1000000.0f) << stream::endl;
 
     com_1.flush();
 

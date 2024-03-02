@@ -147,34 +147,29 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     com_1.flush();
     com_1 << 'f' << 'g' << 'h' << 'i' << 'j' << 'k' << 'l' << 'm';
     com_1 << '0' << '1' << '2' << '3' << '4' << '5' << '6' << '7';
+    com_1 << endl;
     com_1.flush();
 
-    com_1 << "who's a good boy then huh? is it you? is it?";
-    com_1 << 33 << stream::endl;
-    com_1 << stream::endl;
-    com_1 << -53 << stream::endl;
+    com_1 << "who's a good boy then huh? is it you? is it?" << endl;
+    com_1 << mode::DEC;
+    com_1 << 33 << endl;
+    com_1 << -53 << endl;
 
-    com_1 << stream::mode::DEC << 201 << stream::endl;
-    com_1 << stream::mode::BIN << 201 << stream::endl;
-    com_1 << stream::mode::HEX << 201 << stream::endl;
+    com_1 << mode::DEC << 201 << endl;
+    com_1 << mode::BIN << 201 << endl;
+    com_1 << mode::HEX << 201 << endl;
     com_1.flush();
 
-    // for (int s = 0; s < 10; s++)
-    // {
-    //     for (uint32_t t = 0; t < 102400000; t++) {}
+    com_1 << mode::DEC << endl;
 
-    //     man.frame_outline_colour = nov_colour{ random_uint32_t() & 0xFF, random_uint32_t() & 0xFF, random_uint32_t() && 0xFF };
-    //     float div;
-    //     do
-    //     {
-    //         div = (float)random_uint32_t() / (float)0xFFFFFFFF;
-    //     } while (div < 0.2f || div > 0.8f);
+    float f = MATH_PI/3.0f;
+    f = tanf(f);
+    com_1 << (int)(f*100.0f) << endl;
 
-    //     gui::split_container(root, nov_fvector2{ s % 2 ? 0 : div, s % 2 ? div : 0 });
-    //     man.draw_specific(root);
-    //     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-    //     root = random_bool() ? root->child_b : root->child_a;
-    // }
+    f = 16.0f;
+    f = sqrt(f);
+    com_1 << (int)f << endl;
+    com_1.flush();
 
     return;
 }

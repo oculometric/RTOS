@@ -35,7 +35,7 @@ void gui::nov_panel_memorymonitor::_draw draw_function_stub
             pixel_index++;
         }
         // update current block colour
-        current_block_colour = nov_colour{ current_block_colour.x + 64, current_block_colour.y + 64, current_block_colour.z + 32 };
+        current_block_colour = nov_colour{ (uint8_t)(current_block_colour.x + 64), (uint8_t)(current_block_colour.y + 64), (uint8_t)(current_block_colour.z + 32) };
         current = current->next;
     }
 }

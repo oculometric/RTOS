@@ -16,24 +16,18 @@ template <typename T>
 inline T abs(T a) { return a < 0 ? -a : a; }
 
 // TODO: move these functions to calling assembly instructions
-inline float inv_sqrt(float number)
-{ // literally just the quake iii code
-    long i;
-    float x2, y;
-    const float threehalfs = 1.5F;
+inline float sqrt(float number)
+{
+    float f;
+    asm("fsqrt" : "=t" (f) : "0" (number));
 
-    x2 = number * 0.5F;
-    y  = number;
-    i  = * ( long * ) &y;                       // evil floating point bit level hacking
-    i  = 0x5f3759df - ( i >> 1 );               // what the fuck?
-    y  = * ( float * ) &i;
-    y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
-    // y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
-
-    return y;
+    return f;
 }
 
-inline float sqrt(float number) { return 1.0f/inv_sqrt(number); }
+inline float inv_sqrt(float number)
+{ 
+    return 1.0f/sqrt(number);
+}
 
 inline float modf(float a, float b)
 {
@@ -46,8 +40,21 @@ inline float tanf(float rad)
 {
     float f;
     asm("fptan;"
-    "fdivr;"
-    : "=t" (f) : "0" (rad));
+    "fdivp" : "=t" (f) : "0" (rad));
+    return f;
+}
+
+inline float sinf(float rad)
+{
+    float f;
+    asm("fsin" : "=t" (f) : "0" (rad));
+    return f;
+}
+
+inline float cosf(float rad)
+{
+    float f;
+    asm("fcos" : "=t" (f) : "0" (rad));
     return f;
 }
 
