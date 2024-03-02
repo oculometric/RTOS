@@ -1,16 +1,8 @@
 #include <boot.h>
 #include <serial.h>
-#include <itos.h>
-#include <vbe.h>
-#include <graphics.h>
-#include <colour.h>
 #include <memory.h>
-#include <gui/gui.h>
-#include <gui/panel_graphicsdemos.h>
-#include <gui/panel_textbox.h>
-#include <gui/panel_memorymonitor.h>
-#include <random.h>
-#include <array.h>
+#include <gui.h>
+#include <panic.h>
 
 // TODO: keyboard
 // TODO: interrupts
@@ -82,7 +74,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     if (backbuffer == 0x0) { com_1 << "unable to allocate memory for GUI backbuffer. panic!" << endl; panic(); }
     memory::mview();
 
-    graphics::nov_framebuffer framebuffer{ real_buffer, nov_uvector2{ 640, 480 }, 3 };
+    graphics::nov_framebuffer framebuffer{ backbuffer, nov_uvector2{ 640, 480 }, 3 };
     gui::nov_gui_manager man (framebuffer);
 
     auto root = man.get_root();
@@ -90,7 +82,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     gui::split_container(root->child_a, nov_fvector2{ 0.0f, 0.8f });
     gui::split_container(root->child_a->child_b, nov_fvector2{ 0.25f, 0.0f });
     man.draw_root();
-    //memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+    memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
     gui::nov_panel_cuberender* pan_cube = new gui::nov_panel_cuberender();
     pan_cube->line_colour = nov_colour{ 128,64,32 };
@@ -114,7 +106,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     memory::mview();
     
     man.draw_root();
-    //memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+    memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
     com_1 << "starting speedtest" << endl;
     bool x_increasing = false;
@@ -130,14 +122,14 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
         if (pan_star->uv.v >= 1.0f) y_increasing = false;
 
         man.draw_specific(root->child_b);
-        //memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+        memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
     }
     com_1 << "speedtest done" << endl;
 
     pan_star->foreground = nov_colour_gold;
     pan_star->uv = nov_fvector2{ 0.9, 0.9 };
     man.draw_root();
-    //memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+    memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
     com_1 << 'a';
     com_1 << 'b';

@@ -15,7 +15,6 @@ inline T min(T a, T b, T c) { if (a < b && a < c) return a; if (b < a && b < c) 
 template <typename T>
 inline T abs(T a) { return a < 0 ? -a : a; }
 
-// TODO: move these functions to calling assembly instructions
 inline float sqrt(float number)
 {
     float f;

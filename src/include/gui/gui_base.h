@@ -14,7 +14,6 @@ namespace gui
 {
 
 using namespace nov::vector;
-using namespace nov;
 
 /**
  * contains data about the frame (block of memory) into which something should be rendered

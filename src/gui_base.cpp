@@ -1,7 +1,5 @@
-#include <gui/gui.h>
+#include <gui/gui_base.h>
 
-#include <serial.h>
-#include <memory.h>
 #include <array.h>
 #include <colour.h>
 #include <graphics.h>
