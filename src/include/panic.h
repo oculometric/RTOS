@@ -8,8 +8,8 @@ namespace nov
 
 inline void panic()
 {
-    serial_println((char*)"PANIC", COM1);
-    serial_print((char*)"EIP : ", COM1);  serial_println_hex(get_eip(), COM1);
+    com_1 << "PANIC" << stream::endl;
+    com_1 << "EIP : " << stream::mode::HEX << get_eip() << stream::endl;
 
     while (true) hlt();
 }

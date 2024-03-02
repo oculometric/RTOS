@@ -7,8 +7,6 @@ using namespace nov;
 
 void gui::nov_panel_memorymonitor::_draw draw_function_stub
 {
-    nov_panel_memorymonitor* memory_panel = static_cast<nov_panel_memorymonitor*>(panel);
-
     const uint32_t total_size = memory::memory_information.size;
     const uint32_t total_pixels = frame.size.u * frame.size.v;
     const float pixels_per_byte = (float)total_pixels / (float)total_size;

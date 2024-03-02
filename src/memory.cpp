@@ -98,7 +98,7 @@ void mfree(void* ptr)
     // step back to the metadata of the block
     nov_memory_frame* block = (nov_memory_frame*)((uint32_t)ptr-sizeof(nov_memory_frame));
     // someone tried to free an invalid block, or the block metadata has been corrupted (oh no)
-    if (block->signature != 0x4a6b || block->signature_end != 0x79) { serial_println_hex((uint32_t)ptr, COM1); serial_println_hex((uint32_t)block->signature, COM1); panic(); }
+    if (block->signature != 0x4a6b || block->signature_end != 0x79) { com_1 << stream::mode::HEX << (uint32_t)ptr << stream::endl << (uint32_t)block->signature << stream::endl; panic(); }
     // if this block is already free, um, cry
     if (block->is_free) return;
     // mark as free
@@ -135,22 +135,27 @@ void mview()
     nov_memory_frame* next_block;
     uint32_t block_size;
 
-    serial_println((char*)"=== MMAP START ===", COM1);
+    com_1 << "=== MMAP START ===" << stream::endl;
     while (current_block != 0x0)
     {
         next_block = current_block->next;
-        if (next_block == 0x0) { serial_print((char*)"end block found at ", COM1); serial_println_hex((uint32_t)current_block, COM1); serial_println((char*)"=== MMAP END ===", COM1); return; }
+        if (next_block == 0x0) 
+        {
+            com_1 << "end block found at " << stream::mode::HEX << (uint32_t)current_block << stream::endl;
+            com_1 << "=== MMAP END ===" << stream::endl;
+            return;
+        }
 
         block_size = (uint32_t)next_block-(uint32_t)current_block;
-        serial_print((char*)"block at     ", COM1); serial_println_hex((uint32_t)current_block, COM1);
-        serial_print((char*)"   size w/h  ", COM1); serial_print_dec(block_size, COM1); serial_print((char*)"/", COM1); serial_println_hex(block_size, COM1);
-        serial_print((char*)"   size wo/h ", COM1); serial_print_dec(block_size-sizeof(nov_memory_frame), COM1); serial_print((char*)"/", COM1); serial_println_hex(block_size-sizeof(nov_memory_frame), COM1);
-        serial_print((char*)"   next      ", COM1); serial_println_hex((uint32_t)current_block->next, COM1);
-        serial_print((char*)"   is free?  ", COM1); serial_println_dec(current_block->is_free, COM1);
+        com_1 << "block at     " << stream::mode::HEX << (uint32_t)current_block << stream::endl;
+        com_1 << "   size w/h  " << stream::mode::DEC << block_size << '/' << stream::mode::HEX << block_size << stream::endl;
+        com_1 << "   size wo/h " << stream::mode::DEC << block_size-sizeof(nov_memory_frame) << '/' << stream::mode::HEX << (block_size-sizeof(nov_memory_frame)) << stream::endl;
+        com_1 << "   next      " << stream::mode::HEX << (uint32_t)current_block->next << stream::endl;
+        com_1 << "   is free?  " << stream::mode::DEC << current_block->is_free << stream::endl;
     
         current_block = next_block;
     }
-    serial_println((char*)"=== MMAP END ===", COM1);
+    com_1 << "=== MMAP END ===" << stream::endl;
 }
 
 nov_memory_information memory_information;

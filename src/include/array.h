@@ -10,7 +10,6 @@ namespace nov
 template <typename T>
 struct nov_array_container
 {
-    //nov_array_container<T>* last;
     T data;
     nov_array_container<T>* next;
     bool is_allocation_head;
@@ -96,27 +95,6 @@ public:
         // and get the data from this container
         return current->data;
     }
-
-    // /**
-    //  * insert an element into the back of the list
-    //  * 
-    //  * @param element element data to insert
-    //  * 
-    //  * **/
-    // inline void push(T& element)
-    // {
-    //     // if we're at the limit, resize
-    //     if (length == capacity)
-    //     {
-    //         resize(capacity+4);
-    //     }
-    //     // if we have size now, increase length and insert
-    //     if (capacity > length)
-    //     {
-    //         length++;
-    //         (*this)[length-1] = element;
-    //     }
-    // }
 
     /**
      * insert an element into the back of the list

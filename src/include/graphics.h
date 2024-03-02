@@ -18,8 +18,6 @@ struct nov_framebuffer
     uint8_t bytes_per_pixel;
 };
 
-inline void serial_println_uvector2(const nov_uvector2& v, uint32_t port) { serial_print((char*)"point(x:", port); serial_print_dec(v.u, port); serial_print((char*)",y:", port); serial_print_dec(v.v, port); serial_println((char*)")", port); }
-
 static inline void set_pixel(uint32_t at, const nov_colour& col, const nov_framebuffer& framebuffer) 
 {
     framebuffer.address[(at*framebuffer.bytes_per_pixel)] = col.z;

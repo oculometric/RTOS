@@ -35,159 +35,6 @@ void serial_print(char chr, uint32_t port)
 }
 
 /**
- * output a string of characters to serial
- * @param str pointer to the start of the string
- * @param port serial port to direct output to
- * **/
-void serial_print(char* str, uint32_t port)
-{
-    uint32_t i = 0;
-    while (str[i] != '\0')
-    {
-        while (!transmit_ready(port));
-        outb(port+SERIAL_DATA_REG, str[i]);
-        i++;
-    }
-}
-
-/**
- * output a string of characters to serial, limited by length
- * @param str pointer to the start of the string
- * @param length maximum number of characters to output
- * @param port serial port to direct output to
- * **/
-void serial_print(char* str, uint32_t length, uint32_t port)
-{
-    uint32_t i = 0;
-    while (str[i] != '\0' && i < length)
-    {
-        while (!transmit_ready(port));
-        outb(port+SERIAL_DATA_REG, str[i]);
-        i++;
-    }
-}
-
-#define HEX_BUFFER_SIZE 10
-#define BIN_BUFFER_SIZE 34
-#define DEC_BUFFER_SIZE 10
-
-/**
- * output an integer to serial in denary format
- * @param val integer to output
- * @param port serial port to direct output to
- * **/
-void serial_print_dec(uint32_t val, uint32_t port)
-{
-    char outbuffer[DEC_BUFFER_SIZE];
-    for (int i = 0; i < DEC_BUFFER_SIZE; i++) outbuffer[i] = '\0';
-    dec_to_string(val, outbuffer);
-    serial_print(outbuffer, DEC_BUFFER_SIZE, port);
-}
-
-/**
- * output an integer to serial in hexadecimal format
- * @param val integer to output
- * @param port serial port to direct output to
- * **/
-void serial_print_hex(uint32_t val, uint32_t port)
-{
-    char outbuffer[HEX_BUFFER_SIZE];
-    for (int i = 0; i < HEX_BUFFER_SIZE; i++) outbuffer[i] = '\0';
-    hex_to_string(val, outbuffer);
-    serial_print(outbuffer, HEX_BUFFER_SIZE, port);
-}
-
-/**
- * output an integer to serial in binary format
- * @param val integer to output
- * @param port serial port to direct output to
- * **/
-void serial_print_bin(uint32_t val, uint32_t port)
-{
-    char outbuffer[BIN_BUFFER_SIZE];
-    for (int i = 0; i < BIN_BUFFER_SIZE; i++) outbuffer[i] = '\0';
-    bin_to_string(val, outbuffer);
-    serial_print(outbuffer, BIN_BUFFER_SIZE, port);
-}
-
-/**
- * output a newline to serial
- * @param port serial port to direct output to
- * **/
-void serial_println(uint32_t port)
-{
-    while (!transmit_ready(port));
-    outb(port+SERIAL_DATA_REG, '\n');
-}
-
-/**
- * output a single character to serial, followed by a newline
- * @param chr character to output
- * @param port serial port to direct output to 
- * **/
-void serial_println(char chr, uint32_t port)
-{
-    serial_print(chr, port);
-    serial_println(port);
-}
-
-/**
- * output a string of characters to serial, followed by a newline
- * @param str pointer to the start of the string
- * @param port serial port to direct output to
- * **/
-void serial_println(char* str, uint32_t port)
-{
-    serial_print(str, port);
-    serial_println(port);
-}
-
-/**
- * output a string of characters to serial, limited by length, followed by a newline
- * @param str pointer to the start of the string
- * @param length maximum number of characters to output
- * @param port serial port to direct output to
- * **/
-void serial_println(char* str, uint32_t length, uint32_t port)
-{
-    serial_print(str, length, port);
-    serial_println(port);
-}
-
-/**
- * output an integer to serial in denary format, followed by a newline
- * @param val integer to output
- * @param port serial port to direct output to
- * **/
-void serial_println_dec(uint32_t val, uint32_t port)
-{
-    serial_print_dec(val, port);
-    serial_println(port);
-}
-
-/**
- * output an integer to serial in hexadecimal format, followed by a newline
- * @param val integer to output
- * @param port serial port to direct output to
- * **/
-void serial_println_hex(uint32_t val, uint32_t port)
-{
-    serial_print_hex(val, port);
-    serial_println(port);
-}
-
-/**
- * output an integer to serial in binary format, followed by a newline
- * @param val integer to output
- * @param port serial port to direct output to
- * **/
-void serial_println_bin(uint32_t val, uint32_t port)
-{
-    serial_print_bin(val, port);
-    serial_println(port);
-}
-
-/**
  * dump a region of memory of a specified length in bytes to serial, formatted in hexadecimal
  * @param start address of the first byte
  * @param length number of bytes to output
@@ -205,10 +52,10 @@ void serial_dump_hex_byte(void* start, uint32_t length, uint32_t port, uint8_t p
     {
         // translate byte
         hex_to_string(ptr[offset], outbuffer, 2);
-        serial_print(outbuffer, 5, port);
+        for (uint8_t i = 0; i < 6 && outbuffer[i] != 0; i++) serial_print(outbuffer[i], port);
         col++;
         offset++;
-        if (per_line != 0 && col >= per_line) { serial_println(port); col = 0; }
+        if (per_line != 0 && col >= per_line) { com_1 << port << nov::stream::endl; col = 0; }
     }
 }
 
@@ -230,10 +77,10 @@ void serial_dump_hex_word(void* start, uint32_t length, uint32_t port, uint8_t p
     {
         // translate byte
         hex_to_string(ptr[offset], outbuffer, 4);
-        serial_print(outbuffer, 7, port);
+        for (uint8_t i = 0; i < 8 && outbuffer[i] != 0; i++) serial_print(outbuffer[i], port);
         col++;
         offset++;
-        if (per_line != 0 && col >= per_line) { serial_println(port); col = 0; }
+        if (per_line != 0 && col >= per_line) { com_1 << port << nov::stream::endl; col = 0; }
     }
 }
 
@@ -255,10 +102,10 @@ void serial_dump_hex_dwrd(void* start, uint32_t length, uint32_t port, uint8_t p
     {
         // translate byte
         hex_to_string(ptr[offset], outbuffer, 8);
-        serial_print(outbuffer, 11, port);
+        for (uint8_t i = 0; i < 12 && outbuffer[i] != 0; i++) serial_print(outbuffer[i], port);
         col++;
         offset++;
-        if (per_line != 0 && col >= per_line) { serial_println(port); col = 0; }
+        if (per_line != 0 && col >= per_line) { com_1 << port << nov::stream::endl; col = 0; }
     }
 }
 
@@ -284,6 +131,9 @@ void serial_dump_byte(void* start, uint32_t length, uint32_t port, uint8_t per_l
         col++;
         offset++;
         if (separator != '\0') serial_print(separator, port);
-        if (per_line != 0 && col >= per_line) { serial_println(port); col = 0; }
+        if (per_line != 0 && col >= per_line) { com_1 << port << nov::stream::endl; col = 0; }
     }
 }
+
+nov::stream::nov_stream com_1([](char c){ serial_print(c, COM1); });
+nov::stream::nov_stream com_2([](char c){ serial_print(c, COM2); });

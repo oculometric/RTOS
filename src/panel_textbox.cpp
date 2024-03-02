@@ -7,5 +7,5 @@ void gui::nov_panel_textbox::_draw draw_function_stub
 {
     nov_panel_textbox* text_panel = static_cast<nov_panel_textbox*>(panel);
 
-    serial_println(text_panel->text, COM1);
+    com_1 << text_panel->text << stream::endl;
 }

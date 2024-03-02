@@ -26,20 +26,6 @@ static inline bool transmit_ready(uint32_t port) { return inb(port+SERIAL_LINEST
 static inline bool receive_ready(uint32_t port) { return inb(port+SERIAL_LINESTATUS_REG) & 0b00000001; }
 
 void serial_print(char chr, uint32_t port);
-void serial_print(char* str, uint32_t port);
-void serial_print(char* str, uint32_t length, uint32_t port);
-void serial_print_dec(uint32_t val, uint32_t port);
-void serial_print_hex(uint32_t val, uint32_t port);
-void serial_print_bin(uint32_t val, uint32_t port);
-
-void serial_println(uint32_t port);
-
-void serial_println(char chr, uint32_t port);
-void serial_println(char* str, uint32_t port);
-void serial_println(char* str, uint32_t length, uint32_t port);
-void serial_println_dec(uint32_t val, uint32_t port);
-void serial_println_hex(uint32_t val, uint32_t port);
-void serial_println_bin(uint32_t val, uint32_t port);
 
 void serial_dump_byte(void* start, uint32_t length, uint32_t port, uint8_t per_line = 0, char separator = '\0');
 
@@ -47,4 +33,5 @@ void serial_dump_hex_byte(void* start, uint32_t length, uint32_t port, uint8_t p
 void serial_dump_hex_word(void* start, uint32_t length, uint32_t port, uint8_t per_line = 8);
 void serial_dump_hex_dwrd(void* start, uint32_t length, uint32_t port, uint8_t per_line = 8);
 
-static nov::stream::nov_stream serial([](char c){ serial_print(c, COM1); });
+extern nov::stream::nov_stream com_1;
+extern nov::stream::nov_stream com_2;

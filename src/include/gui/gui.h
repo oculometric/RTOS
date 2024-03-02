@@ -46,7 +46,7 @@ protected:
 public:
     inline void draw(const nov_frame_data& frame, const graphics::nov_framebuffer& framebuffer)
     {
-        if (draw_function_ptr == 0x0) { serial_println((char*)"invalid draw pointer", COM1); return; }
+        if (draw_function_ptr == 0x0) { com_1 << "invalid draw pointer" << stream::endl; return; }
         else draw_function_ptr(frame, framebuffer, this);
     }
 

@@ -44,19 +44,8 @@ void gui::nov_panel_cuberender::_draw draw_function_stub
     const matrix::nov_fmatrix4 world_to_view = camera_to_view * world_to_camera;
     // FIXME this i snot working
     vector::nov_fvector4 test = world_to_view * t_0;
-    serial_println_dec(test.x * 1000000.0f, COM1);
-    serial_println_dec(test.x * -1000000.0f, COM1);
-    serial_println_dec(test.y * 1000000.0f, COM1);
-    serial_println_dec(test.y * -1000000.0f, COM1);
-    serial_println_dec(test.z * 1000000.0f, COM1);
-    serial_println_dec(test.z * -1000000.0f, COM1);
-    serial_println_dec(test.w * 1000000.0f, COM1);
-    serial_println_dec(test.w * -1000000.0f, COM1);
 
-
-    serial << vector::nov_vector3<uint32_t>{ 121, 446, 362 } << stream::endl;
-    serial << frame.size << stream::endl;
-    serial.flush();
+    com_1.flush();
 
 }
 
