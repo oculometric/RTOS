@@ -23,13 +23,12 @@ void gui::nov_panel_cuberender::_draw draw_function_stub
     const vector::nov_fvector3 camera_up{ 0,1,0 };
     const vector::nov_fvector3 camera_back{ 0,0,1 };
 
-    const vector::nov_fvector3 camera_position{0,2,10};
+    const vector::nov_fvector3 camera_position{0.5f,1.2f,3.5f};
 
     const matrix::nov_fmatrix4 world_to_camera{ camera_right.x, camera_right.y, camera_right.z, -(camera_right ^ camera_position),
-                                                camera_up.x,    camera_up.y,    camera_up.z,    -(camera_up ^ camera_position),
+                                                camera_up.x,    camera_up.y,    camera_up.z,    (camera_up ^ camera_position),
                                                 camera_back.x,  camera_back.y,  camera_back.z,  -(camera_back ^ camera_position),
                                                 0.0f,           0.0f,           0.0f,           1.0f                                };
-
 
     const float far_clip = 100.0f;
     const float near_clip = 0.001f;
@@ -42,10 +41,45 @@ void gui::nov_panel_cuberender::_draw draw_function_stub
                                                0.0f,    0.0f,       clip_rat,   clip_rat * near_clip,
                                                0.0f,    0.0f,       -1.0f,      0.0f                    };
     const matrix::nov_fmatrix4 world_to_view = camera_to_view * world_to_camera;
-    // FIXME this i snot working
-    vector::nov_fvector4 test = world_to_view * t_0;
-    com_1 << stream::DEC;
-    com_1 << (int)(test.x*1000000.0f) << ' ' << (int)(test.y*1000000.0f) << ' ' << (int)(test.z*1000000.0f) << ' ' << (int)(test.w*1000000.0f) << stream::endl;
+    
+    const vector::nov_fvector4* path[16] = 
+    {
+        &t_0, &t_1, &t_2, &t_3, &t_0, &b_0, &b_1, &b_2, &b_3, &b_0, &b_1, &t_1, &t_2, &b_2, &b_3, &t_3
+    };
+    
+    com_1 << world_to_camera << stream::endl;
+    com_1 << camera_to_view << stream::endl;
+    com_1 << world_to_view << stream::endl;
+    
+    vector::nov_fvector4 v_a_view;
+    vector::nov_fvector4 v_b_view;
+    vector::nov_uvector2 v_a_window;
+    vector::nov_uvector2 v_b_window;
+
+    for (uint32_t i = 0; i < sizeof(path)/sizeof(vector::nov_fvector4*) - 1; i++)
+    {
+        v_a_view = world_to_view * *(path[i]);
+        v_a_view /= v_a_view.w;
+        v_b_view = world_to_view * *(path[i+1]);
+        v_b_view /= v_b_view.w;
+
+        v_a_window = nov_uvector2
+        { 
+            (uint32_t)(((v_a_view.x + 1.0f) * 0.5f) * frame.size.u), 
+            (uint32_t)(((v_a_view.y + 1.0f) * 0.5f) * frame.size.v)
+        }; v_a_window += frame.origin;
+
+        v_b_window = nov_uvector2 
+        { 
+            (uint32_t)(((v_b_view.x + 1.0f) * 0.5f) * frame.size.u), 
+            (uint32_t)(((v_b_view.y + 1.0f) * 0.5f) * frame.size.v)
+        }; v_b_window += frame.origin;
+
+        graphics::draw_line(v_a_window, v_b_window, cuberender_panel->line_colour, framebuffer);
+
+        com_1 << *(path[i]) << " -> " << v_a_view << stream::endl;
+        com_1 << *(path[i+1]) << " -> " << v_b_view << stream::endl;
+    }
 
     com_1.flush();
 

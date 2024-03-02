@@ -79,6 +79,13 @@ nov_stream& operator<<(nov_stream& stream, int32_t i)
     }
 }
 
+nov_stream& operator<<(nov_stream& stream, float f)
+{
+    char buf[128] = { 0 };
+    float_to_string(f, buf, 3);
+    return stream << buf;
+}
+
 nov_stream& operator<<(nov_stream& stream, mode m)
 {
     stream.uint_mode = m;

@@ -70,7 +70,7 @@ void nov_gui_manager::draw_container(nov_container* container, const nov_frame_d
 
     if (large_enough_for_frame
         && ((container->panel != 0x0 && container->panel->wants_border())
-         || (container->child_a == 0x0 && container->child_b == 0x0))
+         || (container->panel == 0x0 && container->child_a == 0x0 && container->child_b == 0x0))
        )
     {
         // TODO: text label/title

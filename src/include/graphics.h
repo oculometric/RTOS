@@ -32,6 +32,7 @@ static inline uint32_t get_offset(const nov_uvector2& co, const nov_uvector2& fr
 
 void draw_box(const nov_uvector2& origin, const nov_uvector2& size, const nov_colour& col, const nov_framebuffer& framebuffer);
 void fill_box(const nov_uvector2& origin, const nov_uvector2& size, const nov_colour& col, const nov_framebuffer& framebuffer);
+void draw_line(const nov_uvector2& start, const nov_uvector2& end, const nov_colour& col, const nov_framebuffer& framebuffer);
 
 }
 }

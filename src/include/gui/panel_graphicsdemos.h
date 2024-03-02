@@ -19,6 +19,7 @@ public:
     inline nov_panel_cuberender()
     {
         draw_function_ptr = _draw;
+        line_colour = nov_colour_gold;
     }
 };
 
