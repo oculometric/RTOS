@@ -57,8 +57,8 @@ nov_stream& operator<<(nov_stream& stream, uint32_t u)
     switch (stream.uint_mode)
     {
     case mode::DEC: int_to_string(u, 10, buf); break;
-    case mode::BIN: int_to_string(u, 2, buf); break;
-    case mode::HEX: int_to_string(u, 16, buf); break;
+    case mode::BIN: stream << "0b"; int_to_string(u, 2, buf); break;
+    case mode::HEX: stream << "0x"; int_to_string(u, 16, buf); break;
     default: return stream;
     }
     return stream << buf;
