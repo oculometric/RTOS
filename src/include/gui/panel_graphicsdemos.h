@@ -6,20 +6,18 @@ namespace nov
 namespace gui
 {
 
-
-class nov_panel_cuberender : public nov_panel
+class nov_panel_meshrender : public nov_panel
 {
 private:
     static void _draw draw_function_stub;
 public:
-    nov_colour line_colour;
-    nov_fvector3 radius;
+    nov_colour line_colour = nov_colour_gold;
+    graphics::nov_mesh* mesh;
     nov_fvector3 rotation;
 
-    inline nov_panel_cuberender()
+    inline nov_panel_meshrender()
     {
         draw_function_ptr = _draw;
-        line_colour = nov_colour_gold;
     }
 };
 

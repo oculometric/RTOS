@@ -71,29 +71,40 @@ mmap_failed:
     mov cl, 'M'
     jmp show_error
 
-; load the next 127 sectors (each 512b)
+; load the next 64 sectors (each 512b) * 16 heads
 load_kernel_bootstrapper:
     mov bx, KERNEL_LOAD_ADDR / 16
-    mov es, bx      ; kernel will be loaded at es:bx, so we set that to be 0:KERNEL_LOAD_ADDR
+    mov es, bx      ; kernel will be loaded at es:bx, so we set that to be KERNEL_LOAD_ADDR/16:0
     mov bx, 0x0
     mov ah, 2
     mov ch, 0       ; cylinder number
     mov cl, 2       ; start at sector 1 (CHS sector index starts at 1 because of course it does)
     mov dl, [OS_HINT_TABLE+OHT_DISKNUM_OFFSET] ; disk number
     mov bp, 0       ; used to keep track of retries
+    mov di, 0       ; head number
 continue_kernel_loading:
     mov ah, 2
     mov al, 1       ; load 1 sector
-    mov dh, 0       ; head number (this gets clobbered)
+    mov dx, di      ; head number (this gets clobbered)
+    mov dl, [OS_HINT_TABLE+OHT_DISKNUM_OFFSET]
     int 0x13        ; actually do the interrupt this time
     jc kernel_end_check
     cmp ah, 0       ; if we failed, just try again
     jne retry_load_kernel
-    add bx, 0x200   ; increment bx by 512
+    mov si, es
+    add si, 0x20
+    mov es, si      ; increment bx by 512
     inc cl          ; move to next sector
-    cmp cl, 126
-    jge kernel_load_finished
+    cmp cl, 64
+    jge load_next_head
     mov bp, 0       ; reset retry counter
+    jmp continue_kernel_loading
+load_next_head:
+    mov bp, 0       ; reset retry counter
+    mov cl, 1       ; reset sector number
+    add di, 0x100   ; increment head counter
+    cmp di, 0x1000  ; check if its 16
+    jge kernel_load_finished
     jmp continue_kernel_loading
 
 retry_load_kernel:
@@ -102,7 +113,8 @@ retry_load_kernel:
     inc bp
 
 kernel_end_check:
-    cmp bx, 0x0     ; if zero, then there were no sectors to load, and thus no kernel to jump to (so dont do that)
+    mov dx, es
+    cmp dx, KERNEL_LOAD_ADDR / 16  ; if equal, then there were no sectors to load, and thus no kernel to jump to (so dont do that)
     je kernel_load_failed
     jmp kernel_load_finished
 

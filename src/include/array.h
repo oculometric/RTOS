@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <memory.h>
 #include <panic.h>
+#include <serial.h>
 
 namespace nov
 {
@@ -10,8 +11,8 @@ namespace nov
 template <typename T>
 struct nov_array_container
 {
-    T data;
     nov_array_container<T>* next;
+    T data;
     bool is_allocation_head;
 };
 
@@ -24,9 +25,9 @@ private:
     // pointer to last allocated element slot in the linked list. may or may not actually contain list data
     nov_array_container<T>* last = 0x0;
     // number of consumed element slots in the linked list
-    uint32_t length;
+    uint32_t length = 0;
     // number of allocated element slots
-    uint32_t capacity;
+    uint32_t capacity = 0;
 public:
     /**
      * extend the array to have a greater capacity to fit more items in.
@@ -43,8 +44,9 @@ public:
         uint32_t extra_capacity = new_capacity-capacity;
         
         // request more memory from malloc
-        nov_array_container<T>* first_fresh = (nov_array_container<T>*)memory::malloc(sizeof(nov_array_container<T>)*(extra_capacity));
-        if (first_fresh == 0x0) return;
+        nov_array_container<T>* first_fresh = (nov_array_container<T>*)memory::malloc(sizeof(nov_array_container<T>)*extra_capacity);
+        if (first_fresh == 0x0) panic();
+
 
         // check if the array is uninitialised
         if (first == 0x0)
@@ -57,7 +59,7 @@ public:
         {
             // otherwise, tell the existing block to point to this new one
             last->next = first_fresh;
-            last = last->next;
+            last = first_fresh;
         }
 
         // start populating this block of memory with array containers (slots for elements)
@@ -84,6 +86,25 @@ public:
      * 
      * **/
     inline T& operator[](uint32_t index)
+    {
+        if (index >= length) panic(); // crashes the kernel
+        // step over the linked list until we reach the right index
+        nov_array_container<T>* current = first;
+        for (uint32_t i = 0; i < index; i++)
+        {
+            current = current->next;
+        }
+        // and get the data from this container
+        return current->data;
+    }
+
+    /**
+     * access element by index from the array
+     * 
+     * @param index index into the array to access
+     * 
+     * **/
+    inline T operator[](uint32_t index) const
     {
         if (index >= length) panic(); // crashes the kernel
         // step over the linked list until we reach the right index
@@ -140,10 +161,10 @@ public:
         length = 0;
     }
 
-    inline uint32_t get_length() { return length; }
-    inline uint32_t get_capacity() { return capacity; }
+    inline uint32_t get_length() const { return length; }
+    inline uint32_t get_capacity() const { return capacity; }
 
-    inline nov_array(uint32_t _capacity = 1)
+    inline constexpr nov_array(uint32_t _capacity)
     {
         // clear all values, then request a resize to the desired capacity
         first = 0x0;
@@ -153,8 +174,13 @@ public:
         resize(_capacity);
     }
 
+    nov_array(const nov_array&) = delete;
+
+    nov_array() : first(0x0), last(0x0), length(0), capacity(0) { };
+
     inline ~nov_array()
     {
+        if (first == 0x0) return;
         // iterate over the containers in the array
         nov_array_container<T>* current = first;
         for (uint32_t i = 0; i < capacity; i++)
@@ -165,6 +191,7 @@ public:
             // step onto the next
             current = current->next;
         }
+        first = 0x0; last = 0x0;
         memory::mconsolidate();
     }
 };

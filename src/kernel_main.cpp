@@ -3,12 +3,17 @@
 #include <memory.h>
 #include <gui.h>
 #include <panic.h>
+#include <3d_demo_objs.h>
+#include <array.h>
+#include <string.h>
 
 // TODO: keyboard
 // TODO: interrupts
 // TODO: timing
 // TODO: textbox panel
 // TODO: v-tables
+// TODO: redo arrays
+// TODO: 3dmodels
 
 using namespace nov;
 using namespace stream;
@@ -17,6 +22,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
 {
     init_serial(COM1);
     com_1 << "hello from kernel main." << endl;
+    com_1.flush();
     com_1 << "reading the os hint table..." << endl;
     com_1 << "    gdt address      : " << mode::HEX << (uint32_t)os_hint_table->gdt_address << endl;
     com_1 << "    1kib low blocks  : " << mode::DEC << os_hint_table->low_kilobyte_blocks << endl;
@@ -84,10 +90,11 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     man.draw_root();
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
-    gui::nov_panel_cuberender* pan_cube = new gui::nov_panel_cuberender();
+    gui::nov_panel_meshrender* pan_cube = new gui::nov_panel_meshrender();
     pan_cube->line_colour = nov_colour{ 128,64,32 };
-    pan_cube->radius = nov_fvector3{ 1,1,1 };
     pan_cube->rotation = nov_fvector3{ 33,0, 45 };
+    nov_string teapot_str(teapot_obj);
+    //pan_cube->mesh = new graphics::nov_mesh(teapot_obj);
 
     gui::nov_panel_star* pan_star = new gui::nov_panel_star();
     pan_star->background = nov_colour_nearblack;
@@ -102,8 +109,6 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     root->child_a->child_b->child_b->panel = pan_text;
     root->child_a->child_b->child_a->panel = pan_mem;
     root->child_b->panel = pan_star;
-
-    memory::mview();
     
     man.draw_root();
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
@@ -131,35 +136,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     man.draw_root();
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
-    com_1 << 'a';
-    com_1 << 'b';
-    com_1 << 'c' << 'd' << 'e';
-    com_1.flush();
-    com_1 << 'f' << 'g' << 'h' << 'i' << 'j' << 'k' << 'l' << 'm';
-    com_1 << '0' << '1' << '2' << '3' << '4' << '5' << '6' << '7';
-    com_1 << endl;
-    com_1.flush();
+    memory::mview();
 
-    com_1 << "who's a good boy then huh? is it you? is it?" << endl;
-    com_1 << mode::DEC;
-    com_1 << 33 << endl;
-    com_1 << -53 << endl;
-
-    com_1 << mode::DEC << 201 << endl;
-    com_1 << mode::BIN << 201 << endl;
-    com_1 << mode::HEX << 201 << endl;
-    com_1.flush();
-
-    com_1 << mode::DEC << endl;
-
-    float f = MATH_PI/3.0f;
-    f = tanf(f);
-    com_1 << (int)(f*100.0f) << endl;
-
-    f = 16.0f;
-    f = sqrt(f);
-    com_1 << (int)f << endl;
-    com_1.flush();
-
-    return;
+    while(true);
 }

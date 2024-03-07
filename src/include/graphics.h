@@ -2,7 +2,9 @@
 
 #include <vbe.h>
 #include <vector.h>
-#include <serial.h>
+#include <graphics/mesh.h>
+#include <graphics/bounds.h>
+#include <graphics/material.h>
 
 namespace nov
 {

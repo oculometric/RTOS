@@ -18,6 +18,24 @@ void operator delete(void* ptr)
     nov::memory::mfree(ptr);
 }
 
+// FIXME: i literally have no idea what im doing beyon dthis point. its 1:30. i t hink these jsould be calling destructors o rsomething, and maube error checking too
+void operator delete[](void* ptr)
+{
+    nov::memory::mfree(ptr);
+}
+
+void operator delete(void* ptr, uint32_t size)
+{
+    nov::memory::mfree(ptr);
+}
+
+void operator delete[](void* ptr, uint32_t size)
+{
+    nov::memory::mfree(ptr);
+}
+
+
+
 namespace nov
 {
 namespace memory
@@ -59,6 +77,9 @@ void* malloc(uint32_t size)
     nov_memory_frame* current_block = head_frame;
     nov_memory_frame* next_block;
     uint32_t block_size;
+    // calculate the size of the block of memory we actually want. add some padding and also align
+    // to a 4-byte boundary (hence left and right shifting)
+    uint32_t search_size = ((size+sizeof(nov_memory_frame)+sizeof(nov_memory_frame)+8) >> 2) << 2;
 
     while (current_block != 0x0)
     {
@@ -70,7 +91,7 @@ void* malloc(uint32_t size)
 
         // find the block size (i.e. the distance between the current frame and the next)
         block_size = (uint32_t)next_block-(uint32_t)current_block;
-        if (block_size > size+sizeof(nov_memory_frame)+sizeof(nov_memory_frame))
+        if (block_size >= search_size)
         {
             // we've found a free block big enough to hold the new memory allocation and the necessarry memory frame
             // make a new memory frame delineating the end of this newly allocated block

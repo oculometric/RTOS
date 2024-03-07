@@ -1,23 +1,24 @@
 #include <gui/panel_graphicsdemos.h>
 #include <math.h>
 #include <matrix.h>
+#include <serial.h>
 
 using namespace nov;
 
-void gui::nov_panel_cuberender::_draw draw_function_stub
+void gui::nov_panel_meshrender::_draw draw_function_stub
 {
-    nov_panel_cuberender* cuberender_panel = (nov_panel_cuberender*)panel;
+    nov_panel_meshrender* meshrender_panel = (nov_panel_meshrender*)panel;
 
     // define vertex points
-    const vector::nov_fvector4 t_0{ -cuberender_panel->radius.x, -cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
-    const vector::nov_fvector4 t_1{ cuberender_panel->radius.x, -cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
-    const vector::nov_fvector4 t_2{ cuberender_panel->radius.x, cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
-    const vector::nov_fvector4 t_3{ -cuberender_panel->radius.x, cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
+    // const vector::nov_fvector4 t_0{ -cuberender_panel->radius.x, -cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
+    // const vector::nov_fvector4 t_1{ cuberender_panel->radius.x, -cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
+    // const vector::nov_fvector4 t_2{ cuberender_panel->radius.x, cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
+    // const vector::nov_fvector4 t_3{ -cuberender_panel->radius.x, cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
 
-    const vector::nov_fvector4 b_0{ t_0.x, t_0.y, -t_0.z, 1.0f };
-    const vector::nov_fvector4 b_1{ t_1.x, t_1.y, -t_1.z, 1.0f };
-    const vector::nov_fvector4 b_2{ t_2.x, t_2.y, -t_2.z, 1.0f };
-    const vector::nov_fvector4 b_3{ t_3.x, t_3.y, -t_3.z, 1.0f };
+    // const vector::nov_fvector4 b_0{ t_0.x, t_0.y, -t_0.z, 1.0f };
+    // const vector::nov_fvector4 b_1{ t_1.x, t_1.y, -t_1.z, 1.0f };
+    // const vector::nov_fvector4 b_2{ t_2.x, t_2.y, -t_2.z, 1.0f };
+    // const vector::nov_fvector4 b_3{ t_3.x, t_3.y, -t_3.z, 1.0f };
 
     const vector::nov_fvector3 camera_right{ 1,0,0 };
     const vector::nov_fvector3 camera_up{ 0,1,0 };
@@ -42,10 +43,10 @@ void gui::nov_panel_cuberender::_draw draw_function_stub
                                                0.0f,    0.0f,       -1.0f,      0.0f                    };
     const matrix::nov_fmatrix4 world_to_view = camera_to_view * world_to_camera;
     
-    const vector::nov_fvector4* path[16] = 
-    {
-        &t_0, &t_1, &t_2, &t_3, &t_0, &b_0, &b_1, &b_2, &b_3, &b_0, &b_1, &t_1, &t_2, &b_2, &b_3, &t_3
-    };
+    // const vector::nov_fvector4* path[16] = 
+    // {
+    //     &t_0, &t_1, &t_2, &t_3, &t_0, &b_0, &b_1, &b_2, &b_3, &b_0, &b_1, &t_1, &t_2, &b_2, &b_3, &t_3
+    // };
     
     com_1 << world_to_camera << stream::endl;
     com_1 << camera_to_view << stream::endl;
@@ -56,11 +57,12 @@ void gui::nov_panel_cuberender::_draw draw_function_stub
     vector::nov_uvector2 v_a_window;
     vector::nov_uvector2 v_b_window;
 
-    for (uint32_t i = 0; i < sizeof(path)/sizeof(vector::nov_fvector4*) - 1; i++)
+    for (uint32_t i = 0; i < (meshrender_panel->mesh->count_triangles() * 3) - 1; i++)
     {
-        v_a_view = world_to_view * *(path[i]);
+        // TODO: swap in last vertex to save on recomputation
+        v_a_view = world_to_view * nov_fvector4{ meshrender_panel->mesh->vertices[meshrender_panel->mesh->triangles[i]] };
         v_a_view /= v_a_view.w;
-        v_b_view = world_to_view * *(path[i+1]);
+        v_b_view = world_to_view * nov_fvector4{ meshrender_panel->mesh->vertices[meshrender_panel->mesh->triangles[i+1]] };
         v_b_view /= v_b_view.w;
 
         v_a_window = nov_uvector2
@@ -75,10 +77,8 @@ void gui::nov_panel_cuberender::_draw draw_function_stub
             (uint32_t)(((v_b_view.y + 1.0f) * 0.5f) * frame.size.v)
         }; v_b_window += frame.origin;
 
-        graphics::draw_line(v_a_window, v_b_window, cuberender_panel->line_colour, framebuffer);
+        graphics::draw_line(v_a_window, v_b_window, meshrender_panel->line_colour, framebuffer);
 
-        com_1 << *(path[i]) << " -> " << v_a_view << stream::endl;
-        com_1 << *(path[i+1]) << " -> " << v_b_view << stream::endl;
     }
 
     com_1.flush();

@@ -1,5 +1,6 @@
 #include <gui/panel_textbox.h>
 #include <math.h>
+#include <serial.h>
 
 using namespace nov;
 
