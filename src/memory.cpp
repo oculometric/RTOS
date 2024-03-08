@@ -119,7 +119,7 @@ void mfree(void* ptr)
     // step back to the metadata of the block
     nov_memory_frame* block = (nov_memory_frame*)((uint32_t)ptr-sizeof(nov_memory_frame));
     // someone tried to free an invalid block, or the block metadata has been corrupted (oh no)
-    if (block->signature != 0x4a6b || block->signature_end != 0x79) { com_1 << stream::mode::HEX << (uint32_t)ptr << stream::endl << (uint32_t)block->signature << stream::endl; panic(); }
+    if (block->signature != 0x4a6b || block->signature_end != 0x79) { com_1 << "memory free error: " << stream::mode::HEX << (uint32_t)ptr << stream::endl << (uint32_t)block->signature << stream::endl; panic(); }
     // if this block is already free, um, cry
     if (block->is_free) return;
     // mark as free
@@ -164,6 +164,7 @@ void mview()
         {
             com_1 << "end block found at " << stream::mode::HEX << (uint32_t)current_block << stream::endl;
             com_1 << "=== MMAP END ===" << stream::endl;
+            com_1.flush();
             return;
         }
 
@@ -177,6 +178,7 @@ void mview()
         current_block = next_block;
     }
     com_1 << "=== MMAP END ===" << stream::endl;
+    com_1.flush();
 }
 
 nov_memory_information memory_information;

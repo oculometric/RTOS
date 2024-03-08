@@ -3,17 +3,14 @@
 #include <stdint.h>
 #include <memory.h>
 #include <panic.h>
-#include <serial.h>
 
 namespace nov
 {
 
-template <typename T>
 struct nov_array_container
 {
-    nov_array_container<T>* next;
-    T data;
-    bool is_allocation_head;
+    nov_array_container* next;
+    uint32_t elements_in_block;
 };
 
 template <typename T>
@@ -21,9 +18,9 @@ class nov_array
 {
 private:
     // pointer to first allocated element slot in the linked list. may or may not actually contain list data
-    nov_array_container<T>* first = 0x0;
+    nov_array_container* first = 0x0;
     // pointer to last allocated element slot in the linked list. may or may not actually contain list data
-    nov_array_container<T>* last = 0x0;
+    nov_array_container* last = 0x0;
     // number of consumed element slots in the linked list
     uint32_t length = 0;
     // number of allocated element slots
@@ -42,11 +39,9 @@ public:
         // only allow increasing the size of the array for now
         if (new_capacity <= capacity) return;
         uint32_t extra_capacity = new_capacity-capacity;
-        
         // request more memory from malloc
-        nov_array_container<T>* first_fresh = (nov_array_container<T>*)memory::malloc(sizeof(nov_array_container<T>)*extra_capacity);
+        nov_array_container* first_fresh = (nov_array_container*)memory::malloc(sizeof(nov_array_container) + (extra_capacity * sizeof(T)));
         if (first_fresh == 0x0) panic();
-
 
         // check if the array is uninitialised
         if (first == 0x0)
@@ -63,14 +58,7 @@ public:
         }
 
         // start populating this block of memory with array containers (slots for elements)
-        last->is_allocation_head = true;
-        for (uint32_t i = 0; i < extra_capacity-1; i++)
-        {
-            // repeatedly place an array container after the last one, filling the allocated space
-            last->next = last+1;
-            last = last->next;
-            last->is_allocation_head = false;
-        }
+        last->elements_in_block = extra_capacity;
         last->next = 0x0;
 
         // update capacity
@@ -88,14 +76,17 @@ public:
     inline T& operator[](uint32_t index)
     {
         if (index >= length) panic(); // crashes the kernel
-        // step over the linked list until we reach the right index
-        nov_array_container<T>* current = first;
-        for (uint32_t i = 0; i < index; i++)
+        // step over the linked list until we reach the block which contains the relevant index
+        nov_array_container* current = first;
+        uint32_t cumulative = 0;
+        while (index > cumulative + current->elements_in_block)
         {
+            cumulative += current->elements_in_block;
             current = current->next;
         }
+
         // and get the data from this container
-        return current->data;
+        return ((T*)(current + 1))[index - cumulative];
     }
 
     /**
@@ -107,14 +98,17 @@ public:
     inline T operator[](uint32_t index) const
     {
         if (index >= length) panic(); // crashes the kernel
-        // step over the linked list until we reach the right index
-        nov_array_container<T>* current = first;
-        for (uint32_t i = 0; i < index; i++)
+        // step over the linked list until we reach the block which contains the relevant index
+        nov_array_container* current = first;
+        uint32_t cumulative = 0;
+        while (index > cumulative + current->elements_in_block)
         {
+            cumulative += current->elements_in_block;
             current = current->next;
         }
+
         // and get the data from this container
-        return current->data;
+        return ((T*)(current + 1))[index - cumulative];
     }
 
     /**
@@ -182,12 +176,11 @@ public:
     {
         if (first == 0x0) return;
         // iterate over the containers in the array
-        nov_array_container<T>* current = first;
-        for (uint32_t i = 0; i < capacity; i++)
+        nov_array_container* current = first;
+        while (current != 0x0)
         {
-            // if the current container is flagged as being somewhere memory was actually allocated
-            // (i.e. it represents a pointer returned by malloc) then we free it
-            if (current->is_allocation_head) memory::mfree((void*)current);
+            // free the block
+            memory::mfree((void*)current);
             // step onto the next
             current = current->next;
         }
