@@ -1,32 +1,22 @@
 # novos
-it begins again again again
 
-## Reference points
-osdev wiki of course
-https://wiki.osdev.org/GCC_Cross-Compiler
+hiyya! this is my kernel development project. i use 'kernel' loosely since it mostly amounts to me building all the *bits* of a kernel without really following a specific kernel design or model.
 
-im so sorry, they were right all along, i do just need to read the intel processor manual
-https://www.intel.com/content/www/us/en/developer/articles/technical/intel-sdm.html
+## state of the project
 
-this was also useful because sometimes you just gotta read the garbage as numbers and bang your head against it
-https://www.asciitable.com
+as of writing this, i've written a reasonably okayish (if not very portable) *bootloader* for loading an elf binary, i've implemented a simple memory allocator, designed a *UI layou*t mechanism and a drawing system, written some *3D graphics* library stuff, and implemented *serial logging* for debugging. some other cool things i've done are re-implementing *streams* to make serial-debugging things easier (and all the other useful things you can do with streams), and implementing *dynamic arrays and strings*. in fact, a fair bit of stuff is re-creating C++ standard library stuff.
 
-some other more summary useful stuff
-https://www.cs.virginia.edu/~evans/cs216/guides/x86.html
+## goal of the project
 
-this oh god
-https://stanislavs.org/helppc/int_table.html
+i don't have much of a concrete goal with this. to be honest, given how challenging this kind of development is (for me at least) i don't want to set myself huge goals, and you shouldn't expect this to turn into a full graphical operating system capable of loading Steam games for at least 70 years or so.
 
-working my way through this partly
-https://github.com/tuhdo/os01/blob/master/Operating_Systems_From_0_to_1.pdf
+mostly the point of this is just learning doing things from the ground up, having fun implementing fundamental data structures and algorithms for myself, and having fun while suffering through that.
 
-also this which explains stuff pretty well
-https://www.youtube.com/playlist?list=PLm3B56ql_akNcvH8vvJRYOc7TbYhRs19M
+me being a graphics programming victim/interested-person, *the only long-term goal i have for this is creating some kind of simple 3D space-related videogame, in the sense that **the kernel is the game**. i.e. i'm writing a game engine, and a game to use it, but completely freestanding and bootable on its own*.
 
-these two for video modes
-https://en.wikipedia.org/wiki/VESA_BIOS_Extensions
-http://www.petesqbsite.com/sections/tutorials/tuts/vbe3.pdf
+the other thing i do want to do is try and make *some* note about anything particular i learn during this. this is unlikely to happen substantially. something i am **absolutely** going to do is write *well-documented code* because *the number one reason building something like this is so difficult is that i can find very very few well-documented, understandable, followable code examples for this kind of project*. the [osdev wiki](https://wiki.osdev.org) is an amazing resource but, understandably, its pretty opaque if you don't already know everything on it intimately. hopefully someone else will find this useful (assuming another sufficiently stupid noob comes along like me).
 
+## progress toward that goal
 
-## the game
-'fantastic virtual exhibition of the cosmos'? maybe? FVEC
+- [ ] test
+- [x] thing
