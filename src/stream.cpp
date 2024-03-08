@@ -1,5 +1,5 @@
 #include <stream.h>
-#include <itos.h>
+#include <string.h>
 
 namespace nov
 {
@@ -56,9 +56,9 @@ nov_stream& operator<<(nov_stream& stream, uint32_t u)
     char buf[36] = { 0 };
     switch (stream.uint_mode)
     {
-    case mode::DEC: int_to_string(u, 10, buf); break;
-    case mode::BIN: stream << "0b"; int_to_string(u, 2, buf); break;
-    case mode::HEX: stream << "0x"; int_to_string(u, 16, buf); break;
+    case mode::DEC: nov::int_to_string(u, 10, buf); break;
+    case mode::BIN: stream << "0b"; nov::int_to_string(u, 2, buf); break;
+    case mode::HEX: stream << "0x"; nov::int_to_string(u, 16, buf); break;
     default: return stream;
     }
     return stream << buf;
@@ -70,7 +70,7 @@ nov_stream& operator<<(nov_stream& stream, int32_t i)
     if (i < 0)
     {
         buf[0] = '-';
-        int_to_string(-i, 10, buf+1);
+        nov::int_to_string(-i, 10, buf+1);
         return stream << buf;
     }
     else
@@ -82,7 +82,7 @@ nov_stream& operator<<(nov_stream& stream, int32_t i)
 nov_stream& operator<<(nov_stream& stream, float f)
 {
     char buf[128] = { 0 };
-    float_to_string(f, buf, 3);
+    nov::float_to_string(f, buf, 3);
     return stream << buf;
 }
 

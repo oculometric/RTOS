@@ -40,6 +40,15 @@ public:
 
 uint32_t find_next_byte(char* addr, char target);
 
+uint16_t int_to_string(uint32_t i, uint8_t base, char* buffer, uint8_t padding = 0);
+void float_to_string(const float f, char* buffer, const uint8_t dps = 3);
+void hex_to_string(uint32_t i, char* buffer, uint8_t padding = 0);
+void bin_to_string(uint32_t i, char* buffer, uint8_t padding = 0);
+void dec_to_string(uint32_t i, char* buffer, uint8_t padding = 0);
+
+int32_t string_to_int(const nov_string& str, uint8_t base);
+float string_to_float(const nov_string& str);
+
 stream::nov_stream& operator<<(stream::nov_stream& stream, const nov_string& s);
 
 }
