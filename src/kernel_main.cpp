@@ -7,7 +7,6 @@
 #include <array.h>
 #include <string.h>
 
-// TODO: redo arrays
 // TODO: 3dmodels
 // TODO: textbox panel
 // TODO: interrupts
