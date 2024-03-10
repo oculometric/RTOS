@@ -154,13 +154,11 @@ int32_t nov_string::find(char c, uint32_t start) const
 
 nov_string nov_string::substring(uint32_t start, uint32_t end) const
 {
-    if (end <= start) { com_1 << "e < s" << stream::endl; return nov_string(); }
-    if (start >= backing.get_length()) { com_1 << "s > l" << stream::endl; return nov_string(); }
+    if (end <= start) { return nov_string(); }
+    if (start >= backing.get_length()) { return nov_string(); }
     nov_string substr((end < backing.get_length() ? end : backing.get_length()) - start);
-    com_1 << "substr constructed with size " << stream::mode::DEC << substr.get_capacity() << stream::endl;
     for (uint32_t i = start; i < end && i < backing.get_length(); i++)
         substr.append((*this)[i]);
-    com_1 << "substr constructed: " << substr << stream::endl;
     return substr;
 }
 
