@@ -5,10 +5,14 @@ using namespace nov;
 
 nov_string::nov_string()
 {
+    com_1 << "base constructor" << stream::endl;
+    backing.resize(8);
 }
 
 nov_string::nov_string(const nov_string& str)
 {
+    com_1 << "copy constructor from " << stream::mode::HEX << (uint32_t)(&str) << stream::endl;
+
     backing.resize(str.get_length());
     for (uint32_t i = 0; i < str.get_length(); i++)
     {
@@ -18,6 +22,8 @@ nov_string::nov_string(const nov_string& str)
 
 nov_string::nov_string(const char* chrs)
 {
+    com_1 << "char* constructor from " << stream::mode::HEX << (uint32_t)chrs << stream::endl;
+
     uint32_t chr_len = 0;
     while (chrs[chr_len] != 0x0)
         chr_len++;
@@ -29,6 +35,8 @@ nov_string::nov_string(const char* chrs)
 
 nov_string::nov_string(char* chrs)
 {
+    com_1 << "char* constructor from " << stream::mode::HEX << (uint32_t)chrs << stream::endl;
+
     uint32_t chr_len = 0;
     while (chrs[chr_len] != 0x0)
         chr_len++;
@@ -39,6 +47,8 @@ nov_string::nov_string(char* chrs)
 
 nov_string::nov_string(uint32_t initial_capacity)
 {
+    com_1 << "initial capacity constructor sized " << stream::mode::DEC << initial_capacity << stream::endl;
+
     backing.resize(initial_capacity);
 }
 
@@ -119,6 +129,11 @@ uint32_t nov_string::get_length() const
     return backing.get_length();
 }
 
+uint32_t nov_string::get_capacity() const
+{
+    return backing.get_capacity();
+}
+
 const char* nov_string::const_str() const
 {
     uint32_t len = get_length();
@@ -139,11 +154,13 @@ int32_t nov_string::find(char c, uint32_t start) const
 
 nov_string nov_string::substring(uint32_t start, uint32_t end) const
 {
-    if (end <= start) return nov_string();
-    if (start >= backing.get_length()) return nov_string();
-    nov_string substr(end-start);
-    for (uint32_t i = start; i < end && (*this)[i] != 0x0; i++)
+    if (end <= start) { com_1 << "e < s" << stream::endl; return nov_string(); }
+    if (start >= backing.get_length()) { com_1 << "s > l" << stream::endl; return nov_string(); }
+    nov_string substr((end < backing.get_length() ? end : backing.get_length()) - start);
+    com_1 << "substr constructed with size " << stream::mode::DEC << substr.get_capacity() << stream::endl;
+    for (uint32_t i = start; i < end && i < backing.get_length(); i++)
         substr.append((*this)[i]);
+    com_1 << "substr constructed: " << substr << stream::endl;
     return substr;
 }
 

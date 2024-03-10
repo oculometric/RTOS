@@ -7,7 +7,6 @@
 #include <array.h>
 #include <string.h>
 
-// TODO: test substr with proper copy/move constructo? idk
 // TODO: 3dmodels
 // TODO: textbox panel
 // TODO: interrupts
@@ -140,9 +139,20 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     memory::mview();
 
     nov_string str("Lorem ipsum dolor sit amet!");
-    com_1 << str << endl;
-    nov_string substr = str.substring(0);
-    com_1 << substr << endl;
+    com_1 << str << ' ' << mode::DEC << str.get_length() << endl;
+    nov_string substr = str.substring(3);
+    com_1 << substr.get_length() << ' ' << substr << endl;
+
+    nov_array<int> arr;
+    arr.push(33);
+    arr.push(44);
+    arr.push(55);
+
+    com_1 << mode::DEC << arr[0] << ' ' << arr[1] << ' ' << arr[2] << endl;
+    memory::mview();
+    arr.~nov_array();
+    memory::mview();
+
 
     com_1 << "all done." << endl;
     com_1.flush();

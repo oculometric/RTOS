@@ -25,6 +25,8 @@ private:
     uint32_t length = 0;
     // number of allocated element slots
     uint32_t capacity = 0;
+    // is this object valid/initialised
+    bool is_valid = false;
 public:
     /**
      * extend the array to have a greater capacity to fit more items in.
@@ -165,15 +167,20 @@ public:
         last = 0x0;
         length = 0;
         capacity = 0;
+        is_valid = true;
         resize(_capacity);
     }
 
     nov_array(const nov_array&) = delete;
+    nov_array& operator=(const nov_array&) = delete;
+    nov_array(nov_array&&) = delete;
+    nov_array& operator=(nov_array&&) = delete;
 
-    nov_array() : first(0x0), last(0x0), length(0), capacity(0) { };
+    nov_array() : first(0x0), last(0x0), length(0), capacity(0), is_valid(true) { };
 
     inline ~nov_array()
     {
+        if (!is_valid) return;
         if (first == 0x0) return;
         // iterate over the containers in the array
         nov_array_container* current = first;

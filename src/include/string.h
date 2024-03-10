@@ -34,6 +34,7 @@ public:
     const char* const_str() const;
 
     uint32_t get_length() const;
+    uint32_t get_capacity() const;
 
     int32_t find(char c, uint32_t start = 0) const;
     nov_string substring(uint32_t start, uint32_t end = -1) const;
