@@ -142,7 +142,7 @@ nov_string nov_string::substring(uint32_t start, uint32_t end) const
     if (end <= start) return nov_string();
     if (start >= backing.get_length()) return nov_string();
     nov_string substr(end-start);
-    for (uint32_t i = start; i < end; i++)
+    for (uint32_t i = start; i < end && (*this)[i] != 0x0; i++)
         substr.append((*this)[i]);
     return substr;
 }
