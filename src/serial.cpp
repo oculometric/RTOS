@@ -51,7 +51,7 @@ void serial_dump_hex_byte(void* start, uint32_t length, uint32_t port, uint8_t p
     while (offset < length)
     {
         // translate byte
-        nov::hex_to_string(ptr[offset], outbuffer, 2);
+        nov::int_to_string(ptr[offset], 16, outbuffer+2, 2);
         for (uint8_t i = 0; i < 6 && outbuffer[i] != 0; i++) serial_print(outbuffer[i], port);
         col++;
         offset++;
@@ -76,7 +76,7 @@ void serial_dump_hex_word(void* start, uint32_t length, uint32_t port, uint8_t p
     while (offset < length)
     {
         // translate byte
-        nov::hex_to_string(ptr[offset], outbuffer, 4);
+        nov::int_to_string(ptr[offset], 16, outbuffer+2, 4);
         for (uint8_t i = 0; i < 8 && outbuffer[i] != 0; i++) serial_print(outbuffer[i], port);
         col++;
         offset++;
@@ -101,7 +101,7 @@ void serial_dump_hex_dwrd(void* start, uint32_t length, uint32_t port, uint8_t p
     while (offset < length)
     {
         // translate byte
-        nov::hex_to_string(ptr[offset], outbuffer, 8);
+        nov::int_to_string(ptr[offset], 16, outbuffer+2, 8);
         for (uint8_t i = 0; i < 12 && outbuffer[i] != 0; i++) serial_print(outbuffer[i], port);
         col++;
         offset++;

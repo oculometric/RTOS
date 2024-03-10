@@ -30,6 +30,9 @@ public:
 
     void resize(uint32_t new_capacity);
     void clear();
+
+    const char* const_str() const;
+
     uint32_t get_length() const;
 
     int32_t find(char c, uint32_t start = 0) const;
@@ -40,11 +43,14 @@ public:
 
 uint32_t find_next_byte(char* addr, char target);
 
-uint16_t int_to_string(uint32_t i, uint8_t base, char* buffer, uint8_t padding = 0);
+uint16_t int_to_string(const uint32_t i, const uint8_t base, char* buffer, const uint8_t padding = 0);
 void float_to_string(const float f, char* buffer, const uint8_t dps = 3);
-void hex_to_string(uint32_t i, char* buffer, uint8_t padding = 0);
-void bin_to_string(uint32_t i, char* buffer, uint8_t padding = 0);
-void dec_to_string(uint32_t i, char* buffer, uint8_t padding = 0);
+
+nov_string int_to_string(const uint32_t i, const uint8_t base, const uint8_t padding = 0);
+nov_string float_to_string(const float f, const uint8_t dps = 3);
+
+int32_t string_to_int(const char* str, uint8_t base);
+float string_to_float(const char* str);
 
 int32_t string_to_int(const nov_string& str, uint8_t base);
 float string_to_float(const nov_string& str);
