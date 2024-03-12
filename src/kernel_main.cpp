@@ -7,6 +7,8 @@
 #include <array.h>
 #include <string.h>
 
+// TODO: string splitting
+// TODO: fix deconstruction in delete function
 // TODO: 3dmodels
 // TODO: textbox panel
 // TODO: interrupts
@@ -93,8 +95,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     pan_cube->line_colour = nov_colour{ 128,64,32 };
     pan_cube->rotation = nov_fvector3{ 33,0, 45 };
     nov_string demo = "helo 123412341234 123412341234 rararar wooo!";
-    nov_string teapot_str(teapot_obj);
-    //pan_cube->mesh = new graphics::nov_mesh(teapot_obj);
+    pan_cube->mesh = new graphics::nov_mesh(teapot_obj);
 
     gui::nov_panel_star* pan_star = new gui::nov_panel_star();
     pan_star->background = nov_colour_nearblack;

@@ -52,6 +52,17 @@ nov_string::nov_string(uint32_t initial_capacity)
     backing.resize(initial_capacity);
 }
 
+nov_string::nov_string(nov_string&& str)
+{
+    com_1 << "move constructor from " << stream::mode::HEX << (uint32_t)(&str) << stream::endl;
+
+    backing.resize(str.get_length());
+    for (uint32_t i = 0; i < str.get_length(); i++)
+    {
+        backing.push(str[i]);
+    }
+}
+
 char& nov_string::operator[](uint32_t index)
 {
     if (index >= backing.get_length()) panic();

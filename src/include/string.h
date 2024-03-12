@@ -16,6 +16,10 @@ public:
     nov_string(const char* chrs);
     nov_string(char* chrs);
     nov_string(uint32_t initial_capacity);
+    nov_string(nov_string&& str);
+
+    nov_string& operator=(const nov_string&) = delete;
+    nov_string& operator=(nov_string&&) = delete;
 
     char& operator[](uint32_t index);
     char operator[](uint32_t index) const;
@@ -38,6 +42,7 @@ public:
 
     int32_t find(char c, uint32_t start = 0) const;
     nov_string substring(uint32_t start, uint32_t end = -1) const;
+    void split (nov_array& out_array, char c) const; // TODO: string splitting
 
     ~nov_string();
 };

@@ -234,9 +234,9 @@ bool nov_mesh::read_obj(const char* mesh_data)
     // step through the data line by line and count how many vertex, face, uv and vnormal lines there are
     char* line = (char*)mesh_data;
     uint32_t line_length = 1;
-    while (line_length > 0)
+    while (line_length >= 0)
     {
-        line_length = find_next_byte(line + 1, '\n');
+        line_length = find_next_byte(line + 1, '\n') + 1;
 
         if (line_length < 2 || line[0] == '#') { }
         else if (line[0] == 'v' && line[1] == ' ') found_vertices++;
@@ -244,11 +244,11 @@ bool nov_mesh::read_obj(const char* mesh_data)
         else if (line[0] == 'v' && line[1] == 't' && line[2] == ' ') found_uvs++;
         else if (line[0] == 'v' && line[1] == 'n' && line[2] == ' ') found_vnorms++;
 
-        line += line_length;
+        line += line_length + 1;
     }
 
     // if there were no vertices, or no triangles, return false. we're done here
-    if (found_vertices == 0 || found_triangles == 0) return false;
+    if (found_vertices == 0 || found_triangles == 0) { return false; }
 
     // delete all the existing data
     if (vertices != 0x0) delete[] vertices;
@@ -276,7 +276,50 @@ bool nov_mesh::read_obj(const char* mesh_data)
     uvs = new nov_fvector2[triangles_count];
     vertex_normals = new nov_fvector3[triangles_count];
 
+    // step through again, this time for real
+    int v = 0;
+    int vt = 0;
+    int vn = 0;
+    int f = 0;
+    nov_fvector3 tmp3;
+    nov_fvector2 tmp2;
+
+    int[4] line_space_indices = { 0 };
+    char* copied_line = new char[255];
+    memory::memset((char)0, copied_line, 255);
+
+    line = (char*)mesh_data;
+    line_length = 1;
+    while (line_length >= 0)
+    {
+        line_length = find_next_byte(line + 1, '\n') + 1;
+
+        // if the line would be too short, skip to the next one
+        if (line_length < 2 || line[0] == '#') { line += line_length + 1; continue; }
+        
+        // 
+        memory::memcpy(line, copied_line, line_length);
+
+        if (line[0] == 'v' && line[1] == ' ')
+        {
+            // read a vertex
+
+        }
+        else if (line[0] == 'v' && line[1] == 't' && line[2] == ' ')
+        {
+            // read a vertex uv coord
+        }
+        else if (line[0] == 'v' && line[1] == 'n' && line[2] == ' ')
+        {
+            // read a vertex normal
+        }
+
+        line += line_length + 1;
+    }
+
     // TODO: here
+    com_1 << "found verts: " << stream::mode::DEC << found_vertices << stream::endl;
+    com_1 << "found tris: " << stream::mode::DEC << found_triangles << stream::endl;
 
     return false;
 }
