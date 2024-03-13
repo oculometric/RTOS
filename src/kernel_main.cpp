@@ -91,7 +91,10 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
 
     gui::nov_panel_meshrender* pan_cube = new gui::nov_panel_meshrender();
     pan_cube->line_colour = nov_colour_indigo;
-    pan_cube->rotation = nov_fvector3{ 33,0, 45 };
+    // pan_cube->camera_rotation = nov_fvector3{ 33,0, 45 };
+    pan_cube->camera_up_direction = nov_fvector3{0,0,1};
+    pan_cube->camera_look_direction = norm(nov_fvector3{ 0,1,-1 });
+    pan_cube->camera_position = nov_fvector3{ 0.0f, -3.0f, 4.0f };
     pan_cube->mesh = new graphics::nov_mesh(_binary_res_teapot_binmesh_start);
 
     gui::nov_panel_star* pan_star = new gui::nov_panel_star();
@@ -147,6 +150,8 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     {
         man.draw_root();
         memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+        // pan_cube->camera_rotation.z += 0.01f;
+
         i++;
         if (i == 100)
         {
@@ -155,7 +160,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
             if (monkey)
             {
                 pan_cube->line_colour = nov_colour_indigo;
-                pan_cube->mesh->read_obj(_binary_res_teapot_binmesh_start);
+                pan_cube->mesh->read_obj(_binary_res_axes_binmesh_start);
             }
             else
             {

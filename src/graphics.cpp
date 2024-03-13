@@ -331,7 +331,7 @@ bool nov_mesh::read_obj(const char* mesh_data)
     }
 
     // pump the last bit of backing data, FIXME: disabled for now since most of the data isn't needed 
-    //update_mesh_data();
+    update_mesh_data();
 
     // we're done
     return true;

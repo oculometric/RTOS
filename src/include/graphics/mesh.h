@@ -30,7 +30,6 @@ public:
     // stores normals for vertices, used for surface smoothing. length should be 3 times number of triangles
     vector::nov_fvector3* vertex_normals = 0x0;
 
-private:
     // stores normal data for each triangle, length should be equal to number of triangles. never directly touch this
     vector::nov_fvector3* normals = 0x0;
     // stores the 1->2 and 1->3 vectors for each triangle, length should be 2 times number of triangles. never directly touch this

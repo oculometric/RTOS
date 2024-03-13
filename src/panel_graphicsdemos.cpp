@@ -12,16 +12,34 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
     if (!meshrender_panel->mesh) return;
 
     // TODO: 3D rotation
-    const vector::nov_fvector3 camera_right{ 0,1,0 };
-    const vector::nov_fvector3 camera_up{ 0,0,1 };
-    const vector::nov_fvector3 camera_back{ 1,0,0 };
+    const vector::nov_fvector3 camera_right = meshrender_panel->camera_look_direction % -meshrender_panel->camera_up_direction;
+    const vector::nov_fvector3 camera_up = meshrender_panel->camera_look_direction % camera_right;
+    const vector::nov_fvector3 camera_back = -meshrender_panel->camera_look_direction;
 
-    const vector::nov_fvector3 camera_position{4.5f,0.0f,1.0f};
+    const vector::nov_fvector3 camera_position = meshrender_panel->camera_position;
 
     const matrix::nov_fmatrix4 world_to_camera{ camera_right.x, camera_right.y, camera_right.z, -(camera_right ^ camera_position),
                                                 -camera_up.x,   -camera_up.y,   -camera_up.z,    (camera_up ^ camera_position),
                                                 camera_back.x,  camera_back.y,  camera_back.z,  -(camera_back ^ camera_position),
                                                 0.0f,           0.0f,           0.0f,           1.0f                                };
+
+    // const vector::nov_fvector3 euler = meshrender_panel->camera_rotation;
+    // const matrix::nov_fmatrix4 rotate_camera_x{ 1.0f, 0.0f,          0.0f,           0.0f,
+    //                                             0.0f, cosf(euler.x), -sinf(euler.x), 0.0f,
+    //                                             0.0f, sinf(euler.x), cosf(euler.x),  0.0f,
+    //                                             0.0f, 0.0f,          0.0f,           1.0f  };
+    
+    // const matrix::nov_fmatrix4 rotate_camera_y{ cosf(euler.y),  0.0f, sinf(euler.y),  0.0f,
+    //                                             0.0f,           1.0f, 0.0f,           0.0f,
+    //                                             -sinf(euler.y), 0.0f, cosf(euler.x),  0.0f,
+    //                                             0.0f,           0.0f, 0.0f,           1.0f  };
+
+    // const matrix::nov_fmatrix4 rotate_camera_z{ cosf(euler.z),  -sinf(euler.z), 0.0f,  0.0f,
+    //                                             sinf(euler.z),  cosf(euler.z),  0.0f,  0.0f,
+    //                                             0.0f,           0.0f,           1.0f,  0.0f,
+    //                                             0.0f,           0.0f,           0.0f,  1.0f  };
+
+    // const matrix::nov_fmatrix4 rotate_camera = rotate_camera_x * rotate_camera_y * rotate_camera_z;
 
     const float far_clip = 100.0f;
     const float near_clip = 0.001f;
@@ -33,7 +51,7 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
                                                0.0f,    s,          0.0f,       0.0f,
                                                0.0f,    0.0f,       clip_rat,   clip_rat * near_clip,
                                                0.0f,    0.0f,       -1.0f,      0.0f                    };
-    const matrix::nov_fmatrix4 world_to_view = camera_to_view * world_to_camera;
+    const matrix::nov_fmatrix4 world_to_view = camera_to_view /* * ~rotate_camera*/ * world_to_camera;
     
     vector::nov_fvector4 v_a_view;
     vector::nov_fvector4 v_b_view;
@@ -53,6 +71,7 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
 
     for (uint32_t i = 0; i < (meshrender_panel->mesh->count_triangles() * 3) - 2; i++)
     {
+        if ((meshrender_panel->mesh->normals[i/3] ^ camera_back) < 0.0f) { i += 2; continue; }
         if (i % 3 <= 1)
         {
             v_a_view = transformed_vertex_buffer[meshrender_panel->mesh->triangles[i]];
@@ -63,6 +82,8 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
             v_a_view = transformed_vertex_buffer[meshrender_panel->mesh->triangles[i]];
             v_b_view = transformed_vertex_buffer[meshrender_panel->mesh->triangles[i-2]];
         }
+
+        if (v_a_view.z < 0.0f || v_b_view.z < 0.0f) continue;
 
         v_a_to_v_b = v_b_view - v_a_view;
         gradient = v_a_to_v_b.y / v_a_to_v_b.x;

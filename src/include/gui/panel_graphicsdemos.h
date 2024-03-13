@@ -13,7 +13,9 @@ private:
 public:
     nov_colour line_colour = nov_colour_gold;
     graphics::nov_mesh* mesh;
-    nov_fvector3 rotation;
+    nov_fvector3 camera_look_direction;
+    nov_fvector3 camera_up_direction;
+    nov_fvector3 camera_position;
 
     inline nov_panel_meshrender()
     {
