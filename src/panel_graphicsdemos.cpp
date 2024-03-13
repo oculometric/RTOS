@@ -12,16 +12,40 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
     if (!meshrender_panel->mesh) return;
 
     // TODO: 3D rotation
-    const vector::nov_fvector3 camera_right = meshrender_panel->camera_look_direction % -meshrender_panel->camera_up_direction;
-    const vector::nov_fvector3 camera_up = meshrender_panel->camera_look_direction % camera_right;
+    
+    // this represents the x-axis vector of the camera
+    const vector::nov_fvector3 camera_right = meshrender_panel->camera_look_direction % meshrender_panel->camera_up_direction;
+    com_1 << "right: " << camera_right << stream::endl;
+    // this represents the y-axis vector of the camera
+    const vector::nov_fvector3 camera_up = camera_right % meshrender_panel->camera_look_direction;
+    com_1 << "up: " << camera_up << stream::endl;
+    // this represents the z-axis vector of the camera
     const vector::nov_fvector3 camera_back = -meshrender_panel->camera_look_direction;
+    com_1 << "back: " << camera_back << stream::endl;
 
+    // this represents the offset of the camera from the origin
     const vector::nov_fvector3 camera_position = meshrender_panel->camera_position;
+    com_1 << "position: " << camera_position << stream::endl;
+    // FIXME: this ugh
+    // the world to camera transform is the inverse of the transform that takes the camera from its 'origin' state to its world position
+    // so a matrix which represents the camera's transformation (position, rotation), the inverse needs to be applied to world-space stuff
+    // to transform it into camera-space stuff
 
-    const matrix::nov_fmatrix4 world_to_camera{ camera_right.x, camera_right.y, camera_right.z, -(camera_right ^ camera_position),
-                                                -camera_up.x,   -camera_up.y,   -camera_up.z,    (camera_up ^ camera_position),
-                                                camera_back.x,  camera_back.y,  camera_back.z,  -(camera_back ^ camera_position),
-                                                0.0f,           0.0f,           0.0f,           1.0f                                };
+    // these two matrices represent the transformation of a point at the origin to where the camera is located/rotated in the world
+    // therefore their inverses represent the transformation of a point located relative to the camera
+    // i.e. multiplying by the inverse represents transforming the camera, and everything in the scene, such
+    // that the camera is located at the origin and is facing along its normal axes (i.e. no rotation or offset)
+    const matrix::nov_fmatrix4 camera_position_mat{ 1.0f, 0.0f, 0.0f, camera_position.x,
+                                                    0.0f, 1.0f, 0.0f, camera_position.y,
+                                                    0.0f, 0.0f, 1.0f, camera_position.z,
+                                                    0.0f, 0.0f, 0.0f, 1.0f,              };
+    
+    const matrix::nov_fmatrix4 camera_rotation_mat{ camera_right.x, -camera_right.y, camera_right.z, 0.0f,
+                                                    -camera_up.x,   camera_up.y,     -camera_up.z,   0.0f,
+                                                    camera_back.x,  -camera_back.y,  camera_back.z,  0.0f,
+                                                    0.0f,           0.0f,            0.0f,           1.0f  };
+
+    const matrix::nov_fmatrix4 world_to_camera = ~(camera_rotation_mat * camera_position_mat);
 
     // const vector::nov_fvector3 euler = meshrender_panel->camera_rotation;
     // const matrix::nov_fmatrix4 rotate_camera_x{ 1.0f, 0.0f,          0.0f,           0.0f,
@@ -51,7 +75,7 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
                                                0.0f,    s,          0.0f,       0.0f,
                                                0.0f,    0.0f,       clip_rat,   clip_rat * near_clip,
                                                0.0f,    0.0f,       -1.0f,      0.0f                    };
-    const matrix::nov_fmatrix4 world_to_view = camera_to_view /* * ~rotate_camera*/ * world_to_camera;
+    const matrix::nov_fmatrix4 world_to_view = camera_to_view * world_to_camera;
     
     vector::nov_fvector4 v_a_view;
     vector::nov_fvector4 v_b_view;

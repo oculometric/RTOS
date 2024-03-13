@@ -93,9 +93,9 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     pan_cube->line_colour = nov_colour_indigo;
     // pan_cube->camera_rotation = nov_fvector3{ 33,0, 45 };
     pan_cube->camera_up_direction = nov_fvector3{0,0,1};
-    pan_cube->camera_look_direction = norm(nov_fvector3{ 0,1,-1 });
-    pan_cube->camera_position = nov_fvector3{ 0.0f, -3.0f, 4.0f };
-    pan_cube->mesh = new graphics::nov_mesh(_binary_res_teapot_binmesh_start);
+    pan_cube->camera_look_direction = norm(nov_fvector3{ 0,-1,-1 });
+    pan_cube->camera_position = nov_fvector3{ 1.0f, 5.0f, 5.0f };
+    pan_cube->mesh = new graphics::nov_mesh(_binary_res_axes_binmesh_start);
 
     gui::nov_panel_star* pan_star = new gui::nov_panel_star();
     pan_star->background = nov_colour_nearblack;
@@ -114,62 +114,39 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     man.draw_root();
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
-    com_1 << "starting speedtest" << endl;
-    bool x_increasing = false;
-    bool y_increasing = false;
-    for (uint32_t tmp = 0; tmp < 800; tmp++)
-    {
-        pan_star->foreground = nov_colour{ (uint8_t)(pan_star->uv.u * 255),(uint8_t)((1 - pan_star->uv.v) * 255), 21 };
-        pan_star->uv.u += x_increasing ? 0.005f : -0.005f;
-        pan_star->uv.v += y_increasing ? 0.02f : -0.02f;
-        if (pan_star->uv.u <= 0.005f) x_increasing = true;
-        if (pan_star->uv.u >= 1.0f) x_increasing = false;
-        if (pan_star->uv.v <= 0.02f) y_increasing = true;
-        if (pan_star->uv.v >= 1.0f) y_increasing = false;
 
-        man.draw_specific(root->child_b);
-        memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-    }
-    com_1 << "speedtest done" << endl;
+    // man.draw_root();
+    // memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
-    pan_star->foreground = nov_colour_gold;
-    pan_star->uv = nov_fvector2{ 0.9, 0.9 };
-    man.draw_root();
-    memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+    // pan_cube->line_colour = nov_colour_carmine;
+    // pan_cube->mesh->read_obj(_binary_res_suzanne_binmesh_start);
 
+    // int i = 0;
+    // bool monkey = true;
+    // while(true)
+    // {
+    //     man.draw_root();
+    //     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+    //     // pan_cube->camera_rotation.z += 0.01f;
 
-    man.draw_root();
-    memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-
-    pan_cube->line_colour = nov_colour_carmine;
-    pan_cube->mesh->read_obj(_binary_res_suzanne_binmesh_start);
-
-    int i = 0;
-    bool monkey = true;
-    while(true)
-    {
-        man.draw_root();
-        memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-        // pan_cube->camera_rotation.z += 0.01f;
-
-        i++;
-        if (i == 100)
-        {
-            com_1 << "100 frames drawn" << endl;
-            i = 0;
-            if (monkey)
-            {
-                pan_cube->line_colour = nov_colour_indigo;
-                pan_cube->mesh->read_obj(_binary_res_axes_binmesh_start);
-            }
-            else
-            {
-                pan_cube->line_colour = nov_colour_carmine;
-                pan_cube->mesh->read_obj(_binary_res_suzanne_binmesh_start);
-            }
-            monkey = !monkey;
-        }
-    }
+    //     i++;
+    //     if (i == 100)
+    //     {
+    //         com_1 << "100 frames drawn" << endl;
+    //         i = 0;
+    //         if (monkey)
+    //         {
+    //             pan_cube->line_colour = nov_colour_indigo;
+    //             pan_cube->mesh->read_obj(_binary_res_axes_binmesh_start);
+    //         }
+    //         else
+    //         {
+    //             pan_cube->line_colour = nov_colour_carmine;
+    //             pan_cube->mesh->read_obj(_binary_res_suzanne_binmesh_start);
+    //         }
+    //         monkey = !monkey;
+    //     }
+    // }
 
     com_1 << "all done." << endl;
     com_1.flush();

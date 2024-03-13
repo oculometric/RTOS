@@ -67,7 +67,7 @@ build: $(BL_FILES_OUT) $(CC_FILES_OUT) $(AS_FILES_OUT) $(EMBED_FILES_OUT)
 	@stat -c%s $(BOOT_OUT)
 
 emulate:
-	qemu-system-x86_64 -drive file=$(BOOT_OUT),format=raw,index=0,media=disk -m 128M -monitor stdio -serial file:log/output.log
+	qemu-system-x86_64 -drive file=$(BOOT_OUT),format=raw,index=0,media=disk -m 32M -monitor stdio -serial file:log/output.log
 
 disassemble:
 	objdump -m i8086 -M intel -b binary -D $(BOOT_OUT)
