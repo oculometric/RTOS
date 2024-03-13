@@ -90,7 +90,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
     gui::nov_panel_meshrender* pan_cube = new gui::nov_panel_meshrender();
-    pan_cube->line_colour = nov_colour{ 252,100,53 };
+    pan_cube->line_colour = nov_colour_indigo;
     pan_cube->rotation = nov_fvector3{ 33,0, 45 };
     pan_cube->mesh = new graphics::nov_mesh(_binary_res_teapot_binmesh_start);
 
@@ -138,6 +138,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     man.draw_root();
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
+    pan_cube->line_colour = nov_colour_carmine;
     pan_cube->mesh->read_obj(_binary_res_suzanne_binmesh_start);
 
     int i = 0;
@@ -153,13 +154,14 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
             i = 0;
             if (monkey)
             {
+                pan_cube->line_colour = nov_colour_indigo;
                 pan_cube->mesh->read_obj(_binary_res_teapot_binmesh_start);
             }
             else
             {
+                pan_cube->line_colour = nov_colour_carmine;
                 pan_cube->mesh->read_obj(_binary_res_suzanne_binmesh_start);
             }
-            // memory::mconsolidate();
             monkey = !monkey;
         }
     }

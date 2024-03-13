@@ -11,14 +11,15 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
     
     if (!meshrender_panel->mesh) return;
 
-    const vector::nov_fvector3 camera_right{ 1,0,0 };
-    const vector::nov_fvector3 camera_up{ 0,1,0 };
-    const vector::nov_fvector3 camera_back{ 0,0,1 };
+    // TODO: 3D rotation
+    const vector::nov_fvector3 camera_right{ 0,1,0 };
+    const vector::nov_fvector3 camera_up{ 0,0,1 };
+    const vector::nov_fvector3 camera_back{ 1,0,0 };
 
-    const vector::nov_fvector3 camera_position{0.5f,1.2f,5.5f};
+    const vector::nov_fvector3 camera_position{4.5f,0.0f,1.0f};
 
     const matrix::nov_fmatrix4 world_to_camera{ camera_right.x, camera_right.y, camera_right.z, -(camera_right ^ camera_position),
-                                                camera_up.x,    camera_up.y,    camera_up.z,    (camera_up ^ camera_position),
+                                                -camera_up.x,   -camera_up.y,   -camera_up.z,    (camera_up ^ camera_position),
                                                 camera_back.x,  camera_back.y,  camera_back.z,  -(camera_back ^ camera_position),
                                                 0.0f,           0.0f,           0.0f,           1.0f                                };
 
@@ -50,11 +51,18 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
         transformed_vertex_buffer[i] /= transformed_vertex_buffer[i].w;
     }
 
-    for (uint32_t i = 0; i < (meshrender_panel->mesh->count_triangles() * 3) - 1; i++)
+    for (uint32_t i = 0; i < (meshrender_panel->mesh->count_triangles() * 3) - 2; i++)
     {
-        // TODO: swap in last vertex to save on recomputation
-        v_a_view = transformed_vertex_buffer[meshrender_panel->mesh->triangles[i]];
-        v_b_view = transformed_vertex_buffer[meshrender_panel->mesh->triangles[i+1]];
+        if (i % 3 <= 1)
+        {
+            v_a_view = transformed_vertex_buffer[meshrender_panel->mesh->triangles[i]];
+            v_b_view = transformed_vertex_buffer[meshrender_panel->mesh->triangles[i+1]];
+        }
+        else
+        {
+            v_a_view = transformed_vertex_buffer[meshrender_panel->mesh->triangles[i]];
+            v_b_view = transformed_vertex_buffer[meshrender_panel->mesh->triangles[i-2]];
+        }
 
         v_a_to_v_b = v_b_view - v_a_view;
         gradient = v_a_to_v_b.y / v_a_to_v_b.x;
