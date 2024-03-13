@@ -18,7 +18,6 @@ void operator delete(void* ptr)
     nov::memory::mfree(ptr);
 }
 
-// FIXME: i literally have no idea what im doing beyon dthis point. its 1:30. i t hink these jsould be calling destructors o rsomething, and maube error checking too
 void operator delete[](void* ptr)
 {
     nov::memory::mfree(ptr);
@@ -170,9 +169,7 @@ void mview()
 
         block_size = (uint32_t)next_block-(uint32_t)current_block;
         com_1 << "block at     " << stream::mode::HEX << (uint32_t)current_block << stream::endl;
-        com_1 << "   size w/h  " << stream::mode::DEC << block_size << '/' << stream::mode::HEX << block_size << stream::endl;
         com_1 << "   size wo/h " << stream::mode::DEC << block_size-sizeof(nov_memory_frame) << '/' << stream::mode::HEX << (block_size-sizeof(nov_memory_frame)) << stream::endl;
-        com_1 << "   next      " << stream::mode::HEX << (uint32_t)current_block->next << stream::endl;
         com_1 << "   is free?  " << stream::mode::DEC << current_block->is_free << stream::endl;
     
         current_block = next_block;

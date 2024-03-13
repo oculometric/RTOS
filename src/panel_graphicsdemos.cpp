@@ -8,23 +8,14 @@ using namespace nov;
 void gui::nov_panel_meshrender::_draw draw_function_stub
 {
     nov_panel_meshrender* meshrender_panel = (nov_panel_meshrender*)panel;
-
-    // define vertex points
-    // const vector::nov_fvector4 t_0{ -cuberender_panel->radius.x, -cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
-    // const vector::nov_fvector4 t_1{ cuberender_panel->radius.x, -cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
-    // const vector::nov_fvector4 t_2{ cuberender_panel->radius.x, cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
-    // const vector::nov_fvector4 t_3{ -cuberender_panel->radius.x, cuberender_panel->radius.y, cuberender_panel->radius.z, 1.0f };
-
-    // const vector::nov_fvector4 b_0{ t_0.x, t_0.y, -t_0.z, 1.0f };
-    // const vector::nov_fvector4 b_1{ t_1.x, t_1.y, -t_1.z, 1.0f };
-    // const vector::nov_fvector4 b_2{ t_2.x, t_2.y, -t_2.z, 1.0f };
-    // const vector::nov_fvector4 b_3{ t_3.x, t_3.y, -t_3.z, 1.0f };
+    
+    if (!meshrender_panel->mesh) return;
 
     const vector::nov_fvector3 camera_right{ 1,0,0 };
     const vector::nov_fvector3 camera_up{ 0,1,0 };
     const vector::nov_fvector3 camera_back{ 0,0,1 };
 
-    const vector::nov_fvector3 camera_position{0.5f,1.2f,3.5f};
+    const vector::nov_fvector3 camera_position{0.5f,1.2f,5.5f};
 
     const matrix::nov_fmatrix4 world_to_camera{ camera_right.x, camera_right.y, camera_right.z, -(camera_right ^ camera_position),
                                                 camera_up.x,    camera_up.y,    camera_up.z,    (camera_up ^ camera_position),
@@ -43,27 +34,63 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
                                                0.0f,    0.0f,       -1.0f,      0.0f                    };
     const matrix::nov_fmatrix4 world_to_view = camera_to_view * world_to_camera;
     
-    // const vector::nov_fvector4* path[16] = 
-    // {
-    //     &t_0, &t_1, &t_2, &t_3, &t_0, &b_0, &b_1, &b_2, &b_3, &b_0, &b_1, &t_1, &t_2, &b_2, &b_3, &t_3
-    // };
-    
-    com_1 << world_to_camera << stream::endl;
-    com_1 << camera_to_view << stream::endl;
-    com_1 << world_to_view << stream::endl;
-    
     vector::nov_fvector4 v_a_view;
     vector::nov_fvector4 v_b_view;
+    vector::nov_fvector4 v_a_to_v_b;
+    float gradient;
     vector::nov_uvector2 v_a_window;
     vector::nov_uvector2 v_b_window;
+
+    // transform all vertices into view space (NDCs)
+    nov_fvector4* transformed_vertex_buffer = new nov_fvector4[meshrender_panel->mesh->count_vertices()];
+
+    for (uint32_t i = 0; i < meshrender_panel->mesh->count_vertices(); i++)
+    {
+        transformed_vertex_buffer[i] = world_to_view * nov_fvector4{ meshrender_panel->mesh->vertices[i] };
+        transformed_vertex_buffer[i] /= transformed_vertex_buffer[i].w;
+    }
 
     for (uint32_t i = 0; i < (meshrender_panel->mesh->count_triangles() * 3) - 1; i++)
     {
         // TODO: swap in last vertex to save on recomputation
-        v_a_view = world_to_view * nov_fvector4{ meshrender_panel->mesh->vertices[meshrender_panel->mesh->triangles[i]] };
-        v_a_view /= v_a_view.w;
-        v_b_view = world_to_view * nov_fvector4{ meshrender_panel->mesh->vertices[meshrender_panel->mesh->triangles[i+1]] };
-        v_b_view /= v_b_view.w;
+        v_a_view = transformed_vertex_buffer[meshrender_panel->mesh->triangles[i]];
+        v_b_view = transformed_vertex_buffer[meshrender_panel->mesh->triangles[i+1]];
+
+        v_a_to_v_b = v_b_view - v_a_view;
+        gradient = v_a_to_v_b.y / v_a_to_v_b.x;
+
+        // if the line is completely off the screen, ignore it
+        if ((v_a_view.x > 1.0f && v_b_view.x > 1.0f)
+         || (v_a_view.x < -1.0f && v_b_view.x < -1.0f)
+         || (v_a_view.y > 1.0f && v_b_view.y > 1.0f)
+         || (v_a_view.y < -1.0f && v_b_view.y < -1.0f)) continue;
+
+        // clip lines to the screen box
+        if (abs(v_a_view.x) >= 1.0f)
+        {
+            float scalar = (abs(v_a_view.x) - 1.0f) * sign(v_a_view.x);
+            v_a_view.x -= scalar;
+            v_a_view.y -= scalar * gradient;
+        }
+        if (abs(v_a_view.y) >= 1.0f)
+        {
+            float scalar = (abs(v_a_view.y) - 1.0f) * sign(v_a_view.y);
+            v_a_view.y -= scalar;
+            v_a_view.x -= scalar / gradient;
+        }
+
+        if (abs(v_b_view.x) >= 1.0f)
+        {
+            float scalar = (abs(v_b_view.x) - 1.0f) * sign(v_b_view.x);
+            v_b_view.x -= scalar;
+            v_b_view.y -= scalar * gradient;
+        }
+        if (abs(v_b_view.y) >= 1.0f)
+        {
+            float scalar = (abs(v_b_view.y) - 1.0f) * sign(v_b_view.y);
+            v_b_view.y -= scalar;
+            v_b_view.x -= scalar / gradient;
+        }
 
         v_a_window = nov_uvector2
         { 
@@ -78,8 +105,9 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
         }; v_b_window += frame.origin;
 
         graphics::draw_line(v_a_window, v_b_window, meshrender_panel->line_colour, framebuffer);
-
     }
+
+    delete[] transformed_vertex_buffer;
 
     com_1.flush();
 

@@ -57,6 +57,8 @@ public:
 
     nov_mesh();
     nov_mesh(const char* obj_data);
+
+    ~nov_mesh();
 };
 
 }

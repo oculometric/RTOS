@@ -3,13 +3,11 @@
 #include <memory.h>
 #include <gui.h>
 #include <panic.h>
-#include <3d_demo_objs.h>
+#include <3d_demo_meshes.h>
 #include <array.h>
 #include <string.h>
 
 // TODO: string splitting
-// TODO: fix deconstruction in delete function
-// TODO: 3dmodels
 // TODO: textbox panel
 // TODO: interrupts
 // TODO: keyboard
@@ -92,10 +90,9 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
     gui::nov_panel_meshrender* pan_cube = new gui::nov_panel_meshrender();
-    pan_cube->line_colour = nov_colour{ 128,64,32 };
+    pan_cube->line_colour = nov_colour{ 252,100,53 };
     pan_cube->rotation = nov_fvector3{ 33,0, 45 };
-    nov_string demo = "helo 123412341234 123412341234 rararar wooo!";
-    pan_cube->mesh = new graphics::nov_mesh(teapot_obj);
+    pan_cube->mesh = new graphics::nov_mesh(_binary_res_teapot_binmesh_start);
 
     gui::nov_panel_star* pan_star = new gui::nov_panel_star();
     pan_star->background = nov_colour_nearblack;
@@ -137,23 +134,35 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     man.draw_root();
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
-    memory::mview();
 
-    nov_string str("Lorem ipsum dolor sit amet!");
-    com_1 << str << ' ' << mode::DEC << str.get_length() << endl;
-    nov_string substr = str.substring(3);
-    com_1 << substr.get_length() << ' ' << substr << endl;
+    man.draw_root();
+    memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
-    nov_array<int> arr;
-    arr.push(33);
-    arr.push(44);
-    arr.push(55);
+    pan_cube->mesh->read_obj(_binary_res_suzanne_binmesh_start);
 
-    com_1 << mode::DEC << arr[0] << ' ' << arr[1] << ' ' << arr[2] << endl;
-    memory::mview();
-    arr.~nov_array();
-    memory::mview();
-
+    int i = 0;
+    bool monkey = true;
+    while(true)
+    {
+        man.draw_root();
+        memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+        i++;
+        if (i == 100)
+        {
+            com_1 << "100 frames drawn" << endl;
+            i = 0;
+            if (monkey)
+            {
+                pan_cube->mesh->read_obj(_binary_res_teapot_binmesh_start);
+            }
+            else
+            {
+                pan_cube->mesh->read_obj(_binary_res_suzanne_binmesh_start);
+            }
+            // memory::mconsolidate();
+            monkey = !monkey;
+        }
+    }
 
     com_1 << "all done." << endl;
     com_1.flush();

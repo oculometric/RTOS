@@ -15,6 +15,9 @@ inline T min(T a, T b, T c) { if (a < b && a < c) return a; if (b < a && b < c) 
 template <typename T>
 inline T abs(T a) { return a < 0 ? -a : a; }
 
+template <typename T>
+inline T sign(T a) { return a > 0 ? 1 : -1; }
+
 inline float sqrt(float number)
 {
     float f;

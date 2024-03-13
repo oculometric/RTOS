@@ -42,7 +42,7 @@ public:
 
     int32_t find(char c, uint32_t start = 0) const;
     nov_string substring(uint32_t start, uint32_t end = -1) const;
-    void split (nov_array& out_array, char c) const; // TODO: string splitting
+    void split (nov_array<nov_string>& out_array, char c) const; // TODO: string splitting
 
     ~nov_string();
 };

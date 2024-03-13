@@ -1,5 +1,7 @@
 #include <graphics.h>
 #include <string.h>
+#include <serial.h>
+#include <binary_mesh.h>
 
 namespace nov
 {
@@ -90,8 +92,19 @@ void draw_line(const nov_uvector2& start, const nov_uvector2& end, const nov_col
         {
             set_pixel(get_offset(current, framebuffer.size), col, framebuffer);
             current.v++;
+            if (current.v > framebuffer.size.v) break;
         }
-    } else if (m >= 1.0f)
+    }
+    else if (maximum.v == minimum.v) 
+    {
+        while (current.u < maximum.u)
+        {
+            set_pixel(get_offset(current, framebuffer.size), col, framebuffer);
+            current.u++;
+            if (current.u > framebuffer.size.u) break;
+        }
+    }
+    else if (m >= 1.0f)
     {
         while (current.u < maximum.u)
         {
@@ -225,103 +238,103 @@ void nov_mesh::update_mesh_data()
  * **/
 bool nov_mesh::read_obj(const char* mesh_data)
 {
-    // keep count of how many vertices, etc we need to make space for
-    uint16_t found_vertices = 0;
-    uint16_t found_triangles = 0;
-    uint16_t found_uvs = 0;
-    uint16_t found_vnorms = 0;
-
-    // step through the data line by line and count how many vertex, face, uv and vnormal lines there are
-    char* line = (char*)mesh_data;
-    uint32_t line_length = 1;
-    while (line_length >= 0)
-    {
-        line_length = find_next_byte(line + 1, '\n') + 1;
-
-        if (line_length < 2 || line[0] == '#') { }
-        else if (line[0] == 'v' && line[1] == ' ') found_vertices++;
-        else if (line[0] == 'f' && line[1] == ' ') found_triangles++;
-        else if (line[0] == 'v' && line[1] == 't' && line[2] == ' ') found_uvs++;
-        else if (line[0] == 'v' && line[1] == 'n' && line[2] == ' ') found_vnorms++;
-
-        line += line_length + 1;
-    }
-
-    // if there were no vertices, or no triangles, return false. we're done here
-    if (found_vertices == 0 || found_triangles == 0) { return false; }
+    // lay a header over the start of the mesh data like a stencil
+    file::nov_binary_mesh_header* header;
+    header = (file::nov_binary_mesh_header*)mesh_data;
+    
+    // if the header is invalid, or there are no valid verts or tris, give up
+    if (header->checksum != NOV_BINARY_MESH_HEADER_CHECKSUM 
+     || header->vertex_buffer_length == 0 
+     || header->triangle_buffer_length == 0) return false;
 
     // delete all the existing data
-    if (vertices != 0x0) delete[] vertices;
-    if (triangles != 0x0) delete[] triangles;
-    if (materials != 0x0) delete[] materials;
-    if (material_indices != 0x0) delete[] material_indices;
-    if (uvs != 0x0) delete[] uvs;
-    if (vertex_normals != 0x0) delete[] vertex_normals;
+    if (vertices) delete[] vertices; vertices = 0x0;
+    if (triangles) delete[] triangles; triangles = 0x0;
+    if (materials) delete[] materials; materials = 0x0;
+    if (material_indices) delete[] material_indices; material_indices = 0x0;
+    if (uvs) delete[] uvs; uvs = 0x0;
+    if (vertex_normals) delete[] vertex_normals; vertex_normals = 0x0;
     // and the other data
-    if (normals != 0x0) delete[] normals;
-    if (edge_vectors != 0x0) delete[] edge_vectors;
-    if (edge_dots != 0x0) delete[] edge_dots;
-    if (inv_denoms != 0x0) delete[] inv_denoms;
+    if (normals) delete[] normals; normals = 0x0;
+    if (edge_vectors) delete[] edge_vectors; edge_vectors = 0x0;
+    if (edge_dots) delete[] edge_dots; edge_dots = 0x0;
+    if (inv_denoms) delete[] inv_denoms; inv_denoms = 0x0;
 
-    vertices_count = found_vertices;
+    // reallocate all the buffers
+    vertices_count = header->vertex_buffer_length;
     vertices = new nov_fvector3[vertices_count];
+    com_1 << stream::mode::DEC;
+    com_1 << "allocated space for " << vertices_count << " verts (" << (vertices_count * sizeof(nov_fvector3)) << ')' << stream::endl;
     vertices_capacity = vertices_count;
 
-    triangles_count = found_triangles*3;
+    triangles_count = header->triangle_buffer_length*3;
     triangles = new uint16_t[triangles_count];
+    com_1 << "allocated space for " << triangles_count << " tris (" << (triangles_count * sizeof(uint16_t)) << ')' << stream::endl;
     triangles_capacity = triangles_count;
 
-    material_indices = new uint16_t[found_triangles];
+    material_indices = new uint16_t[header->triangle_buffer_length];
+    com_1 << "allocated space for " << header->triangle_buffer_length << " mats (" << (header->triangle_buffer_length * sizeof(uint16_t)) << ')' << stream::endl;
 
     uvs = new nov_fvector2[triangles_count];
+    com_1 << "allocated space for " << triangles_count << " uvs (" << (triangles_count * sizeof(nov_fvector2)) << ')' << stream::endl;
     vertex_normals = new nov_fvector3[triangles_count];
+    com_1 << "allocated space for " << triangles_count << " norms (" << (triangles_count * sizeof(nov_fvector3)) << ')' << stream::endl;
 
-    // step through again, this time for real
-    int v = 0;
-    int vt = 0;
-    int vn = 0;
-    int f = 0;
-    nov_fvector3 tmp3;
-    nov_fvector2 tmp2;
+    // TODO: materials?
 
-    int[4] line_space_indices = { 0 };
-    char* copied_line = new char[255];
-    memory::memset((char)0, copied_line, 255);
-
-    line = (char*)mesh_data;
-    line_length = 1;
-    while (line_length >= 0)
+    // iterate over the vertices and read them into the mesh vertex buffer
+    file::nov_binary_mesh_vertex* verts = (file::nov_binary_mesh_vertex*)((char*)header + header->vertex_buffer_offset);
+    for (uint32_t i = 0; i < header->vertex_buffer_length; i++)
     {
-        line_length = find_next_byte(line + 1, '\n') + 1;
-
-        // if the line would be too short, skip to the next one
-        if (line_length < 2 || line[0] == '#') { line += line_length + 1; continue; }
-        
-        // 
-        memory::memcpy(line, copied_line, line_length);
-
-        if (line[0] == 'v' && line[1] == ' ')
-        {
-            // read a vertex
-
-        }
-        else if (line[0] == 'v' && line[1] == 't' && line[2] == ' ')
-        {
-            // read a vertex uv coord
-        }
-        else if (line[0] == 'v' && line[1] == 'n' && line[2] == ' ')
-        {
-            // read a vertex normal
-        }
-
-        line += line_length + 1;
+        vertices[i].x = verts[i].x;
+        vertices[i].y = verts[i].y;
+        vertices[i].z = verts[i].z;
     }
 
-    // TODO: here
-    com_1 << "found verts: " << stream::mode::DEC << found_vertices << stream::endl;
-    com_1 << "found tris: " << stream::mode::DEC << found_triangles << stream::endl;
+    // iterate over triangles and read them into the triangle buffer, and also the uvs at the same time
+    file::nov_binary_mesh_triangle* tris = (file::nov_binary_mesh_triangle*)((char*)header + header->triangle_buffer_offset);
+    file::nov_binary_mesh_normal* norms = (file::nov_binary_mesh_normal*)((char*)header + header->normal_buffer_offset);
+    file::nov_binary_mesh_uv* coords = (file::nov_binary_mesh_uv*)((char*)header + header->uv_buffer_offset);
+    uint32_t i3 = 0;
+    for (uint32_t i = 0; i < header->triangle_buffer_length; i++)
+    {
+        triangles[i3] = tris[i].v0;
+        vertex_normals[i3] = ((tris[i].flags & NOV_BINARY_MESH_TRIANGLE_N0) 
+                            && (tris[i].n0 < header->normal_buffer_length))
+                            ? nov_fvector3{ norms[tris[i].n0].x, norms[tris[i].n0].y, norms[tris[i].n0].z }
+                            : nov_fvector3{ 0.0f, 0.0f, 0.0f };
+        uvs[i3] = ((tris[i].flags & NOV_BINARY_MESH_TRIANGLE_U0) 
+                 && (tris[i].u0 < header->uv_buffer_length))
+                 ? nov_fvector2{ coords[tris[i].u0].u, coords[tris[i].u0].v }
+                 : nov_fvector2{ 0.0f, 0.0f };
+        i3++;
+        triangles[i3] = tris[i].v1;
+        vertex_normals[i3] = ((tris[i].flags & NOV_BINARY_MESH_TRIANGLE_N1) 
+                            && (tris[i].n1 < header->normal_buffer_length))
+                            ? nov_fvector3{ norms[tris[i].n1].x, norms[tris[i].n1].y, norms[tris[i].n1].z }
+                            : nov_fvector3{ 0.0f, 0.0f, 0.0f };
+        uvs[i3] = ((tris[i].flags & NOV_BINARY_MESH_TRIANGLE_U1) 
+                 && (tris[i].u1 < header->uv_buffer_length))
+                 ? nov_fvector2{ coords[tris[i].u1].u, coords[tris[i].u1].v }
+                 : nov_fvector2{ 0.0f, 0.0f };
+        i3++;
+        triangles[i3] = tris[i].v2;
+        vertex_normals[i3] = ((tris[i].flags & NOV_BINARY_MESH_TRIANGLE_N2) 
+                            && (tris[i].n2 < header->normal_buffer_length))
+                            ? nov_fvector3{ norms[tris[i].n2].x, norms[tris[i].n2].y, norms[tris[i].n2].z }
+                            : nov_fvector3{ 0.0f, 0.0f, 0.0f };
+        uvs[i3] = ((tris[i].flags & NOV_BINARY_MESH_TRIANGLE_U2) 
+                 && (tris[i].u2 < header->uv_buffer_length))
+                 ? nov_fvector2{ coords[tris[i].u2].u, coords[tris[i].u2].v }
+                 : nov_fvector2{ 0.0f, 0.0f };
+        i3++;
+    }
 
-    return false;
+    // pump the last bit of backing data, FIXME: disabled for now since most of the data isn't needed 
+    //update_mesh_data();
+
+    // we're done
+    return true;
 }
 
 uint16_t nov_mesh::count_vertices() { return vertices_count; }
@@ -329,6 +342,20 @@ uint16_t nov_mesh::count_triangles() { return triangles_count / 3; }
 
 nov_mesh::nov_mesh() { }
 nov_mesh::nov_mesh(const char* obj_data) { read_obj(obj_data); }
+
+nov_mesh::~nov_mesh()
+{
+    if (vertices) delete[] vertices; vertices = 0x0;
+    if (triangles) delete[] triangles; triangles = 0x0;
+    if (materials) delete[] materials; materials = 0x0;
+    if (material_indices) delete[] material_indices; material_indices = 0x0;
+    if (uvs) delete[] uvs; uvs = 0x0;
+    if (vertex_normals) delete[] vertex_normals; vertex_normals = 0x0;
+    if (normals) delete[] normals; normals = 0x0;
+    if (edge_vectors) delete[] edge_vectors; edge_vectors = 0x0;
+    if (edge_dots) delete[] edge_dots; edge_dots = 0x0;
+    if (inv_denoms) delete[] inv_denoms; inv_denoms = 0x0;
+}
 
 void bounds_mm_from_cr(nov_bounds& bounds)
 {
