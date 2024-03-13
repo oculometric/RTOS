@@ -91,14 +91,14 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
 
     gui::nov_panel_meshrender* pan_cube = new gui::nov_panel_meshrender();
     pan_cube->line_colour = nov_colour_indigo;
-    // pan_cube->camera_rotation = nov_fvector3{ 33,0, 45 };
     pan_cube->camera_up_direction = nov_fvector3{0,0,1};
     pan_cube->camera_look_direction = norm(nov_fvector3{ 0,-1,-1 });
-    pan_cube->camera_position = nov_fvector3{ 1.0f, 5.0f, 5.0f };
+    pan_cube->camera_position = nov_fvector3{ 1.0f, 5.0f, -5.0f };
     pan_cube->mesh = new graphics::nov_mesh(_binary_res_axes_binmesh_start);
 
     gui::nov_panel_star* pan_star = new gui::nov_panel_star();
     pan_star->background = nov_colour_nearblack;
+    pan_star->foreground = nov_colour_carmine;
 
     gui::nov_panel_textbox* pan_text = new gui::nov_panel_textbox();
     pan_text->text_colour = nov_colour_red;
@@ -113,6 +113,38 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     
     man.draw_root();
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+
+    /*
+    nov_fvector3 test = {0.1f, 0.7f, -0.8f};
+    while (true)
+    {
+        test.x -= 0.06;
+        test.y -= 0.04;
+        test.z += 0.01;
+        com_1 << test << endl;
+        com_1 << mag(test) << endl;
+        com_1 << mag_sq(test) << endl;
+        com_1 << norm(test) << endl;
+        com_1 << mag_sq(norm(test)) << endl << endl;
+    } 
+    */
+
+    float z_rot = 0.0f;
+    while (true)
+    {
+        pan_cube->camera_up_direction = nov_fvector3{0,0,1};//norm(nov_fvector3{ sinf(z_rot), cosf(z_rot),0 });
+        pan_cube->camera_look_direction = norm(nov_fvector3{cosf(z_rot),-sinf(z_rot),-1});
+        pan_cube->camera_position = nov_fvector3{-5,0,5};//pan_cube->camera_look_direction * -8.0f;
+        
+        com_1 << z_rot * 10.0f << endl;
+        com_1 << sqrt(z_rot * 10.0f) << endl;
+
+        man.draw_root();
+        memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+
+        z_rot += 0.01f;
+        if (z_rot > MATH_PI * 2.0f) z_rot = 0.0f;
+    }
 
 
     // man.draw_root();

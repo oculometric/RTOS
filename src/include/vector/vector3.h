@@ -58,7 +58,7 @@ template<typename T>
 inline T mag_sq(const nov_vector3<T>& a) { return (a.x*a.x)+(a.y*a.y)+(a.z*a.z); }
 // calcualte magnitude of a vector
 template<typename T>
-inline T mag(const nov_vector3<T>& a) { return sqrt((a.x*a.x)+(a.y*a.y)+(a.z*a.z)); }
+inline T mag(const nov_vector3<T>& a) { return sqrt(mag_sq(a)); }
 
 // calculate a normalised copy of a vector
 template<typename T>

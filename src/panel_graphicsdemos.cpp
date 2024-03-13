@@ -14,13 +14,13 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
     // TODO: 3D rotation
     
     // this represents the x-axis vector of the camera
-    const vector::nov_fvector3 camera_right = meshrender_panel->camera_look_direction % meshrender_panel->camera_up_direction;
+    const vector::nov_fvector3 camera_right = norm(norm(meshrender_panel->camera_look_direction) % norm(meshrender_panel->camera_up_direction));
     com_1 << "right: " << camera_right << stream::endl;
     // this represents the y-axis vector of the camera
-    const vector::nov_fvector3 camera_up = camera_right % meshrender_panel->camera_look_direction;
+    const vector::nov_fvector3 camera_up = camera_right % norm(meshrender_panel->camera_look_direction);
     com_1 << "up: " << camera_up << stream::endl;
     // this represents the z-axis vector of the camera
-    const vector::nov_fvector3 camera_back = -meshrender_panel->camera_look_direction;
+    const vector::nov_fvector3 camera_back = -norm(meshrender_panel->camera_look_direction);
     com_1 << "back: " << camera_back << stream::endl;
 
     // this represents the offset of the camera from the origin
@@ -95,7 +95,7 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
 
     for (uint32_t i = 0; i < (meshrender_panel->mesh->count_triangles() * 3) - 2; i++)
     {
-        if ((meshrender_panel->mesh->normals[i/3] ^ camera_back) < 0.0f) { i += 2; continue; }
+        if ((meshrender_panel->mesh->normals[i/3] ^ camera_back) < -0.5f) { i += 2; continue; }
         if (i % 3 <= 1)
         {
             v_a_view = transformed_vertex_buffer[meshrender_panel->mesh->triangles[i]];
