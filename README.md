@@ -18,7 +18,7 @@ as of writing this, i've written a reasonably okayish (if not very portable) *bo
 - [x] memory view UI panel
 - [ ] text rendering
     - [ ] text view UI panel
-- [ ] 3D wireframe rendering panel able to read 3D model files
+- [x] 3D wireframe rendering panel able to read 3D model files
 - [ ] virtual/abstract file systems
     - [ ] reading from disk, reading into virtual filesystem
     - [ ] update build system to be able to build proper filesystem images
