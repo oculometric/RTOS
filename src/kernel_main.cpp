@@ -94,7 +94,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     pan_cube->camera_up_direction = nov_fvector3{0,0,1};
     pan_cube->camera_look_direction = norm(nov_fvector3{ 0,-1,-1 });
     pan_cube->camera_position = nov_fvector3{ 1.0f, 5.0f, -5.0f };
-    pan_cube->mesh = new graphics::nov_mesh(_binary_res_axes_binmesh_start);
+    pan_cube->mesh = new graphics::nov_mesh(_res_suzanne_binmesh_start);
 
     gui::nov_panel_star* pan_star = new gui::nov_panel_star();
     pan_star->background = nov_colour_nearblack;
@@ -110,75 +110,31 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     root->child_a->child_b->child_b->panel = pan_text;
     root->child_a->child_b->child_a->panel = pan_mem;
     root->child_b->panel = pan_star;
-    
+
     man.draw_root();
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
-    /*
-    nov_fvector3 test = {0.1f, 0.7f, -0.8f};
-    while (true)
-    {
-        test.x -= 0.06;
-        test.y -= 0.04;
-        test.z += 0.01;
-        com_1 << test << endl;
-        com_1 << mag(test) << endl;
-        com_1 << mag_sq(test) << endl;
-        com_1 << norm(test) << endl;
-        com_1 << mag_sq(norm(test)) << endl << endl;
-    } 
-    */
-
+    pan_cube->camera_up_direction = nov_fvector3{0,0,1};
     float z_rot = 0.0f;
+    bool monkey = true;
     while (true)
     {
-        pan_cube->camera_up_direction = nov_fvector3{0,0,1};//norm(nov_fvector3{ sinf(z_rot), cosf(z_rot),0 });
-        pan_cube->camera_look_direction = norm(nov_fvector3{cosf(z_rot),-sinf(z_rot),0});
-        pan_cube->camera_position = nov_fvector3{-5,0,0};//pan_cube->camera_look_direction * -8.0f;
+        pan_cube->camera_look_direction = norm(nov_fvector3{-sinf(z_rot+MATH_PI),cosf(z_rot+MATH_PI),-0.3f});
+        pan_cube->camera_position = pan_cube->camera_look_direction * -6.0f;
         
-        com_1 << z_rot * 10.0f << endl;
-        com_1 << sqrt(z_rot * 10.0f) << endl;
-
-        man.draw_root();
+        man.draw_specific(root->child_a->child_a);
         memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
-        z_rot += 0.01f;
-        if (z_rot > MATH_PI * 2.0f) z_rot = 0.0f;
+        z_rot += 0.015f;
+        if (z_rot > MATH_PI * 2.0f)
+        {
+            z_rot = 0.0f;
+            if (monkey) pan_cube->mesh->read_obj(_res_teapot_binmesh_start);
+            else pan_cube->mesh->read_obj(_res_suzanne_binmesh_start);
+            monkey = !monkey;
+            man.draw_root();
+        }
     }
-
-
-    // man.draw_root();
-    // memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-
-    // pan_cube->line_colour = nov_colour_carmine;
-    // pan_cube->mesh->read_obj(_binary_res_suzanne_binmesh_start);
-
-    // int i = 0;
-    // bool monkey = true;
-    // while(true)
-    // {
-    //     man.draw_root();
-    //     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-    //     // pan_cube->camera_rotation.z += 0.01f;
-
-    //     i++;
-    //     if (i == 100)
-    //     {
-    //         com_1 << "100 frames drawn" << endl;
-    //         i = 0;
-    //         if (monkey)
-    //         {
-    //             pan_cube->line_colour = nov_colour_indigo;
-    //             pan_cube->mesh->read_obj(_binary_res_axes_binmesh_start);
-    //         }
-    //         else
-    //         {
-    //             pan_cube->line_colour = nov_colour_carmine;
-    //             pan_cube->mesh->read_obj(_binary_res_suzanne_binmesh_start);
-    //         }
-    //         monkey = !monkey;
-    //     }
-    // }
 
     com_1 << "all done." << endl;
     com_1.flush();

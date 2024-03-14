@@ -150,6 +150,37 @@ void draw_line(const nov_uvector2& start, const nov_uvector2& end, const nov_col
 }
 
 /**
+ * delete all the buffers (if they actually exist). oh boy you better not do any silly 
+ * stuff after we delete the buffers!
+ * **/
+void nov_mesh::deallocate_buffers()
+{
+    if (vertices) delete[] vertices;
+    vertices = 0x0;
+    if (triangles) delete[] triangles;
+    triangles = 0x0;
+    if (materials) delete[] materials;
+    materials = 0x0;
+    if (material_indices) delete[] material_indices;
+    material_indices = 0x0;
+    if (uvs) delete[] uvs;
+    uvs = 0x0;
+    if (vertex_normals) delete[] vertex_normals;
+    vertex_normals = 0x0;
+    // and the other data
+    if (normals) delete[] normals;
+    normals = 0x0;
+    if (edge_vectors) delete[] edge_vectors;
+    edge_vectors = 0x0;
+    if (edge_dots) delete[] edge_dots;
+    edge_dots = 0x0;
+    if (inv_denoms) delete[] inv_denoms;
+    inv_denoms = 0x0;
+
+    memory::mconsolidate();
+}
+
+/**
  * recalculate stashed mesh data for rendering. this should be called whenever you've finished
  * modifying the mesh data and before using it for rendering
  * **/
@@ -247,38 +278,22 @@ bool nov_mesh::read_obj(const char* mesh_data)
      || header->vertex_buffer_length == 0 
      || header->triangle_buffer_length == 0) return false;
 
-    // delete all the existing data
-    if (vertices) delete[] vertices; vertices = 0x0;
-    if (triangles) delete[] triangles; triangles = 0x0;
-    if (materials) delete[] materials; materials = 0x0;
-    if (material_indices) delete[] material_indices; material_indices = 0x0;
-    if (uvs) delete[] uvs; uvs = 0x0;
-    if (vertex_normals) delete[] vertex_normals; vertex_normals = 0x0;
-    // and the other data
-    if (normals) delete[] normals; normals = 0x0;
-    if (edge_vectors) delete[] edge_vectors; edge_vectors = 0x0;
-    if (edge_dots) delete[] edge_dots; edge_dots = 0x0;
-    if (inv_denoms) delete[] inv_denoms; inv_denoms = 0x0;
+    // delete all existing data
+    deallocate_buffers();
 
     // reallocate all the buffers
     vertices_count = header->vertex_buffer_length;
     vertices = new nov_fvector3[vertices_count];
-    com_1 << stream::mode::DEC;
-    com_1 << "allocated space for " << vertices_count << " verts (" << (vertices_count * sizeof(nov_fvector3)) << ')' << stream::endl;
     vertices_capacity = vertices_count;
 
     triangles_count = header->triangle_buffer_length*3;
     triangles = new uint16_t[triangles_count];
-    com_1 << "allocated space for " << triangles_count << " tris (" << (triangles_count * sizeof(uint16_t)) << ')' << stream::endl;
     triangles_capacity = triangles_count;
 
     material_indices = new uint16_t[header->triangle_buffer_length];
-    com_1 << "allocated space for " << header->triangle_buffer_length << " mats (" << (header->triangle_buffer_length * sizeof(uint16_t)) << ')' << stream::endl;
 
     uvs = new nov_fvector2[triangles_count];
-    com_1 << "allocated space for " << triangles_count << " uvs (" << (triangles_count * sizeof(nov_fvector2)) << ')' << stream::endl;
     vertex_normals = new nov_fvector3[triangles_count];
-    com_1 << "allocated space for " << triangles_count << " norms (" << (triangles_count * sizeof(nov_fvector3)) << ')' << stream::endl;
 
     // TODO: materials?
 
@@ -333,6 +348,10 @@ bool nov_mesh::read_obj(const char* mesh_data)
     // pump the last bit of backing data, FIXME: disabled for now since most of the data isn't needed 
     update_mesh_data();
 
+    com_1 << "successfully read a mesh with " << stream::mode::DEC 
+          << count_vertices() << " verts and " 
+          << count_triangles() << " tris." << stream::endl;
+
     // we're done
     return true;
 }
@@ -345,16 +364,7 @@ nov_mesh::nov_mesh(const char* obj_data) { read_obj(obj_data); }
 
 nov_mesh::~nov_mesh()
 {
-    if (vertices) delete[] vertices; vertices = 0x0;
-    if (triangles) delete[] triangles; triangles = 0x0;
-    if (materials) delete[] materials; materials = 0x0;
-    if (material_indices) delete[] material_indices; material_indices = 0x0;
-    if (uvs) delete[] uvs; uvs = 0x0;
-    if (vertex_normals) delete[] vertex_normals; vertex_normals = 0x0;
-    if (normals) delete[] normals; normals = 0x0;
-    if (edge_vectors) delete[] edge_vectors; edge_vectors = 0x0;
-    if (edge_dots) delete[] edge_dots; edge_dots = 0x0;
-    if (inv_denoms) delete[] inv_denoms; inv_denoms = 0x0;
+    deallocate_buffers();
 }
 
 void bounds_mm_from_cr(nov_bounds& bounds)

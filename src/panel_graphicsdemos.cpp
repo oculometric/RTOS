@@ -11,22 +11,27 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
     
     if (!meshrender_panel->mesh) return;
 
-    // TODO: 3D rotation
-    
+    vector::nov_fvector3 look = norm(meshrender_panel->camera_look_direction);
+    vector::nov_fvector3 up = norm(meshrender_panel->camera_up_direction);
+
+    float tmp = look.x;
+    look.x = look.y;
+    look.y = tmp;
+
+    tmp = up.x;
+    up.x = up.y;
+    up.y = tmp;
+
     // this represents the x-axis vector of the camera
-    const vector::nov_fvector3 camera_right = norm(norm(meshrender_panel->camera_look_direction) % norm(meshrender_panel->camera_up_direction));
-    com_1 << "right: " << camera_right << stream::endl;
+    const vector::nov_fvector3 camera_right = norm(look % up);
     // this represents the y-axis vector of the camera
-    const vector::nov_fvector3 camera_up = camera_right % norm(meshrender_panel->camera_look_direction);
-    com_1 << "up: " << camera_up << stream::endl;
+    const vector::nov_fvector3 camera_up = camera_right % look;
     // this represents the z-axis vector of the camera
-    const vector::nov_fvector3 camera_back = -norm(meshrender_panel->camera_look_direction);
-    com_1 << "back: " << camera_back << stream::endl;
+    const vector::nov_fvector3 camera_back = -look;
 
     // this represents the offset of the camera from the origin
     const vector::nov_fvector3 camera_position = meshrender_panel->camera_position;
-    com_1 << "position: " << camera_position << stream::endl;
-    // FIXME: this ugh
+
     // the world to camera transform is the inverse of the transform that takes the camera from its 'origin' state to its world position
     // so a matrix which represents the camera's transformation (position, rotation), the inverse needs to be applied to world-space stuff
     // to transform it into camera-space stuff
@@ -35,44 +40,23 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
     // therefore their inverses represent the transformation of a point located relative to the camera
     // i.e. multiplying by the inverse represents transforming the camera, and everything in the scene, such
     // that the camera is located at the origin and is facing along its normal axes (i.e. no rotation or offset)
-    const matrix::nov_fmatrix4 camera_position_mat{ 1.0f, 0.0f, 0.0f, camera_position.x,
-                                                    0.0f, 1.0f, 0.0f, -camera_position.y, // negative?
-                                                    0.0f, 0.0f, 1.0f, camera_position.z,
-                                                    0.0f, 0.0f, 0.0f, 1.0f,              };
+    const matrix::nov_fmatrix4 camera_position_mat{ 1.0f, 0.0f, 0.0f,  camera_position.y,
+                                                    0.0f, 1.0f, 0.0f, -camera_position.x,
+                                                    0.0f, 0.0f, 1.0f,  camera_position.z,
+                                                    0.0f, 0.0f, 0.0f,  1.0f,              };
     
-    const matrix::nov_fmatrix4 camera_rotation_mat{ camera_right.x, -camera_right.y, camera_right.z, 0.0f,
-                                                    -camera_up.x,   camera_up.y,     -camera_up.z,   0.0f,
-                                                    camera_back.x,  -camera_back.y,  camera_back.z,  0.0f,
-                                                    0.0f,           0.0f,            0.0f,           1.0f  };
+    const matrix::nov_fmatrix4 camera_rotation_mat{  camera_right.x,  -camera_up.x,   camera_back.x,  0.0f,
+                                                     -camera_right.y,  camera_up.y,  -camera_back.y,  0.0f,
+                                                     camera_right.z,  -camera_up.z,   camera_back.z,  0.0f,
+                                                     0.0f,             0.0f,          0.0f,           1.0f  };
 
+    // apply the position first, then the rotation (flipped since inversing the matrices effectively flips the order of transformations)
     const matrix::nov_fmatrix4 world_to_camera = ~(camera_position_mat * camera_rotation_mat);
-    com_1 << world_to_camera << stream::endl;
-
-    com_1 << "camera position in camera space: " << (world_to_camera * nov_fvector4{camera_position}) << stream::endl;
-    com_1 << "camera forward in camera space: " << (world_to_camera * nov_fvector4{camera_back}) << stream::endl;
-    // FIXME: AHA!
-    // const vector::nov_fvector3 euler = meshrender_panel->camera_rotation;
-    // const matrix::nov_fmatrix4 rotate_camera_x{ 1.0f, 0.0f,          0.0f,           0.0f,
-    //                                             0.0f, cosf(euler.x), -sinf(euler.x), 0.0f,
-    //                                             0.0f, sinf(euler.x), cosf(euler.x),  0.0f,
-    //                                             0.0f, 0.0f,          0.0f,           1.0f  };
-    
-    // const matrix::nov_fmatrix4 rotate_camera_y{ cosf(euler.y),  0.0f, sinf(euler.y),  0.0f,
-    //                                             0.0f,           1.0f, 0.0f,           0.0f,
-    //                                             -sinf(euler.y), 0.0f, cosf(euler.x),  0.0f,
-    //                                             0.0f,           0.0f, 0.0f,           1.0f  };
-
-    // const matrix::nov_fmatrix4 rotate_camera_z{ cosf(euler.z),  -sinf(euler.z), 0.0f,  0.0f,
-    //                                             sinf(euler.z),  cosf(euler.z),  0.0f,  0.0f,
-    //                                             0.0f,           0.0f,           1.0f,  0.0f,
-    //                                             0.0f,           0.0f,           0.0f,  1.0f  };
-
-    // const matrix::nov_fmatrix4 rotate_camera = rotate_camera_x * rotate_camera_y * rotate_camera_z;
 
     const float far_clip = 100.0f;
     const float near_clip = 0.001f;
     const float clip_rat = -far_clip / (far_clip - near_clip);
-    const float fov_deg = 85.0f;
+    const float fov_deg = 75.0f;
     const float s = 1.0f / tanf((fov_deg / 2.0f) * (MATH_PI / 180.0f));
 
     const matrix::nov_fmatrix4 camera_to_view{ s,       0.0f,       0.0f,       0.0f,
@@ -94,12 +78,13 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
     for (uint32_t i = 0; i < meshrender_panel->mesh->count_vertices(); i++)
     {
         transformed_vertex_buffer[i] = world_to_view * nov_fvector4{ meshrender_panel->mesh->vertices[i] };
-        transformed_vertex_buffer[i] /= transformed_vertex_buffer[i].w;
+        float tmp_z = transformed_vertex_buffer[i].w;
+        transformed_vertex_buffer[i] /= tmp_z;
+        transformed_vertex_buffer[i].z = tmp_z;
     }
 
-    for (uint32_t i = 0; i < (meshrender_panel->mesh->count_triangles() * 3) - 2; i++)
+    for (uint32_t i = 0; i < ((uint32_t)meshrender_panel->mesh->count_triangles() * 3) - 2; i++)
     {
-        if ((meshrender_panel->mesh->normals[i/3] ^ camera_back) < -0.5f) { i += 2; continue; }
         if (i % 3 <= 1)
         {
             v_a_view = transformed_vertex_buffer[meshrender_panel->mesh->triangles[i]];

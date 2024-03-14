@@ -41,11 +41,14 @@ public:
     // bounding box of the object. never directly touch this
     nov_bounds bounds;
 
+private:
     // list length data for vertices and triangles. never directly touch these
     uint16_t vertices_count = 0;
     uint16_t vertices_capacity = 0;
     uint16_t triangles_count = 0;
     uint16_t triangles_capacity = 0;
+
+    void deallocate_buffers();
 
 public:
     void update_mesh_data();
