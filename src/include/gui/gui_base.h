@@ -5,6 +5,7 @@
 #include <vector.h>
 #include <colour.h>
 #include <graphics.h>
+#include <array.h>
 
 #define draw_function_stub (const nov_frame_data& frame, const graphics::nov_framebuffer& framebuffer, nov_panel* panel)
 
@@ -76,6 +77,15 @@ struct nov_container
 };
 
 /**
+ * contains information about a cached frame and the container pointer it is relevant to
+ * **/
+struct nov_frame_cache
+{
+    nov_frame_data frame_data;      // cached (pre-calculated) frame data
+    nov_container* container;       // pointer to the container for which this is relevant
+};
+
+/**
  * computes the frame data for two child frames based on a parent frame. does the maths to
  * split the parent in half using the division factor
  * @param parent pointer to parent frame data struct
@@ -110,6 +120,8 @@ private:
     nov_frame_data root_container_frame;
     // information about the current framebuffer being drawn into
     graphics::nov_framebuffer framebuffer;
+    // array of cached information about the container tree
+    nov_array<nov_frame_cache> frame_cache;
 
     /**
      * draw a container, calling draw on the panel inside it if it has one, then drawing its children

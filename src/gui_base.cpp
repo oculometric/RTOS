@@ -116,6 +116,19 @@ bool nov_gui_manager::draw_specific(nov_container* container)
     // return if this container is invalid
     if (container == 0x0) return false;
 
+    // first, check if this container has been cached. if it has, then use the cached data, otherwise
+    // calculate it from scratch
+    for (nov_frame_cache fc : frame_cache)
+    {
+        if (fc.container == container)
+        {
+            draw_container(container, fc.frame_data);
+            return true;
+        }
+    }
+
+    com_1 << "when drawing frame " << stream::mode::HEX << (uint32_t)container << " found no cached data." << stream::endl;
+
     // return if this container has no parent and is not the root container
     if (container->parent == 0x0 && container != root_container) return false;
 
@@ -150,6 +163,7 @@ bool nov_gui_manager::draw_specific(nov_container* container)
 
     // now, draw current container and all children
     draw_container(current, current_frame_data);
+    frame_cache.push(nov_frame_cache{ current_frame_data, container });
 
     return true;
 }

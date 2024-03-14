@@ -28,13 +28,22 @@ private:
     // is this object valid/initialised
     bool is_valid = false;
 public:
+    struct nov_array_iterator
+    {
+        uint32_t index = 0;
+        nov_array<T>* target = 0x0;
+
+        inline void operator++() { index++; }
+        inline bool operator!=(const nov_array_iterator& other) { return other.index == index; }
+        inline T operator*() { return (*target)[index]; }
+    };
+
     /**
      * extend the array to have a greater capacity to fit more items in.
      * requests memory from malloc and sets up the array container slots ready for them to be `push`ed into
      * 
      * @param new_capacity desired total number of slots in the array (i.e. this function will ensure there
      * is this much capacity in the array)
-     * 
      * **/
     inline void resize(uint32_t new_capacity)
     {
@@ -73,11 +82,10 @@ public:
      * access element by index from the array
      * 
      * @param index index into the array to access
-     * 
      * **/
     inline T& operator[](uint32_t index)
     {
-        if (index >= length) panic(); // crashes the kernel
+        if (index >= length) { com_1 << "index out of range " << index << stream::endl; panic(); } // crashes the kernel
         // step over the linked list until we reach the block which contains the relevant index
         nov_array_container* current = first;
         uint32_t cumulative = 0;
@@ -95,11 +103,10 @@ public:
      * access element by index from the array
      * 
      * @param index index into the array to access
-     * 
      * **/
     inline T operator[](uint32_t index) const
     {
-        if (index >= length) panic(); // crashes the kernel
+        if (index >= length) { com_1 << "index out of range " << index << stream::endl; panic(); } // crashes the kernel
         // step over the linked list until we reach the block which contains the relevant index
         nov_array_container* current = first;
         uint32_t cumulative = 0;
@@ -117,7 +124,6 @@ public:
      * insert an element into the back of the list
      * 
      * @param element element data to insert
-     * 
      * **/
     inline void push(T element)
     {
@@ -138,11 +144,10 @@ public:
      * remove an item from the end of the array, and return its value
      * 
      * @return value of the last item in the array before the pop, or NULL if the array has no elements
-     * 
      * **/
     inline T pop()
     {
-        if (length == 0) panic(); // crashes the kernel
+        if (length == 0) { com_1 << "illegal pop attempt" << stream::endl; panic(); } // crashes the kernel
         T value = (*this)[length-1];
         length--;
         return value;
@@ -150,7 +155,6 @@ public:
 
     /**
      * clear the array of all of its items
-     * 
      * **/
     inline void clear()
     {
@@ -159,6 +163,9 @@ public:
 
     inline uint32_t get_length() const { return length; }
     inline uint32_t get_capacity() const { return capacity; }
+
+    inline nov_array_iterator begin() { return nov_array_iterator{ 0, this }; }
+    inline nov_array_iterator end() { return nov_array_iterator{ get_length()-1, this }; }
 
     inline constexpr nov_array(uint32_t _capacity)
     {
@@ -195,5 +202,10 @@ public:
         memory::mconsolidate();
     }
 };
+
+template <typename T>
+auto begin(nov_array<T>& arr) { return arr.begin(); }
+template <typename T>
+auto end(nov_array<T>& arr) { return arr.end(); }
 
 }
