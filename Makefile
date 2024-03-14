@@ -22,7 +22,7 @@ CC_INCLUDE		= $(SRC)/include
 AS_DIR			= $(SRC)
 BL_DIR			= $(SRC)/boot
 OBJ_DIR			= $(BIN)/obj
-ORES_DIR		= $(BIN)/res
+BINRES_DIR		= $(BIN)/res
 
 CC_FILES_IN		= $(wildcard $(CC_DIR)/*.cpp)
 CC_FILES_OUT	= $(patsubst $(CC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(CC_FILES_IN))
@@ -33,14 +33,18 @@ AS_FILES_OUT	= $(patsubst $(AS_DIR)/%.asm, $(OBJ_DIR)/%.o, $(AS_FILES_IN))
 BL_FILES_IN		= $(wildcard $(BL_DIR)/*.asm)
 BL_FILES_OUT	= $(patsubst $(BL_DIR)/%.asm, $(OBJ_DIR)/%.bin, $(BL_FILES_IN))
 
-EMBED_FILES		= $(wildcard $(RES)/*.binmesh) $(wildcard $(RES)/*.binbmp)
-EMBED_FILES_OUT = $(patsubst $(RES)/%, $(ORES_DIR)/%, $(EMBED_FILES))
+MESH_FILES		= $(wildcard $(RES)/*.obj)
+REENCODED_MESHES= $(patsubst $(RES)/%.obj, $(BINRES_DIR)/%.binmesh, $(MESH_FILES))
+BMP_FILES		= $(wildcard $(RES)/*.bmp)
+REENCODED_BMPS  = $(patsubst $(RES)/%.bmp, $(BINRES_DIR)/%.binbmp, $(BMP_FILES))
+EMBED_FILES		= $(REENCODED_MESHES) $(REENCODED_BMPS)
+EMBED_FILES_OUT = $(patsubst $(BINRES_DIR)/%, $(BINRES_DIR)/%.o, $(EMBED_FILES))
 
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
-$(ORES_DIR):
-	@mkdir -p $(ORES_DIR)
+$(BINRES_DIR):
+	@mkdir -p $(BINRES_DIR)
 
 $(OBJ_DIR)/%.o: $(CC_DIR)/%.cpp $(OBJ_DIR)
 	@echo "Compiling" $<
@@ -54,9 +58,24 @@ $(OBJ_DIR)/%.bin: $(BL_DIR)/%.asm $(OBJ_DIR)
 	@echo "Assembling raw" $<
 	@$(AS) -f bin $< -o $@
 
-$(ORES_DIR)/%: $(RES)/% $(ORES_DIR)
-	@echo "Copying object " $<
+$(BINRES_DIR)/%.o: $(BINRES_DIR)/% $(BINRES_DIR)
+	@echo "Copying resource" $<
 	@$(PREFIX)objcopy -I binary -O elf32-i386 -B i386 $< $@
+	@echo _binary_$(subst /,_,$(subst .,_,$(patsubst %.o,%,$@)))_start=_res_$(subst .,_,$(patsubst $(BINRES_DIR)/%,%,$<))_start
+	@$(PREFIX)objcopy -I binary -O elf32-i386 -B i386 $< $@ \
+		--redefine-sym _binary_$(subst /,_,$(subst .,_,$(patsubst %.o,%,$@)))_start=_res_$(subst .,_,$(patsubst $(BINRES_DIR)/%,%,$<))_start \
+		--redefine-sym _binary_$(subst /,_,$(subst .,_,$(patsubst %.o,%,$@)))_end=_res_$(subst .,_,$(patsubst $(BINRES_DIR)/%,%,$<))_end \
+		--redefine-sym _binary_$(subst /,_,$(subst .,_,$(patsubst %.o,%,$@)))_size=_res_$(subst .,_,$(patsubst $(BINRES_DIR)/%,%,$<))_size
+
+$(BINRES_DIR)/%.binmesh: $(RES)/%.obj $(BINRES_DIR)
+	@echo "Reencoding" $< "to" $@
+	@$(RES)/obj_to_binmesh $< $@
+
+$(BINRES_DIR)/%.binbmp: $(RES)/%.bmp $(BINRES_DIR)
+	@echo "Reencoding" $< "to" $@
+	@echo "NOT IMPLEMENTED"
+
+reencode-meshes: $(REENCODED_MESHES)
 
 build: $(BL_FILES_OUT) $(CC_FILES_OUT) $(AS_FILES_OUT) $(EMBED_FILES_OUT)
 	@echo "Linking" $(KERN_OUT)
