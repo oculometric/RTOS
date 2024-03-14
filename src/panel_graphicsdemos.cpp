@@ -36,7 +36,7 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
     // i.e. multiplying by the inverse represents transforming the camera, and everything in the scene, such
     // that the camera is located at the origin and is facing along its normal axes (i.e. no rotation or offset)
     const matrix::nov_fmatrix4 camera_position_mat{ 1.0f, 0.0f, 0.0f, camera_position.x,
-                                                    0.0f, 1.0f, 0.0f, camera_position.y,
+                                                    0.0f, 1.0f, 0.0f, -camera_position.y, // negative?
                                                     0.0f, 0.0f, 1.0f, camera_position.z,
                                                     0.0f, 0.0f, 0.0f, 1.0f,              };
     
@@ -45,8 +45,12 @@ void gui::nov_panel_meshrender::_draw draw_function_stub
                                                     camera_back.x,  -camera_back.y,  camera_back.z,  0.0f,
                                                     0.0f,           0.0f,            0.0f,           1.0f  };
 
-    const matrix::nov_fmatrix4 world_to_camera = ~(camera_rotation_mat * camera_position_mat);
+    const matrix::nov_fmatrix4 world_to_camera = ~(camera_position_mat * camera_rotation_mat);
+    com_1 << world_to_camera << stream::endl;
 
+    com_1 << "camera position in camera space: " << (world_to_camera * nov_fvector4{camera_position}) << stream::endl;
+    com_1 << "camera forward in camera space: " << (world_to_camera * nov_fvector4{camera_back}) << stream::endl;
+    // FIXME: AHA!
     // const vector::nov_fvector3 euler = meshrender_panel->camera_rotation;
     // const matrix::nov_fmatrix4 rotate_camera_x{ 1.0f, 0.0f,          0.0f,           0.0f,
     //                                             0.0f, cosf(euler.x), -sinf(euler.x), 0.0f,

@@ -133,8 +133,8 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     while (true)
     {
         pan_cube->camera_up_direction = nov_fvector3{0,0,1};//norm(nov_fvector3{ sinf(z_rot), cosf(z_rot),0 });
-        pan_cube->camera_look_direction = norm(nov_fvector3{cosf(z_rot),-sinf(z_rot),-1});
-        pan_cube->camera_position = nov_fvector3{-5,0,5};//pan_cube->camera_look_direction * -8.0f;
+        pan_cube->camera_look_direction = norm(nov_fvector3{cosf(z_rot),-sinf(z_rot),0});
+        pan_cube->camera_position = nov_fvector3{-5,0,0};//pan_cube->camera_look_direction * -8.0f;
         
         com_1 << z_rot * 10.0f << endl;
         com_1 << sqrt(z_rot * 10.0f) << endl;
