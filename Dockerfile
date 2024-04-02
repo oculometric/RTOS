@@ -7,7 +7,7 @@ FROM ubuntu:jammy-20240227 AS base
 
 RUN apt-get update -y \
     && apt-get install -y make libgmp3-dev libmpc-dev libmpfr-dev texinfo \
-       nasm xz-utils g++ curl git
+       nasm gzip g++ curl git
 
 ENV TARGET=i386-elf
 ENV PREFIX="/opt/cross"
@@ -19,7 +19,7 @@ FROM base AS binutils
 WORKDIR /build
 
 ARG BINUTILS_VERSION=2.42
-RUN curl "https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.xz" | tar -xJC / \
+RUN curl "https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.gz" | tar -xzC / \
     &&  /binutils-${BINUTILS_VERSION}/configure --target="$TARGET" --prefix="$PREFIX" \
         --with-sysroot --disable-nls --disable-werror \
     && make \
@@ -35,7 +35,7 @@ ARG GCC_VERSION=13.2.0
 # TODO: Add argument for setting `-j 8` parallelism?
 # Note: If debugging issues with `make all-target-libgcc`, split this into multiple RUN commands
 #       to ensure that Docker build cache can prevent rerunning `make all-gcc`
-RUN curl "https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.xz" | tar -xJC / \
+RUN curl "https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.gz" | tar -xzC / \
     && /gcc-${GCC_VERSION}/configure --target="$TARGET" --prefix="$PREFIX" --disable-nls \
        --enable-languages=c,c++ --without-headers \
     && make -j 8 all-gcc \
