@@ -69,7 +69,7 @@ prerequisites:
 - make*
 - qemu (system-x86_64/system-i386) to run the resulting image
 
-just run `make docker` and it should output files into `./bin/`. the first run will take a few minutes as it build the required dependencies, but subsequent runs only need to build the actual image thanks to Docker layer caching.
+just run `make docker` and it should output files into `./bin/`. the first run will take a few minutes as it builds the required dependencies, but subsequent runs only need to build the actual image thanks to Docker layer caching.
 as a \*very* rough guide, `docker system df` reports using ~6.5GB after a build (having pruned beforehand), but that will *not* grow significantly with subsequent reruns.
 
 additionally, the Dockerfile shows the exact steps and dependencies required on Ubuntu, so can serve as a rough guide on what tools/steps are required in other environments.
