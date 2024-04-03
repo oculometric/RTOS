@@ -2,6 +2,8 @@
 
 hiyya! this is my kernel development project. i use 'kernel' loosely since it mostly amounts to me building all the *bits* of a kernel without really following a specific kernel design or model.
 
+thankyou to @OmichronAgain for the Docker build script!
+
 ## state of the project
 
 as of writing this, i've written a reasonably okayish (if not very portable) *bootloader* for loading an elf binary, i've implemented a simple memory allocator, designed a *UI layout* mechanism and a drawing system, written some *3D graphics* library stuff, and implemented *serial logging* for debugging. some other cool things i've done are re-implementing *streams* to make serial-debugging things easier (and all the other useful things you can do with streams), and implementing *dynamic arrays and strings*. in fact, a fair bit of stuff is re-creating C++ standard library stuff.
