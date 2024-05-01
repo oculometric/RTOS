@@ -174,9 +174,7 @@ nov_string nov_string::substring(uint32_t start, uint32_t end) const
 }
 
 nov_string::~nov_string()
-{
-    backing.~nov_array();
-}
+{ }
 
 uint32_t nov::find_next_byte(char* addr, char target)
 {
