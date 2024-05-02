@@ -18,8 +18,8 @@ as of writing this, i've written a reasonably okayish (if not very portable) *bo
 - [x] strings
     - [ ] stream into a string
 - [x] memory view UI panel
-- [ ] text rendering
-    - [ ] text view UI panel
+- [x] text rendering
+    - [x] text view UI panel
 - [x] 3D wireframe rendering panel able to read 3D model files
 - [ ] virtual/abstract file systems
     - [ ] reading from disk, reading into virtual filesystem

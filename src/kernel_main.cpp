@@ -158,7 +158,7 @@ BARRY:
     )""";
     text_panel->text_colour = nov_colour_carmine;
 
-    com_1 << "string is: " << text_panel->text << endl;
+    com_1 << "string is: \"" << text_panel->text << "\"" << endl;
 
     while (true)
     {
