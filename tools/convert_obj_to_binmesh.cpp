@@ -5,7 +5,7 @@
 #include <math.h>
 #include <memory.h>
 
-#include "src/include/binary_mesh.h"
+#include "../src/include/binary_mesh.h"
 
 using namespace std;
 using namespace nov;

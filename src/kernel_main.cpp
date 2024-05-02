@@ -6,6 +6,8 @@
 #include <3d_demo_meshes.h>
 #include <array.h>
 #include <string.h>
+#include <binary_bitmap.h>
+#include <font.h>
 
 // TODO: string splitting
 // TODO: textbox panel
@@ -83,57 +85,86 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     gui::nov_gui_manager man (framebuffer);
 
     auto root = man.get_root();
-    gui::split_container(root, nov_fvector2{ 0.7f, 0.0f });
-    gui::split_container(root->child_a, nov_fvector2{ 0.0f, 0.8f });
-    gui::split_container(root->child_a->child_b, nov_fvector2{ 0.25f, 0.0f });
-    man.draw_root();
-    memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+    auto text_panel = new gui::nov_panel_textbox();
+    root->panel = text_panel;
 
-    gui::nov_panel_meshrender* pan_cube = new gui::nov_panel_meshrender();
-    pan_cube->line_colour = nov_colour_indigo;
-    pan_cube->camera_up_direction = nov_fvector3{0,0,1};
-    pan_cube->camera_look_direction = norm(nov_fvector3{ 0,-1,-1 });
-    pan_cube->camera_position = nov_fvector3{ 1.0f, 5.0f, -5.0f };
-    pan_cube->mesh = new graphics::nov_mesh(_res_suzanne_binmesh_start);
+    file::nov_binary_bitmap_header* font_header = (file::nov_binary_bitmap_header*)_res_font_binbmp_start;
+    com_1 << "font checksum:        " << font_header->checksum << endl;
+    com_1 << "bitmap checksum:      " << NOV_BINARY_BITMAP_HEADER_CHECKSUM << endl;
+    com_1 << mode::DEC;
+    com_1 << "font bitmap width:    " << font_header->image_width << endl;
+    com_1 << "font bitmap height:   " << font_header->image_height << endl;
+    com_1 << "font bits per pixel:  " << font_header->bits_per_pixel << endl;
+    com_1 << "font bitmap length:   " << font_header->image_size << endl;
+    com_1 << "font bitmap offset:   " << font_header->data_offset << endl;
+    com_1.flush();
 
-    gui::nov_panel_star* pan_star = new gui::nov_panel_star();
-    pan_star->background = nov_colour_nearblack;
-    pan_star->foreground = nov_colour_carmine;
+    nov_font* font = new nov_font();
+    font->char_width = 5;
+    font->char_height = 8;
+    font->bitmap = ((uint8_t*)font_header + font_header->data_offset);
+    font->bitmap_width = font_header->image_width;
+    font->bitmap_height = font_header->image_height;
+    font->tiles_per_row = font->bitmap_width / font->char_width;
+    font->tiles_per_column = font->bitmap_height / font->char_height;
+    text_panel->font = font;
 
-    gui::nov_panel_textbox* pan_text = new gui::nov_panel_textbox();
-    pan_text->text_colour = nov_colour_red;
-    pan_text->text = (char*)"Hello, World!";
+    text_panel->text = R"""(0: The quick brown fox jumps over the lazy dog. Lorem ipsum dolor sit amet.
+Bee Movie
+By Jerry Seinfeld
 
-    gui::nov_panel_memorymonitor* pan_mem = new gui::nov_panel_memorymonitor();
+NARRATOR:
+(Black screen with text; The sound of buzzing bees can be heard)
+According to all known laws
+of aviation,
+ :
+there is no way a bee
+should be able to fly.
+ :
+Its wings are too small to get
+its fat little body off the ground.
+ :
+The bee, of course, flies anyway
+ :
+because bees don't care
+what humans think is impossible.
+BARRY BENSON:
+(Barry is picking out a shirt)
+Yellow, black. Yellow, black.
+Yellow, black. Yellow, black.
+ :
+Ooh, black and yellow!
+Let's shake it up a little.
+JANET BENSON:
+Barry! Breakfast is ready!
+BARRY:
+Coming!
+ :
+Hang on a second.
+(Barry uses his antenna like a phone)
+ :
+Hello?
+ADAM FLAYMAN:
 
-    root->child_a->child_a->panel = pan_cube;
-    root->child_a->child_b->child_b->panel = pan_text;
-    root->child_a->child_b->child_a->panel = pan_mem;
-    root->child_b->panel = pan_star;
+(Through phone)
+- Barry?
+BARRY:
+- Adam?
+ADAM:
+- Can you believe this is happening?
+BARRY:
+- I can't. I'll pick you up.
+(Barry flies down the stairs)
+    )""";
+    text_panel->text_colour = nov_colour_carmine;
 
-    man.draw_root();
-    memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+    com_1 << "string is: \"" << text_panel->text << "\"" << endl;
 
-    pan_cube->camera_up_direction = nov_fvector3{0,0,1};
-    float z_rot = 0.0f;
-    bool monkey = true;
     while (true)
     {
-        pan_cube->camera_look_direction = norm(nov_fvector3{-sinf(z_rot+MATH_PI),cosf(z_rot+MATH_PI),-0.3f});
-        pan_cube->camera_position = pan_cube->camera_look_direction * -6.0f;
-        
-        man.draw_specific(root->child_a->child_a);
+        man.draw_root();
         memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-
-        z_rot += 0.015f;
-        if (z_rot > MATH_PI * 2.0f)
-        {
-            z_rot = 0.0f;
-            if (monkey) pan_cube->mesh->read_obj(_res_teapot_binmesh_start);
-            else pan_cube->mesh->read_obj(_res_suzanne_binmesh_start);
-            monkey = !monkey;
-            man.draw_root();
-        }
+        text_panel->text[0]++;
     }
 
     com_1 << "all done." << endl;

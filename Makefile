@@ -73,9 +73,7 @@ $(BINRES_DIR)/%.binmesh: $(RES)/%.obj $(BINRES_DIR)
 
 $(BINRES_DIR)/%.binbmp: $(RES)/%.bmp $(BINRES_DIR)
 	@echo "Reencoding" $< "to" $@
-	@echo "NOT IMPLEMENTED"
-
-reencode-meshes: $(REENCODED_MESHES)
+	@$(RES)/bmp_to_binbmp $< $@
 
 build: $(BL_FILES_OUT) $(CC_FILES_OUT) $(AS_FILES_OUT) $(EMBED_FILES_OUT)
 	@echo "Linking" $(KERN_OUT)
