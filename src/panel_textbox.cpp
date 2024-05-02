@@ -4,309 +4,43 @@
 
 using namespace nov;
 
-#define CHARACTER_WIDTH 5
-#define CHARACTER_HEIGHT 8
-#define NUM_CHARS (26 + 26 + 10 + 10)
-
-static const uint8_t (char_map[CHARACTER_WIDTH * CHARACTER_HEIGHT])[NUM_CHARS]
-{
-    { // ' '
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0
-    },
-    { // 'a'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 1, 1, 1, 0,
-        0, 0, 0, 0, 1,
-        0, 1, 1, 1, 1,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 1, 1,
-        0, 1, 1, 0, 1
-    },
-    { // 'b'
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 0,
-        1, 1, 1, 1, 0,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1,
-        1, 1, 0, 0, 1,
-        1, 0, 1, 1, 0
-    },
-    { // 'c'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 1, 1, 1, 0,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 1,
-        0, 1, 1, 1, 0
-    },
-    { // 'd'
-        0, 0, 0, 0, 1,
-        0, 0, 0, 0, 1,
-        0, 0, 0, 0, 1,
-        0, 1, 1, 1, 1,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 1, 1,
-        0, 1, 1, 0, 1
-    },
-    { // 'e'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 1, 1, 1, 0,
-        1, 0, 0, 0, 1,
-        1, 1, 1, 1, 0,
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 1,
-        0, 1, 1, 1, 0
-    },
-    { // 'f'
-        0, 0, 0, 1, 1,
-        0, 0, 1, 0, 0,
-        0, 0, 1, 0, 0,
-        0, 1, 1, 1, 1,
-        0, 0, 1, 0, 0,
-        0, 0, 1, 0, 0,
-        0, 0, 1, 0, 0,
-        0, 0, 1, 0, 0
-    },
-    { // 'g'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 1, 1, 1, 1,
-        1, 0, 0, 0, 1,
-        0, 1, 1, 1, 0,
-        0, 0, 0, 0, 1,
-        0, 1, 1, 1, 0
-    },
-    { // 'h'
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 0,
-        1, 0, 1, 0, 0,
-        1, 1, 0, 1, 0,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1
-    },
-    { // 'i'
-        0, 0, 0, 0, 0,
-        0, 0, 1, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 1, 1, 0, 0,
-        0, 0, 1, 0, 0,
-        0, 0, 1, 0, 0,
-        0, 0, 1, 0, 0,
-        0, 0, 1, 1, 0
-    },
-    { // 'j'
-        0, 0, 0, 1, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 1, 1, 0,
-        0, 0, 0, 1, 0,
-        0, 0, 0, 1, 0,
-        0, 0, 0, 1, 0,
-        1, 0, 0, 1, 0,
-        0, 1, 1, 0, 0
-    },
-    { // 'k'
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 0,
-        1, 0, 1, 1, 0,
-        1, 1, 1, 0, 0,
-        1, 0, 1, 0, 0,
-        1, 0, 0, 1, 0,
-        1, 0, 0, 1, 0,
-        1, 0, 0, 1, 0
-    },
-    { // 'l'
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 0,
-        1, 0, 0, 1, 0,
-        0, 1, 1, 0, 0
-    },
-    { // 'm'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        1, 0, 0, 0, 0,
-        1, 1, 1, 1, 1,
-        1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1,
-        1, 0, 1, 0, 1
-    },
-    { // 'n'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        1, 0, 1, 1, 0,
-        1, 1, 0, 0, 1,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1
-    },
-    { // 'o'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 1, 1, 1, 0,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1,
-        0, 1, 1, 1, 0
-    },
-    { // 'p'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 1, 1, 1, 0,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1,
-        1, 1, 1, 1, 0,
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 0
-    },
-    { // 'q'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 1, 1, 1, 0,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1,
-        0, 1, 1, 1, 1,
-        0, 0, 0, 0, 1,
-        0, 0, 0, 0, 1
-    },
-    { // 'r'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        1, 0, 1, 1, 0,
-        1, 1, 0, 0, 1,
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 0,
-        1, 0, 0, 0, 0
-    },
-    { // 's'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 1, 1, 1, 0,
-        1, 0, 0, 0, 1,
-        0, 1, 0, 0, 0,
-        0, 0, 1, 1, 1,
-        1, 0, 0, 0, 1,
-        0, 1, 1, 1, 0
-    },
-    { // 't'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 1, 0, 0, 0,
-        1, 1, 1, 1, 0,
-        0, 1, 0, 0, 0,
-        0, 1, 0, 0, 0,
-        0, 1, 0, 0, 1,
-        0, 0, 1, 1, 0
-    },
-    { // 'u'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 1, 1,
-        0, 1, 1, 0, 1
-    },
-    { // 'v'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1,
-        0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0,
-        0, 0, 1, 0, 0
-    },
-    { // 'w'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1,
-        1, 0, 1, 0, 1,
-        0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0
-    },
-    { // 'x'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        1, 0, 0, 0, 1,
-        0, 1, 0, 1, 0,
-        0, 0, 1, 0, 0,
-        0, 1, 0, 1, 0,
-        1, 0, 0, 0, 1
-    },
-    { // 'y'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        1, 0, 0, 0, 1,
-        1, 0, 0, 0, 1,
-        0, 1, 0, 1, 0,
-        0, 1, 0, 1, 0,
-        0, 0, 1, 0, 0,
-        1, 1, 0, 0, 0
-    },
-    { // 'z'
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0,
-        1, 1, 1, 1, 1,
-        0, 0, 0, 1, 0,
-        0, 0, 1, 0, 0,
-        0, 1, 0, 0, 0,
-        1, 1, 1, 1, 1
-    },
-};
-
 void gui::nov_panel_textbox::_draw draw_function_stub
 {
     nov_panel_textbox* text_panel = static_cast<nov_panel_textbox*>(panel);
+    if (!text_panel->font || !text_panel->font->bitmap) return;
 
     nov_uvector2 character_origin = frame.origin;
-    uint8_t length = text_panel->text.get_length();
-    for (uint8_t char_ind = 0; char_ind < length; char_ind++)
+    uint32_t length = text_panel->text.get_length();
+
+    for (uint32_t char_ind = 0; char_ind < length; char_ind++)
     {
-        // draw character
         char chr = text_panel->text[char_ind];
-        const uint8_t* glyph = char_map[0];
-        if (chr >= 'a' && chr <= 'z')
+        // handle specials
+        if (chr == '\n' || chr == '\r')
         {
-            glyph = char_map[(chr - 'a') + 1];
+            character_origin.u = frame.origin.u;
+            if (chr == '\n')
+            {
+                character_origin.v += text_panel->font->char_height + 1;
+            }
+            continue;
         }
-        else if (chr >= 'A' && chr <= 'Z')
+        if (chr == '\t')
         {
-            glyph = char_map[(chr - 'A') + 1];
+            character_origin.u += (text_panel->font->char_width + 1) * 4;
+            continue;
         }
 
-        for (uint8_t y = 0; y < CHARACTER_HEIGHT; y++)
+        // draw character
+        uint8_t glyph_base_x = (chr % text_panel->font->tiles_per_row);
+        uint8_t glyph_base_y = (chr / text_panel->font->tiles_per_row);
+        uint8_t* glyph_start = text_panel->font->bitmap + ((glyph_base_x + (glyph_base_y * text_panel->font->char_height * text_panel->font->tiles_per_row)) * text_panel->font->char_width);
+
+        for (uint8_t y = 0; y < text_panel->font->char_height; y++)
         {
-            for (uint8_t x = 0; x < CHARACTER_WIDTH; x++)
+            for (uint8_t x = 0; x < text_panel->font->char_width; x++)
             {
-                if (glyph[x + (y * CHARACTER_WIDTH)])
+                if (glyph_start[x + (y * text_panel->font->bitmap_width)])
                 {
                     nov_uvector2 position = character_origin + nov_uvector2{ x,y };
                     graphics::set_pixel(position.u + (position.v * framebuffer.size.u), text_panel->text_colour, framebuffer);
@@ -314,6 +48,6 @@ void gui::nov_panel_textbox::_draw draw_function_stub
             }
         }
 
-        character_origin.u += CHARACTER_WIDTH + 1;
+        character_origin.u += text_panel->font->char_width + 1;
     }
 }

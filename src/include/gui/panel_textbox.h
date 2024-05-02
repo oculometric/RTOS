@@ -1,6 +1,7 @@
 #include <gui/gui_base.h>
 #include <graphics.h>
 #include <string.h>
+#include <font.h>
 
 namespace nov
 {
@@ -14,6 +15,7 @@ private:
 public:
     nov_colour text_colour;
     nov_string text;
+    nov_font* font = 0;
 
     inline nov_panel_textbox()
     {

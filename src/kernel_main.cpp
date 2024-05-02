@@ -6,6 +6,8 @@
 #include <3d_demo_meshes.h>
 #include <array.h>
 #include <string.h>
+#include <binary_bitmap.h>
+#include <font.h>
 
 // TODO: string splitting
 // TODO: textbox panel
@@ -86,15 +88,83 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     auto text_panel = new gui::nov_panel_textbox();
     root->panel = text_panel;
 
-    text_panel->text = "a: The quick brown fox jumps over the lazy dog. Lorem ipsum dolor sit amet.";
+    file::nov_binary_bitmap_header* font_header = (file::nov_binary_bitmap_header*)_res_font_binbmp_start;
+    com_1 << "font checksum:        " << font_header->checksum << endl;
+    com_1 << "bitmap checksum:      " << NOV_BINARY_BITMAP_HEADER_CHECKSUM << endl;
+    com_1 << mode::DEC;
+    com_1 << "font bitmap width:    " << font_header->image_width << endl;
+    com_1 << "font bitmap height:   " << font_header->image_height << endl;
+    com_1 << "font bits per pixel:  " << font_header->bits_per_pixel << endl;
+    com_1 << "font bitmap length:   " << font_header->image_size << endl;
+    com_1 << "font bitmap offset:   " << font_header->data_offset << endl;
+    com_1.flush();
+
+    nov_font* font = new nov_font();
+    font->char_width = 5;
+    font->char_height = 8;
+    font->bitmap = ((uint8_t*)font_header + font_header->data_offset);
+    font->bitmap_width = font_header->image_width;
+    font->bitmap_height = font_header->image_height;
+    font->tiles_per_row = font->bitmap_width / font->char_width;
+    font->tiles_per_column = font->bitmap_height / font->char_height;
+    text_panel->font = font;
+
+    text_panel->text = R"""(0: The quick brown fox jumps over the lazy dog. Lorem ipsum dolor sit amet.
+Bee Movie
+By Jerry Seinfeld
+
+NARRATOR:
+(Black screen with text; The sound of buzzing bees can be heard)
+According to all known laws
+of aviation,
+ :
+there is no way a bee
+should be able to fly.
+ :
+Its wings are too small to get
+its fat little body off the ground.
+ :
+The bee, of course, flies anyway
+ :
+because bees don't care
+what humans think is impossible.
+BARRY BENSON:
+(Barry is picking out a shirt)
+Yellow, black. Yellow, black.
+Yellow, black. Yellow, black.
+ :
+Ooh, black and yellow!
+Let's shake it up a little.
+JANET BENSON:
+Barry! Breakfast is ready!
+BARRY:
+Coming!
+ :
+Hang on a second.
+(Barry uses his antenna like a phone)
+ :
+Hello?
+ADAM FLAYMAN:
+
+(Through phone)
+- Barry?
+BARRY:
+- Adam?
+ADAM:
+- Can you believe this is happening?
+BARRY:
+- I can't. I'll pick you up.
+(Barry flies down the stairs)
+    )""";
     text_panel->text_colour = nov_colour_carmine;
+
+    com_1 << "string is: " << text_panel->text << endl;
 
     while (true)
     {
         man.draw_root();
         memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
         text_panel->text[0]++;
-        if (text_panel->text[0] > 'z') text_panel->text[0] = 'a';
     }
 
     com_1 << "all done." << endl;
