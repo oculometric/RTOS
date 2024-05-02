@@ -83,58 +83,14 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     gui::nov_gui_manager man (framebuffer);
 
     auto root = man.get_root();
-    gui::split_container(root, nov_fvector2{ 0.7f, 0.0f });
-    gui::split_container(root->child_a, nov_fvector2{ 0.0f, 0.8f });
-    gui::split_container(root->child_a->child_b, nov_fvector2{ 0.25f, 0.0f });
-    man.draw_root();
-    memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+    auto text_panel = new gui::nov_panel_textbox();
+    root->panel = text_panel;
 
-    gui::nov_panel_meshrender* pan_cube = new gui::nov_panel_meshrender();
-    pan_cube->line_colour = nov_colour_indigo;
-    pan_cube->camera_up_direction = nov_fvector3{0,0,1};
-    pan_cube->camera_look_direction = norm(nov_fvector3{ 0,-1,-1 });
-    pan_cube->camera_position = nov_fvector3{ 1.0f, 5.0f, -5.0f };
-    pan_cube->mesh = new graphics::nov_mesh(_res_suzanne_binmesh_start);
-
-    gui::nov_panel_star* pan_star = new gui::nov_panel_star();
-    pan_star->background = nov_colour_nearblack;
-    pan_star->foreground = nov_colour_carmine;
-
-    gui::nov_panel_textbox* pan_text = new gui::nov_panel_textbox();
-    pan_text->text_colour = nov_colour_red;
-    pan_text->text = (char*)"Hello, World!";
-
-    gui::nov_panel_memorymonitor* pan_mem = new gui::nov_panel_memorymonitor();
-
-    root->child_a->child_a->panel = pan_cube;
-    root->child_a->child_b->child_b->panel = pan_text;
-    root->child_a->child_b->child_a->panel = pan_mem;
-    root->child_b->panel = pan_star;
+    text_panel->text = "The quick brown fox jumps over the lazy dog. Lorem ipsum dolor sit amet.";
+    text_panel->text_colour = nov_colour{ 255, 255, 255 };
 
     man.draw_root();
     memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-
-    pan_cube->camera_up_direction = nov_fvector3{0,0,1};
-    float z_rot = 0.0f;
-    bool monkey = true;
-    while (true)
-    {
-        pan_cube->camera_look_direction = norm(nov_fvector3{-sinf(z_rot+MATH_PI),cosf(z_rot+MATH_PI),-0.3f});
-        pan_cube->camera_position = pan_cube->camera_look_direction * -6.0f;
-        
-        man.draw_specific(root->child_a->child_a);
-        memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-
-        z_rot += 0.015f;
-        if (z_rot > MATH_PI * 2.0f)
-        {
-            z_rot = 0.0f;
-            if (monkey) pan_cube->mesh->read_obj(_res_teapot_binmesh_start);
-            else pan_cube->mesh->read_obj(_res_suzanne_binmesh_start);
-            monkey = !monkey;
-            man.draw_root();
-        }
-    }
 
     com_1 << "all done." << endl;
     com_1.flush();

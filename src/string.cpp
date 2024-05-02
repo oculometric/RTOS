@@ -63,6 +63,13 @@ nov_string::nov_string(nov_string&& str)
     }
 }
 
+nov_string& nov::nov_string::operator=(const char* chrs)
+{
+    clear();
+    append(chrs);
+    return *this;
+}
+
 char& nov_string::operator[](uint32_t index)
 {
     if (index >= backing.get_length()) panic();
@@ -174,7 +181,9 @@ nov_string nov_string::substring(uint32_t start, uint32_t end) const
 }
 
 nov_string::~nov_string()
-{ }
+{
+    com_1 << "destructor" << stream::endl;
+}
 
 uint32_t nov::find_next_byte(char* addr, char target)
 {

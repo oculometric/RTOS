@@ -18,6 +18,8 @@ public:
     nov_string(uint32_t initial_capacity);
     nov_string(nov_string&& str);
 
+    nov_string& operator=(const char* chrs);
+    
     nov_string& operator=(const nov_string&) = delete;
     nov_string& operator=(nov_string&&) = delete;
 
