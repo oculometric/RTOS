@@ -285,8 +285,6 @@ static const uint8_t (char_map[CHARACTER_WIDTH * CHARACTER_HEIGHT])[NUM_CHARS]
 void gui::nov_panel_textbox::_draw draw_function_stub
 {
     nov_panel_textbox* text_panel = static_cast<nov_panel_textbox*>(panel);
-    com_1 << "text panel" << stream::endl;
-    com_1 << text_panel->text << stream::endl;
 
     nov_uvector2 character_origin = frame.origin;
     uint8_t length = text_panel->text.get_length();

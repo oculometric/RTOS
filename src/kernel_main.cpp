@@ -86,11 +86,16 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     auto text_panel = new gui::nov_panel_textbox();
     root->panel = text_panel;
 
-    text_panel->text = "The quick brown fox jumps over the lazy dog. Lorem ipsum dolor sit amet.";
-    text_panel->text_colour = nov_colour{ 255, 255, 255 };
+    text_panel->text = "a: The quick brown fox jumps over the lazy dog. Lorem ipsum dolor sit amet.";
+    text_panel->text_colour = nov_colour_carmine;
 
-    man.draw_root();
-    memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+    while (true)
+    {
+        man.draw_root();
+        memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+        text_panel->text[0]++;
+        if (text_panel->text[0] > 'z') text_panel->text[0] = 'a';
+    }
 
     com_1 << "all done." << endl;
     com_1.flush();

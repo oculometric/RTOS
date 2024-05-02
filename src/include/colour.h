@@ -18,7 +18,7 @@ namespace colour
 #define nov_colour_white nov_colour{ 255,255,255 }
 #define nov_colour_black nov_colour{ 0,0,0 }
 
-#define nov_colour_gold nov_colour{ 252,144,2 }
+#define nov_colour_gold nov_colour{ 242,161,26 }
 #define nov_colour_carmine nov_colour{ 207, 46, 29 }
 #define nov_colour_indigo nov_colour{ 100, 46, 150 }
 #define nov_colour_nearblack nov_colour{ 3,1,0 }
