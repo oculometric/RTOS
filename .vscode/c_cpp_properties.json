@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/src/include",
-                "/home/oculometric/opt/cross/lib/gcc/i386-elf/13.2.0/include",
+                "/home/oculometric/opt/cross/lib/gcc/i386-elf/13.2.0/include"
             ],
             "defines": [],
             "cStandard": "c17",

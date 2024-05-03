@@ -17,6 +17,7 @@ as of writing this, i've written a reasonably okayish (if not very portable) *bo
 - [x] dynamic arrays
 - [x] strings
     - [ ] stream into a string
+    - [ ] string splitting
 - [x] memory view UI panel
 - [x] text rendering
     - [x] text view UI panel
