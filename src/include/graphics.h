@@ -13,28 +13,28 @@ namespace graphics
 
 using namespace nov::vector;
 
-struct nov_framebuffer
+struct Framebuffer
 {
     uint8_t* address;
-    nov_uvector2 size;
+    UVector2 size;
     uint8_t bytes_per_pixel;
 };
 
-static inline void set_pixel(uint32_t at, const nov_colour& col, const nov_framebuffer& framebuffer) 
+static inline void setPixel(uint32_t at, const Colour& col, const Framebuffer& framebuffer) 
 {
     framebuffer.address[(at*framebuffer.bytes_per_pixel)] = col.z;
     framebuffer.address[(at*framebuffer.bytes_per_pixel)+1] = col.y;
     framebuffer.address[(at*framebuffer.bytes_per_pixel)+2] = col.x;
 }
 
-static inline uint32_t get_offset(const nov_uvector2& co, const nov_uvector2& framebuffer_size)
+static inline uint32_t getOffset(const UVector2& co, const UVector2& framebuffer_size)
 {
     return (co.u % framebuffer_size.u) + ((co.v % framebuffer_size.v) * framebuffer_size.u);
 }
 
-void draw_box(const nov_uvector2& origin, const nov_uvector2& size, const nov_colour& col, const nov_framebuffer& framebuffer);
-void fill_box(const nov_uvector2& origin, const nov_uvector2& size, const nov_colour& col, const nov_framebuffer& framebuffer);
-void draw_line(const nov_uvector2& start, const nov_uvector2& end, const nov_colour& col, const nov_framebuffer& framebuffer);
+void drawBox(const UVector2& origin, const UVector2& size, const Colour& col, const Framebuffer& framebuffer);
+void fillBox(const UVector2& origin, const UVector2& size, const Colour& col, const Framebuffer& framebuffer);
+void drawLine(const UVector2& start, const UVector2& end, const Colour& col, const Framebuffer& framebuffer);
 
 }
 }

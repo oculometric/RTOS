@@ -6,7 +6,7 @@ namespace nov
 namespace graphics
 {
 
-class nov_material
+class Material
 {
     // TODO: material
 };

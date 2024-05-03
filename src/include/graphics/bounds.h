@@ -7,15 +7,15 @@ namespace nov
 namespace graphics
 {
 
-struct nov_bounds
+struct Bounds
 {
-    vector::nov_vector3<float> min, max;
-    vector::nov_vector3<float> center, radius;
+    vector::Vector3<float> min, max;
+    vector::Vector3<float> center, radius;
 };
 
-void bounds_mm_from_cr(nov_bounds& bounds);
-void bounds_cr_from_mm(nov_bounds& bounds);
-void bounds_fix_minmax(nov_bounds& bounds);
+void boundsMinMaxFromCenterRadius(Bounds& bounds);
+void boundsCenterRadiusFromMinMax(Bounds& bounds);
+void boundsFixMinmax(Bounds& bounds);
 
 }
 }

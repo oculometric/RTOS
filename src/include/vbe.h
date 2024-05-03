@@ -8,7 +8,7 @@ namespace vbe
 {
 
 #pragma pack (1)
-struct nov_vbe_pm_info_block
+struct VBEPMInfoBlock
 {
     uint8_t p;
     uint8_t m;
@@ -27,7 +27,7 @@ struct nov_vbe_pm_info_block
 #pragma pack (0)
 
 #pragma pack (1)
-struct nov_vbe_mode_info
+struct VBEModeInfo
 {
     uint16_t mode_attributes;
     uint8_t window_a_attributes;
@@ -82,15 +82,15 @@ struct nov_vbe_mode_info
 };
 #pragma pack (0)
 
-static inline void* find_pmid_block(void* start, uint32_t length)
+static inline void* findPMIDBlock(void* start, uint32_t length)
 {
     uint8_t* ptr = (uint8_t*)start;
-    nov_vbe_pm_info_block* block;
+    VBEPMInfoBlock* block;
 
     uint32_t offset = 0;
     while (offset < length)
     {
-        block = (nov_vbe_pm_info_block*)(ptr+offset);
+        block = (VBEPMInfoBlock*)(ptr+offset);
         if (block->p == 'P' && block->m == 'M' && block->i == 'I' && block->d == 'D')
         {
             return (void*)(ptr+offset);

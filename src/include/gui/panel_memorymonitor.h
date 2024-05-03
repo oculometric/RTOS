@@ -6,13 +6,13 @@ namespace nov
 namespace gui
 {
 
-class nov_panel_memorymonitor : public nov_panel
+class PanelMemoryMonitor : public Panel
 {
 private:
     static void _draw draw_function_stub;
 public:
 
-    inline nov_panel_memorymonitor()
+    inline PanelMemoryMonitor()
     {
         draw_function_ptr = _draw;
         clear_on_draw = true;

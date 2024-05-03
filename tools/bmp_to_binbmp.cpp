@@ -123,9 +123,9 @@ int main(int argc, char* argv[])
         pixel_index_bottom_up -= row_width * 2;
     }
 
-    nov_binary_bitmap_header header;
+    BinaryBitmapHeader header;
     header.checksum = NOV_BINARY_BITMAP_HEADER_CHECKSUM;
-    header.data_offset = sizeof(nov_binary_bitmap_header);
+    header.data_offset = sizeof(BinaryBitmapHeader);
     header.bits_per_pixel = bitmap_header.num_bits_per_pixel;
 
     header.image_width = bitmap_header.width_pixels;
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
 
     cout << "success. outputting..." << endl;
 
-    outfile.write((char*)(&header), sizeof(nov_binary_bitmap_header));
+    outfile.write((char*)(&header), sizeof(BinaryBitmapHeader));
     outfile.write((char*)pixel_data, header.image_size);
     outfile << ":)";
 

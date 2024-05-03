@@ -11,7 +11,7 @@ namespace stream
  * 
  * @param c character to send
  * **/
-void nov_stream::send(char c)
+void Stream::send(char c)
 {
     buffer[buffer_index] = c;
     buffer_index++;
@@ -22,7 +22,7 @@ void nov_stream::send(char c)
  * flushes all characters from the stream buffer, clearing the buffer
  * and outputting all characters sequentially according to `flush_char`
  * **/
-void nov_stream::flush()
+void Stream::flush()
 {
     for (uint8_t i = 0; i < buffer_index; i++)
     {
@@ -31,46 +31,46 @@ void nov_stream::flush()
     buffer_index = 0;
 }
 
-nov_stream& operator<<(nov_stream& stream, char c)
+Stream& operator<<(Stream& stream, char c)
 {
     stream.send(c);
     return stream;
 }
 
-nov_stream& operator<<(nov_stream& stream, char* s)
+Stream& operator<<(Stream& stream, char* s)
 {
     uint32_t i = 0;
     while (s[i] != 0) stream.send(s[i++]);
     return stream;
 }
 
-nov_stream& operator<<(nov_stream& stream, const char* s)
+Stream& operator<<(Stream& stream, const char* s)
 {
     uint32_t i = 0;
     while (s[i] != 0) stream.send(s[i++]);
     return stream;
 }
 
-nov_stream& operator<<(nov_stream& stream, uint32_t u)
+Stream& operator<<(Stream& stream, uint32_t u)
 {
     char buf[36] = { 0 };
     switch (stream.uint_mode)
     {
-    case mode::DEC: nov::int_to_string(u, 10, buf); break;
-    case mode::BIN: stream << "0b"; nov::int_to_string(u, 2, buf); break;
-    case mode::HEX: stream << "0x"; nov::int_to_string(u, 16, buf); break;
+    case Mode::DEC: nov::intToString(u, 10, buf); break;
+    case Mode::BIN: stream << "0b"; nov::intToString(u, 2, buf); break;
+    case Mode::HEX: stream << "0x"; nov::intToString(u, 16, buf); break;
     default: return stream;
     }
     return stream << buf;
 }
 
-nov_stream& operator<<(nov_stream& stream, int32_t i)
+Stream& operator<<(Stream& stream, int32_t i)
 {
     char buf[16] = { 0 };
     if (i < 0)
     {
         buf[0] = '-';
-        nov::int_to_string(-i, 10, buf+1);
+        nov::intToString(-i, 10, buf+1);
         return stream << buf;
     }
     else
@@ -79,14 +79,14 @@ nov_stream& operator<<(nov_stream& stream, int32_t i)
     }
 }
 
-nov_stream& operator<<(nov_stream& stream, float f)
+Stream& operator<<(Stream& stream, float f)
 {
     char buf[128] = { 0 };
-    nov::float_to_string(f, buf, 3);
+    nov::floatToString(f, buf, 3);
     return stream << buf;
 }
 
-nov_stream& operator<<(nov_stream& stream, mode m)
+Stream& operator<<(Stream& stream, Mode m)
 {
     stream.uint_mode = m;
     return stream;

@@ -13,31 +13,31 @@ namespace nov
 namespace vector
 {
 
-typedef nov_vector3<uint8_t> nov_colour;
-typedef nov_vector3<float> nov_fvector3;
-typedef nov_vector3<uint32_t> nov_uvector3;
-typedef nov_vector3<int32_t> nov_ivector3;
+typedef Vector3<uint8_t> Colour;
+typedef Vector3<float> FVector3;
+typedef Vector3<uint32_t> UVector3;
+typedef Vector3<int32_t> IVector3;
 
-typedef nov_vector2<float> nov_fvector2;
-typedef nov_vector2<uint32_t> nov_uvector2;
-typedef nov_vector2<int32_t> nov_ivector2;
+typedef Vector2<float> FVector2;
+typedef Vector2<uint32_t> UVector2;
+typedef Vector2<int32_t> IVector2;
 
-typedef nov_vector4<uint8_t> nov_tcolour;
-typedef nov_vector4<float> nov_fvector4;
-typedef nov_vector4<uint32_t> nov_uvector4;
-typedef nov_vector4<int32_t> nov_ivector4;
-
-template <typename T>
-inline stream::nov_stream& operator<<(stream::nov_stream& stream, nov_vector3<T> v)
-{ return stream << stream::mode::DEC << "vector3{ " << v.x << ", " << v.y << ", " << v.z << " }"; }
+typedef Vector4<uint8_t> TColour;
+typedef Vector4<float> FVector4;
+typedef Vector4<uint32_t> UVector4;
+typedef Vector4<int32_t> IVector4;
 
 template <typename T>
-inline stream::nov_stream& operator<<(stream::nov_stream& stream, nov_vector2<T> v)
-{ return stream << stream::mode::DEC << "vector2{ " << v.u << ", " << v.v << " }"; }
+inline stream::Stream& operator<<(stream::Stream& stream, Vector3<T> v)
+{ return stream << stream::Mode::DEC << "vector3{ " << v.x << ", " << v.y << ", " << v.z << " }"; }
 
 template <typename T>
-inline stream::nov_stream& operator<<(stream::nov_stream& stream, nov_vector4<T> v)
-{ return stream << stream::mode::DEC << "vector4{ " << v.x << ", " << v.y << ", " << v.z << ", " << v.w << " }"; }
+inline stream::Stream& operator<<(stream::Stream& stream, Vector2<T> v)
+{ return stream << stream::Mode::DEC << "vector2{ " << v.u << ", " << v.v << " }"; }
+
+template <typename T>
+inline stream::Stream& operator<<(stream::Stream& stream, Vector4<T> v)
+{ return stream << stream::Mode::DEC << "vector4{ " << v.x << ", " << v.y << ", " << v.z << ", " << v.w << " }"; }
 
 }
 }

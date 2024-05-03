@@ -4,13 +4,13 @@
 
 using namespace nov;
 
-void gui::nov_panel_textbox::_draw draw_function_stub
+void gui::PanelTextbox::_draw draw_function_stub
 {
-    nov_panel_textbox* text_panel = static_cast<nov_panel_textbox*>(panel);
+    PanelTextbox* text_panel = static_cast<PanelTextbox*>(panel);
     if (!text_panel->font || !text_panel->font->bitmap) return;
 
-    nov_uvector2 character_origin = frame.origin;
-    uint32_t length = text_panel->text.get_length();
+    UVector2 character_origin = frame.origin;
+    uint32_t length = text_panel->text.getLength();
 
     for (uint32_t char_ind = 0; char_ind < length; char_ind++)
     {
@@ -42,8 +42,8 @@ void gui::nov_panel_textbox::_draw draw_function_stub
             {
                 if (glyph_start[x + (y * text_panel->font->bitmap_width)])
                 {
-                    nov_uvector2 position = character_origin + nov_uvector2{ x,y };
-                    graphics::set_pixel(position.u + (position.v * framebuffer.size.u), text_panel->text_colour, framebuffer);
+                    UVector2 position = character_origin + UVector2{ x,y };
+                    graphics::setPixel(position.u + (position.v * framebuffer.size.u), text_panel->text_colour, framebuffer);
                 }
             }
         }

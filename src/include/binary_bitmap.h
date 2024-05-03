@@ -4,13 +4,12 @@
 
 #define NOV_BINARY_BITMAP_HEADER_CHECKSUM ('n' | ('b' << 8) | ('b' << 16) | ('h' << 24))
 
-
 namespace nov
 {
 namespace file
 {
 
-struct nov_binary_bitmap_header
+struct BinaryBitmapHeader
 {
     uint32_t checksum;
 
