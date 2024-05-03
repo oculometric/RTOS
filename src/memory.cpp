@@ -109,7 +109,8 @@ void* mAlloc(uint32_t size)
         // the block wasn't big enough, so lets move onto the next
         current_block = next_block;
     }
-
+    com_1 << size << stream::endl;
+    panic("unable to allocate memory!!");
     return 0x0;
 }
 
@@ -118,7 +119,7 @@ void mFree(void* ptr)
     // step back to the metadata of the block
     MemoryFrame* block = (MemoryFrame*)((uint32_t)ptr-sizeof(MemoryFrame));
     // someone tried to free an invalid block, or the block metadata has been corrupted (oh no)
-    if (block->signature != 0x4a6b || block->signature_end != 0x79) { com_1 << "memory free error: " << stream::Mode::HEX << (uint32_t)ptr << stream::endl << (uint32_t)block->signature << stream::endl; panic(); }
+    if (block->signature != 0x4a6b || block->signature_end != 0x79) { com_1 << "memory free error: " << stream::Mode::HEX << (uint32_t)ptr << stream::endl << (uint32_t)block->signature << stream::endl; panic("memory free error"); }
     // if this block is already free, um, cry
     if (block->is_free) return;
     // mark as free

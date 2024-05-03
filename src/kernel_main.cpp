@@ -77,15 +77,11 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     
     uint8_t* real_buffer = (uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address;
     uint8_t* backbuffer = new uint8_t[640*480*3];
-    if (backbuffer == 0x0) { com_1 << "unable to allocate memory for GUI backbuffer. panic!" << endl; panic(); }
+    if (backbuffer == 0x0) panic("unable to allocate memory for GUI backbuffer");
     memory::mView();
 
     graphics::Framebuffer framebuffer{ backbuffer, UVector2{ 640, 480 }, 3 };
     gui::GuiManager man (framebuffer);
-
-    auto root = man.getRoot();
-    auto text_panel = new gui::PanelTextbox();
-    root->panel = text_panel;
 
     file::BinaryBitmapHeader* font_header = (file::BinaryBitmapHeader*)_res_font_binbmp_start;
     com_1 << "font checksum:        " << font_header->checksum << endl;
@@ -106,8 +102,17 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     font->bitmap_height = font_header->image_height;
     font->tiles_per_row = font->bitmap_width / font->char_width;
     font->tiles_per_column = font->bitmap_height / font->char_height;
-    text_panel->font = font;
 
+    man.guiFont = font;
+
+    auto root = man.getRoot();
+
+    auto text_panel = new gui::PanelTextbox();
+    root->panel = text_panel;
+
+
+    text_panel->name ="text panel";
+    text_panel->font = font;
     text_panel->text = R"""(0: The quick brown fox jumps over the lazy dog. Lorem ipsum dolor sit amet.
 Bee Movie
 By Jerry Seinfeld
@@ -156,7 +161,6 @@ BARRY:
 (Barry flies down the stairs)
     )""";
     text_panel->text_colour = nov_colour_carmine;
-
     com_1 << "string is: \"" << text_panel->text << "\"" << endl;
 
     while (true)

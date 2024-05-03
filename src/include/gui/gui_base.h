@@ -6,6 +6,7 @@
 #include <colour.h>
 #include <graphics.h>
 #include <array.h>
+#include <string.h>
 
 #define draw_function_stub (const FrameData& frame, const graphics::Framebuffer& framebuffer, Panel* panel)
 
@@ -44,6 +45,8 @@ protected:
     bool show_border = true;
     bool clear_on_draw = true;
 public:
+    String name;
+
     inline void draw(const FrameData& frame, const graphics::Framebuffer& framebuffer)
     {
         if (draw_function_ptr == 0x0) { return; }
@@ -134,6 +137,7 @@ public:
     Colour frame_outline_colour = nov_colour_gold;
     Colour frame_fill_colour = nov_colour_nearblack;
     uint8_t frame_menu_thickness = 6;
+    Font* guiFont = 0;
 
     /**
      * redraw the entire GUI tree

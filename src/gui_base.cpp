@@ -71,11 +71,22 @@ void GuiManager::drawContainer(Container* container, const FrameData& frame)
          || (container->panel == 0x0 && container->child_a == 0x0 && container->child_b == 0x0))
        )
     {
-        // TODO: text label/title
         // draw the top bar
         graphics::fillBox(frame.origin+UVector2{1,1}, UVector2{frame.size.u-2,10}, frame_outline_colour, framebuffer);
         // coloured outline
         graphics::drawBox(frame.origin+UVector2{1,1}, frame.size-UVector2{2,2}, frame_outline_colour, framebuffer);
+        // draw title
+        if (guiFont)
+        {
+            uint32_t length = container->panel->name.getLength();
+            UVector2 character_origin = frame.origin + UVector2{8,1};
+            for (uint32_t char_ind = 0; char_ind < length; char_ind++)
+            {
+                char chr = container->panel->name[char_ind];
+                graphics::drawCharacter(chr, character_origin, nov_colour_black, *guiFont, framebuffer);
+                character_origin.u += guiFont->char_width + 1;
+            }
+        }
     }
 
     // draw panel, if it exists

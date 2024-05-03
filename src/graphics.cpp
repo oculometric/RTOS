@@ -388,5 +388,25 @@ void boundsFixMinmax(Bounds& bounds)
     if (bounds.min.z > bounds.max.z) { tmp = bounds.min.z; bounds.min.z = bounds.max.z; bounds.max.z = tmp; }
 }
 
+void drawCharacter(char chr, const UVector2& origin, const Colour& col, const Font& font, const Framebuffer& framebuffer)
+{
+    uint8_t glyph_base_x = (chr % font.tiles_per_row);
+    uint8_t glyph_base_y = (chr / font.tiles_per_row);
+    uint8_t* glyph_start = font.bitmap + ((glyph_base_x + (glyph_base_y * font.char_height * font.tiles_per_row)) * font.char_width);
+
+    // TODO: small efficiency improvement here
+    for (uint8_t y = 0; y < font.char_height; y++)
+    {
+        for (uint8_t x = 0; x < font.char_width; x++)
+        {
+            if (glyph_start[x + (y * font.bitmap_width)])
+            {
+                UVector2 position = origin + UVector2{ x,y };
+                setPixel(position.u + (position.v * framebuffer.size.u), col, framebuffer);
+            }
+        }
+    }
+}
+
 }
 }

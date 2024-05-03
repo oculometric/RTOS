@@ -72,13 +72,13 @@ String& nov::String::operator=(const char* chrs)
 
 char& String::operator[](uint32_t index)
 {
-    if (index >= backing.getLength()) panic();
+    if (index >= backing.getLength()) panic("index out of range");
     return backing[index];
 }
 
 char String::operator[](uint32_t index) const
 {
-    if (index >= backing.getLength()) panic();
+    if (index >= backing.getLength()) panic("index out of range");
     return backing[index];
 }
 
@@ -90,7 +90,7 @@ void String::append(char c)
 void nov::String::append(char* c)
 {
     uint32_t size = 0;
-    for (size = 0; c[size] != 0x0; size++)
+    for (size = 0; c[size] != 0x0; size++) { }
     backing.resize(backing.getCapacity() + size);
     for (uint32_t i = 0; i < size; i++)
         backing.push(c[i]);
@@ -99,7 +99,7 @@ void nov::String::append(char* c)
 void nov::String::append(const char* c)
 {
     uint32_t size = 0;
-    for (size = 0; c[size] != 0x0; size++)
+    for (size = 0; c[size] != 0x0; size++) { }
     backing.resize(backing.getCapacity() + size);
     for (uint32_t i = 0; i < size; i++)
         backing.push(c[i]);

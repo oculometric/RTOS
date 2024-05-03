@@ -31,23 +31,8 @@ void gui::PanelTextbox::_draw draw_function_stub
             continue;
         }
 
-        // draw character
-        uint8_t glyph_base_x = (chr % text_panel->font->tiles_per_row);
-        uint8_t glyph_base_y = (chr / text_panel->font->tiles_per_row);
-        uint8_t* glyph_start = text_panel->font->bitmap + ((glyph_base_x + (glyph_base_y * text_panel->font->char_height * text_panel->font->tiles_per_row)) * text_panel->font->char_width);
-
-        for (uint8_t y = 0; y < text_panel->font->char_height; y++)
-        {
-            for (uint8_t x = 0; x < text_panel->font->char_width; x++)
-            {
-                if (glyph_start[x + (y * text_panel->font->bitmap_width)])
-                {
-                    UVector2 position = character_origin + UVector2{ x,y };
-                    graphics::setPixel(position.u + (position.v * framebuffer.size.u), text_panel->text_colour, framebuffer);
-                }
-            }
-        }
-
+        graphics::drawCharacter(chr, character_origin, text_panel->text_colour, *(text_panel->font), framebuffer);
+        
         character_origin.u += text_panel->font->char_width + 1;
     }
 }

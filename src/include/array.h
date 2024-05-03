@@ -51,8 +51,8 @@ public:
         if (new_capacity <= capacity) return;
         uint32_t extra_capacity = new_capacity-capacity;
         // request more memory from mAlloc
-        ArrayContainer* first_fresh = (ArrayContainer*)memory::mAlloc(sizeof(ArrayContainer) + (extra_capacity * sizeof(T)));
-        if (first_fresh == 0x0) panic();
+        ArrayContainer* first_fresh = (ArrayContainer*)memory::mAlloc(sizeof(ArrayContainer) + (extra_capacity * sizeof(T)) + 4); // i hate this. why does this fix it?
+        if (first_fresh == 0x0) panic("unable to allocate memory for array");
 
         // check if the array is uninitialised
         if (first == 0x0)
@@ -85,18 +85,18 @@ public:
      * **/
     inline T& operator[](uint32_t index)
     {
-        if (index >= length) { com_1 << "index out of range " << index << stream::endl; panic(); } // crashes the kernel
+        if (index >= length) panic("index out of range"); // crashes the kernel
         // step over the linked list until we reach the block which contains the relevant index
         ArrayContainer* current = first;
-        uint32_t cumulative = 0;
-        while (index > cumulative + current->elements_in_block)
+        uint32_t index_in_container = index;
+        while (index_in_container > current->elements_in_block)
         {
-            cumulative += current->elements_in_block;
+            index_in_container -= current->elements_in_block;
             current = current->next;
         }
 
         // and get the data from this container
-        return ((T*)(current + 1))[index - cumulative];
+        return ((T*)(current + 1))[index_in_container];
     }
 
     /**
@@ -106,18 +106,18 @@ public:
      * **/
     inline T operator[](uint32_t index) const
     {
-        if (index >= length) { com_1 << "index out of range " << index << stream::endl; panic(); } // crashes the kernel
+        if (index >= length) panic("index out of range"); // crashes the kernel
         // step over the linked list until we reach the block which contains the relevant index
         ArrayContainer* current = first;
-        uint32_t cumulative = 0;
-        while (index > cumulative + current->elements_in_block)
+        uint32_t index_in_container = index;
+        while (index_in_container > current->elements_in_block)
         {
-            cumulative += current->elements_in_block;
+            index_in_container -= current->elements_in_block;
             current = current->next;
         }
 
         // and get the data from this container
-        return ((T*)(current + 1))[index - cumulative];
+        return ((T*)(current + 1))[index_in_container];
     }
 
     /**
@@ -133,7 +133,7 @@ public:
             resize(capacity+4);
         }
         // if we have size now, increase length and insert
-        if (capacity > length)
+        if (length < capacity - 1)
         {
             length++;
             (*this)[length-1] = element;
@@ -147,7 +147,7 @@ public:
      * **/
     inline T pop()
     {
-        if (length == 0) { com_1 << "illegal pop attempt" << stream::endl; panic(); } // crashes the kernel
+        if (length == 0) panic("illegal pop attempt"); // crashes the kernel
         T value = (*this)[length-1];
         length--;
         return value;
