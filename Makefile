@@ -6,7 +6,7 @@ CC			:= $(PREFIX)g++
 LD			:= $(PREFIX)ld
 
 AS_FLAGS		:= -f elf
-CC_FLAGS		:= -ffreestanding -m32 -g -masm=intel -Wall -Wextra -Wpedantic -Wno-unused-parameter -mno-red-zone -std=c++20 -fno-exceptions -s -fno-ident -fno-asynchronous-unwind-tables -O3
+CC_FLAGS		:= -ffreestanding -m32 -g -masm=intel -Wall -Wextra -Wpedantic -Wno-unused-parameter -mno-red-zone -std=c++20 -fno-exceptions -s -fno-ident -fno-asynchronous-unwind-tables -O2
 LD_FLAGS		:= -T linker.ld -s
 
 BIN				= bin
@@ -92,6 +92,9 @@ disassemble:
 
 dump:
 	hd $(BOOT_OUT)
+
+analyse: build
+	du -ha -d 3 bin
 
 clean:
 	@rm -fr $(BIN)
