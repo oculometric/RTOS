@@ -26,7 +26,7 @@ inline float sqrt(float number)
     return f;
 }
 
-inline float inv_sqrt(float number)
+inline float invSqrt(float number)
 { 
     return 1.0f/sqrt(number);
 }

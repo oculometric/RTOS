@@ -10,17 +10,17 @@ namespace graphics
 // TODO: comments in this file
 using namespace vector;
 
-void draw_box(const nov_uvector2& origin, const nov_uvector2& size, const nov_colour& col, const nov_framebuffer& framebuffer)
+void drawBox(const UVector2& origin, const UVector2& size, const Colour& col, const Framebuffer& framebuffer)
 {
-    uint32_t top_left = get_offset(origin, framebuffer.size);
+    uint32_t top_left = getOffset(origin, framebuffer.size);
     uint32_t top_right = (top_left + size.u) - 1;
     uint32_t bottom_left = top_left;
     uint32_t bottom_right = top_right;
 
     for (uint32_t t = 0; t < size.v; t++)
     {
-        set_pixel(bottom_left, col, framebuffer);
-        set_pixel(bottom_right, col, framebuffer);
+        setPixel(bottom_left, col, framebuffer);
+        setPixel(bottom_right, col, framebuffer);
 
         bottom_left += framebuffer.size.u;
         bottom_right += framebuffer.size.u;
@@ -31,23 +31,23 @@ void draw_box(const nov_uvector2& origin, const nov_uvector2& size, const nov_co
 
     for (uint32_t t = 0; t < size.u; t++)
     {
-        set_pixel(top_right, col, framebuffer);
-        set_pixel(bottom_left, col, framebuffer);
+        setPixel(top_right, col, framebuffer);
+        setPixel(bottom_left, col, framebuffer);
 
         top_right++;
         bottom_left++;
     }
 }
 
-void fill_box(const nov_uvector2& origin, const nov_uvector2& size, const nov_colour& col, const nov_framebuffer& framebuffer)
+void fillBox(const UVector2& origin, const UVector2& size, const Colour& col, const Framebuffer& framebuffer)
 {
-    uint32_t offset = get_offset(origin, framebuffer.size);
-    uint32_t end_offset = get_offset(origin+size-nov_uvector2{ 1,1 }, framebuffer.size);
+    uint32_t offset = getOffset(origin, framebuffer.size);
+    uint32_t end_offset = getOffset(origin+size-UVector2{ 1,1 }, framebuffer.size);
     uint32_t x = 0;
 
     while (offset <= end_offset)
     {
-        set_pixel(offset, col, framebuffer);
+        setPixel(offset, col, framebuffer);
         offset++;
         x++;
         if (x >= size.u)
@@ -59,10 +59,10 @@ void fill_box(const nov_uvector2& origin, const nov_uvector2& size, const nov_co
     }
 }
 
-void draw_line(const nov_uvector2& start, const nov_uvector2& end, const nov_colour& col, const nov_framebuffer& framebuffer)
+void drawLine(const UVector2& start, const UVector2& end, const Colour& col, const Framebuffer& framebuffer)
 {
-    nov_uvector2 minimum = start;
-    nov_uvector2 maximum = end;
+    UVector2 minimum = start;
+    UVector2 maximum = end;
 
     if (start.u > end.u)
     {
@@ -70,8 +70,8 @@ void draw_line(const nov_uvector2& start, const nov_uvector2& end, const nov_col
         maximum = start;
     }
 
-    nov_uvector2 current = minimum;
-    nov_uvector2 offset = nov_uvector2{0,0};
+    UVector2 current = minimum;
+    UVector2 offset = UVector2{0,0};
 
     float m = ((float)maximum.v-(float)minimum.v)/((float)maximum.u-(float)minimum.u);
 
@@ -90,7 +90,7 @@ void draw_line(const nov_uvector2& start, const nov_uvector2& end, const nov_col
         current = minimum;
         while (current.v < maximum.v)
         {
-            set_pixel(get_offset(current, framebuffer.size), col, framebuffer);
+            setPixel(getOffset(current, framebuffer.size), col, framebuffer);
             current.v++;
             if (current.v > framebuffer.size.v) break;
         }
@@ -99,7 +99,7 @@ void draw_line(const nov_uvector2& start, const nov_uvector2& end, const nov_col
     {
         while (current.u < maximum.u)
         {
-            set_pixel(get_offset(current, framebuffer.size), col, framebuffer);
+            setPixel(getOffset(current, framebuffer.size), col, framebuffer);
             current.u++;
             if (current.u > framebuffer.size.u) break;
         }
@@ -108,7 +108,7 @@ void draw_line(const nov_uvector2& start, const nov_uvector2& end, const nov_col
     {
         while (current.u < maximum.u)
         {
-            set_pixel(get_offset(current, framebuffer.size), col, framebuffer);
+            setPixel(getOffset(current, framebuffer.size), col, framebuffer);
             current.v++;
             offset.v++;
             current.u = (uint32_t)(((float)minimum.u)+((float)offset.v/m));
@@ -118,7 +118,7 @@ void draw_line(const nov_uvector2& start, const nov_uvector2& end, const nov_col
     {
         while (current.u < maximum.u)
         {
-            set_pixel(get_offset(current, framebuffer.size), col, framebuffer);
+            setPixel(getOffset(current, framebuffer.size), col, framebuffer);
             current.u++;
             offset.u++;
             current.v = (uint32_t)(((float)minimum.v)+((float)offset.u*m));
@@ -128,7 +128,7 @@ void draw_line(const nov_uvector2& start, const nov_uvector2& end, const nov_col
     {
         while (current.u < maximum.u)
         {
-            set_pixel(get_offset(current, framebuffer.size), col, framebuffer);
+            setPixel(getOffset(current, framebuffer.size), col, framebuffer);
             current.u++;
             offset.u++;
             current.v = (uint32_t)(((float)minimum.v)+((float)offset.u*m));
@@ -139,7 +139,7 @@ void draw_line(const nov_uvector2& start, const nov_uvector2& end, const nov_col
     {
         while (current.u < maximum.u)
         {
-            set_pixel(get_offset(current, framebuffer.size), col, framebuffer);
+            setPixel(getOffset(current, framebuffer.size), col, framebuffer);
             current.v--;
             offset.v++;
             current.u = (uint32_t)(((float)minimum.u)-((float)offset.v/m));
@@ -153,7 +153,7 @@ void draw_line(const nov_uvector2& start, const nov_uvector2& end, const nov_col
  * delete all the buffers (if they actually exist). oh boy you better not do any silly 
  * stuff after we delete the buffers!
  * **/
-void nov_mesh::deallocate_buffers()
+void Mesh::deallocateBuffers()
 {
     if (vertices) delete[] vertices;
     vertices = 0x0;
@@ -177,14 +177,14 @@ void nov_mesh::deallocate_buffers()
     if (inv_denoms) delete[] inv_denoms;
     inv_denoms = 0x0;
 
-    memory::mconsolidate();
+    memory::mConsolidate();
 }
 
 /**
  * recalculate stashed mesh data for rendering. this should be called whenever you've finished
  * modifying the mesh data and before using it for rendering
  * **/
-void nov_mesh::update_mesh_data()
+void Mesh::updateMeshData()
 {
     // reallocate necessary buffers
     if (edge_vectors != 0x0) { delete[] edge_vectors; edge_vectors = 0x0; }
@@ -194,13 +194,13 @@ void nov_mesh::update_mesh_data()
 
     uint16_t triangles_num = triangles_count/3;
 
-    edge_vectors = new nov_fvector3[2*triangles_num];
+    edge_vectors = new FVector3[2*triangles_num];
     edge_dots = new float[3*triangles_num];
     inv_denoms = new float[triangles_num];
-    normals = new nov_fvector3[triangles_num];
+    normals = new FVector3[triangles_num];
 
     // iterate over triangles and calculate constants
-    nov_fvector3 v1,v2,v3,v1_2,v1_3,n;
+    FVector3 v1,v2,v3,v1_2,v1_3,n;
     float d12_12,d12_13,d13_13;
     for (uint32_t i = 0; i < triangles_num; i++)
     {
@@ -219,16 +219,16 @@ void nov_mesh::update_mesh_data()
         normals[i] = n;
 
         // assign vertex normals, if they're blank (i.e. {0,0,0})
-        if (vertex_normals[(i*3)] == nov_fvector3{0,0,0}) vertex_normals[(i*3)] = n;
-        if (vertex_normals[(i*3)+1] == nov_fvector3{0,0,0}) vertex_normals[(i*3)+1] = n;
-        if (vertex_normals[(i*3)+2] == nov_fvector3{0,0,0}) vertex_normals[(i*3)+2] = n;
+        if (vertex_normals[(i*3)] == FVector3{0,0,0}) vertex_normals[(i*3)] = n;
+        if (vertex_normals[(i*3)+1] == FVector3{0,0,0}) vertex_normals[(i*3)+1] = n;
+        if (vertex_normals[(i*3)+2] == FVector3{0,0,0}) vertex_normals[(i*3)+2] = n;
 
         // calculate v1_2^v1_2, v1_2^v1_3, v1_3^v1_3
-        d12_12 = mag_sq(v1_2);
+        d12_12 = magSq(v1_2);
         edge_dots[(i*3)] = d12_12;
         d12_13 = v1_2 ^ v1_3;
         edge_dots[(i*3)+1] = d12_13;
-        d13_13 = mag_sq(v1_3);
+        d13_13 = magSq(v1_3);
         edge_dots[(i*3)+2] = d13_13;
 
         // calculate inverse denominator
@@ -238,9 +238,9 @@ void nov_mesh::update_mesh_data()
     // calculate object bounding box
     if (vertices_count == 0)
     {
-        bounds.center = nov_fvector3{ 0,0,0 };
-        bounds.radius = nov_fvector3{ 0,0,0 };
-        bounds_mm_from_cr(bounds);
+        bounds.center = FVector3{ 0,0,0 };
+        bounds.radius = FVector3{ 0,0,0 };
+        boundsMinMaxFromCenterRadius(bounds);
         return;
     }
 
@@ -258,7 +258,7 @@ void nov_mesh::update_mesh_data()
         if (v1.x < bounds.min.x) bounds.min.x = v1.x;
     }
 
-    bounds_cr_from_mm(bounds);
+    boundsCenterRadiusFromMinMax(bounds);
 }
 
 /**
@@ -267,11 +267,11 @@ void nov_mesh::update_mesh_data()
  * @param mesh_data pointer to the character array containing the object file data
  * @returns true if the mesh was successfully loaded from the data, or false if something went wrong
  * **/
-bool nov_mesh::read_obj(const char* mesh_data)
+bool Mesh::readObj(const char* mesh_data)
 {
     // lay a header over the start of the mesh data like a stencil
-    file::nov_binary_mesh_header* header;
-    header = (file::nov_binary_mesh_header*)mesh_data;
+    file::BinaryMeshHeader* header;
+    header = (file::BinaryMeshHeader*)mesh_data;
     
     // if the header is invalid, or there are no valid verts or tris, give up
     if (header->checksum != NOV_BINARY_MESH_HEADER_CHECKSUM 
@@ -279,11 +279,11 @@ bool nov_mesh::read_obj(const char* mesh_data)
      || header->triangle_buffer_length == 0) return false;
 
     // delete all existing data
-    deallocate_buffers();
+    deallocateBuffers();
 
     // reallocate all the buffers
     vertices_count = header->vertex_buffer_length;
-    vertices = new nov_fvector3[vertices_count];
+    vertices = new FVector3[vertices_count];
     vertices_capacity = vertices_count;
 
     triangles_count = header->triangle_buffer_length*3;
@@ -292,13 +292,13 @@ bool nov_mesh::read_obj(const char* mesh_data)
 
     material_indices = new uint16_t[header->triangle_buffer_length];
 
-    uvs = new nov_fvector2[triangles_count];
-    vertex_normals = new nov_fvector3[triangles_count];
+    uvs = new FVector2[triangles_count];
+    vertex_normals = new FVector3[triangles_count];
 
     // TODO: materials?
 
     // iterate over the vertices and read them into the mesh vertex buffer
-    file::nov_binary_mesh_vertex* verts = (file::nov_binary_mesh_vertex*)((char*)header + header->vertex_buffer_offset);
+    file::BinaryMeshVertex* verts = (file::BinaryMeshVertex*)((char*)header + header->vertex_buffer_offset);
     for (uint32_t i = 0; i < header->vertex_buffer_length; i++)
     {
         vertices[i].x = verts[i].x;
@@ -307,80 +307,80 @@ bool nov_mesh::read_obj(const char* mesh_data)
     }
 
     // iterate over triangles and read them into the triangle buffer, and also the uvs at the same time
-    file::nov_binary_mesh_triangle* tris = (file::nov_binary_mesh_triangle*)((char*)header + header->triangle_buffer_offset);
-    file::nov_binary_mesh_normal* norms = (file::nov_binary_mesh_normal*)((char*)header + header->normal_buffer_offset);
-    file::nov_binary_mesh_uv* coords = (file::nov_binary_mesh_uv*)((char*)header + header->uv_buffer_offset);
+    file::BinaryMeshTriangle* tris = (file::BinaryMeshTriangle*)((char*)header + header->triangle_buffer_offset);
+    file::BinaryMeshNormal* norms = (file::BinaryMeshNormal*)((char*)header + header->normal_buffer_offset);
+    file::BinaryMeshUV* coords = (file::BinaryMeshUV*)((char*)header + header->uv_buffer_offset);
     uint32_t i3 = 0;
     for (uint32_t i = 0; i < header->triangle_buffer_length; i++)
     {
         triangles[i3] = tris[i].v0;
         vertex_normals[i3] = ((tris[i].flags & NOV_BINARY_MESH_TRIANGLE_N0) 
                             && (tris[i].n0 < header->normal_buffer_length))
-                            ? nov_fvector3{ norms[tris[i].n0].x, norms[tris[i].n0].y, norms[tris[i].n0].z }
-                            : nov_fvector3{ 0.0f, 0.0f, 0.0f };
+                            ? FVector3{ norms[tris[i].n0].x, norms[tris[i].n0].y, norms[tris[i].n0].z }
+                            : FVector3{ 0.0f, 0.0f, 0.0f };
         uvs[i3] = ((tris[i].flags & NOV_BINARY_MESH_TRIANGLE_U0) 
                  && (tris[i].u0 < header->uv_buffer_length))
-                 ? nov_fvector2{ coords[tris[i].u0].u, coords[tris[i].u0].v }
-                 : nov_fvector2{ 0.0f, 0.0f };
+                 ? FVector2{ coords[tris[i].u0].u, coords[tris[i].u0].v }
+                 : FVector2{ 0.0f, 0.0f };
         i3++;
         triangles[i3] = tris[i].v1;
         vertex_normals[i3] = ((tris[i].flags & NOV_BINARY_MESH_TRIANGLE_N1) 
                             && (tris[i].n1 < header->normal_buffer_length))
-                            ? nov_fvector3{ norms[tris[i].n1].x, norms[tris[i].n1].y, norms[tris[i].n1].z }
-                            : nov_fvector3{ 0.0f, 0.0f, 0.0f };
+                            ? FVector3{ norms[tris[i].n1].x, norms[tris[i].n1].y, norms[tris[i].n1].z }
+                            : FVector3{ 0.0f, 0.0f, 0.0f };
         uvs[i3] = ((tris[i].flags & NOV_BINARY_MESH_TRIANGLE_U1) 
                  && (tris[i].u1 < header->uv_buffer_length))
-                 ? nov_fvector2{ coords[tris[i].u1].u, coords[tris[i].u1].v }
-                 : nov_fvector2{ 0.0f, 0.0f };
+                 ? FVector2{ coords[tris[i].u1].u, coords[tris[i].u1].v }
+                 : FVector2{ 0.0f, 0.0f };
         i3++;
         triangles[i3] = tris[i].v2;
         vertex_normals[i3] = ((tris[i].flags & NOV_BINARY_MESH_TRIANGLE_N2) 
                             && (tris[i].n2 < header->normal_buffer_length))
-                            ? nov_fvector3{ norms[tris[i].n2].x, norms[tris[i].n2].y, norms[tris[i].n2].z }
-                            : nov_fvector3{ 0.0f, 0.0f, 0.0f };
+                            ? FVector3{ norms[tris[i].n2].x, norms[tris[i].n2].y, norms[tris[i].n2].z }
+                            : FVector3{ 0.0f, 0.0f, 0.0f };
         uvs[i3] = ((tris[i].flags & NOV_BINARY_MESH_TRIANGLE_U2) 
                  && (tris[i].u2 < header->uv_buffer_length))
-                 ? nov_fvector2{ coords[tris[i].u2].u, coords[tris[i].u2].v }
-                 : nov_fvector2{ 0.0f, 0.0f };
+                 ? FVector2{ coords[tris[i].u2].u, coords[tris[i].u2].v }
+                 : FVector2{ 0.0f, 0.0f };
         i3++;
     }
 
     // pump the last bit of backing data, FIXME: disabled for now since most of the data isn't needed 
-    update_mesh_data();
+    updateMeshData();
 
-    com_1 << "successfully read a mesh with " << stream::mode::DEC 
-          << count_vertices() << " verts and " 
-          << count_triangles() << " tris." << stream::endl;
+    com_1 << "successfully read a mesh with " << stream::Mode::DEC 
+          << countVertices() << " verts and " 
+          << countTriangles() << " tris." << stream::endl;
 
     // we're done
     return true;
 }
 
-uint16_t nov_mesh::count_vertices() { return vertices_count; }
-uint16_t nov_mesh::count_triangles() { return triangles_count / 3; }
+uint16_t Mesh::countVertices() { return vertices_count; }
+uint16_t Mesh::countTriangles() { return triangles_count / 3; }
 
-nov_mesh::nov_mesh() { }
-nov_mesh::nov_mesh(const char* obj_data) { read_obj(obj_data); }
+Mesh::Mesh() { }
+Mesh::Mesh(const char* obj_data) { readObj(obj_data); }
 
-nov_mesh::~nov_mesh()
+Mesh::~Mesh()
 {
-    deallocate_buffers();
+    deallocateBuffers();
 }
 
-void bounds_mm_from_cr(nov_bounds& bounds)
+void boundsMinMaxFromCenterRadius(Bounds& bounds)
 {
     bounds.min = bounds.center - bounds.radius;
     bounds.max = bounds.center + bounds.radius;
 }
 
-void bounds_cr_from_mm(nov_bounds& bounds)
+void boundsCenterRadiusFromMinMax(Bounds& bounds)
 {
-    bounds_fix_minmax(bounds);
+    boundsFixMinmax(bounds);
     bounds.radius = (bounds.max - bounds.min) * 0.5f;
     bounds.center = bounds.min + bounds.radius;
 }
 
-void bounds_fix_minmax(nov_bounds& bounds)
+void boundsFixMinmax(Bounds& bounds)
 {
     float tmp = 0.0f;
     if (bounds.min.x > bounds.max.x) { tmp = bounds.min.x; bounds.min.x = bounds.max.x; bounds.max.x = tmp; }

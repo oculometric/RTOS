@@ -10,7 +10,6 @@
 #include <font.h>
 
 // TODO: string splitting
-// TODO: textbox panel
 // TODO: interrupts
 // TODO: keyboard
 // TODO: v-tables
@@ -19,25 +18,25 @@
 using namespace nov;
 using namespace stream;
 
-extern "C" void main(boot::nov_os_hint_table* os_hint_table)
+extern "C" void main(boot::OSHintTable* os_hint_table)
 {
-    init_serial(COM1);
+    initSerial(COM1);
     com_1 << "hello from kernel main." << endl;
     com_1.flush();
     com_1 << "reading the os hint table..." << endl;
-    com_1 << "    gdt address      : " << mode::HEX << (uint32_t)os_hint_table->gdt_address << endl;
-    com_1 << "    1kib low blocks  : " << mode::DEC << os_hint_table->low_kilobyte_blocks << endl;
-    com_1 << "    CPUID ecx        : " << mode::BIN << os_hint_table->cpuid_ecx_content << endl;
-    com_1 << "    CPUID edx        : " << mode::BIN << os_hint_table->cpuid_edx_content << endl;
-    com_1 << "    memory map table : " << mode::HEX << (uint32_t)os_hint_table->memory_map_table_address << endl;
-    com_1 << "    table entries    : " << mode::DEC << os_hint_table->memory_map_table_entries << endl;
-    com_1 << "    boot disk        : " << mode::DEC << os_hint_table->boot_disk_number << endl;
-    com_1 << "    BDA address      : " << mode::HEX << (uint32_t)os_hint_table->bios_data_area_address << endl;
-    com_1 << "    kernel elf start : " << mode::HEX << (uint32_t)os_hint_table->kernel_elf_start << endl;
-    com_1 << "    kernel elf end   : " << mode::HEX << (uint32_t)os_hint_table->kernel_elf_end << endl;
-    com_1 << "    kernel elf size  : " << mode::DEC << (uint32_t)os_hint_table->kernel_elf_end-(uint32_t)os_hint_table->kernel_elf_start << endl;
-    com_1 << "    checksum         : " << mode::HEX << os_hint_table->checksum << endl;
-    com_1 << "    novo             : " << mode::HEX << os_hint_table->checksum_novo << endl;
+    com_1 << "    gdt address      : " << Mode::HEX << (uint32_t)os_hint_table->gdt_address << endl;
+    com_1 << "    1kib low blocks  : " << Mode::DEC << os_hint_table->low_kilobyte_blocks << endl;
+    com_1 << "    CPUID ecx        : " << Mode::BIN << os_hint_table->cpuid_ecx_content << endl;
+    com_1 << "    CPUID edx        : " << Mode::BIN << os_hint_table->cpuid_edx_content << endl;
+    com_1 << "    memory map table : " << Mode::HEX << (uint32_t)os_hint_table->memory_map_table_address << endl;
+    com_1 << "    table entries    : " << Mode::DEC << os_hint_table->memory_map_table_entries << endl;
+    com_1 << "    boot disk        : " << Mode::DEC << os_hint_table->boot_disk_number << endl;
+    com_1 << "    BDA address      : " << Mode::HEX << (uint32_t)os_hint_table->bios_data_area_address << endl;
+    com_1 << "    kernel elf start : " << Mode::HEX << (uint32_t)os_hint_table->kernel_elf_start << endl;
+    com_1 << "    kernel elf end   : " << Mode::HEX << (uint32_t)os_hint_table->kernel_elf_end << endl;
+    com_1 << "    kernel elf size  : " << Mode::DEC << (uint32_t)os_hint_table->kernel_elf_end-(uint32_t)os_hint_table->kernel_elf_start << endl;
+    com_1 << "    checksum         : " << Mode::HEX << os_hint_table->checksum << endl;
+    com_1 << "    novo             : " << Mode::HEX << os_hint_table->checksum_novo << endl;
     com_1.flush();
 
     com_1 << endl;
@@ -46,7 +45,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
 
     for (int m = 0; m < os_hint_table->memory_map_table_entries; m++)
     {
-        com_1 << "memory map entry " << mode::DEC << m << ':' << endl;
+        com_1 << "memory map entry " << Mode::DEC << m << ':' << endl;
 
         uint64_t size = os_hint_table->memory_map_table_address[m].region_size;
         const char* size_scale = "B)\0\0";
@@ -54,13 +53,13 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
         if (size > 4096) { size /= 1024; size_scale = "MiB)"; }
         if (size > 4096) { size /= 1024; size_scale = "GiB)"; }
 
-        com_1 << "    base address low   : " << mode::HEX << (uint32_t)(os_hint_table->memory_map_table_address[m].region_base & 0xFFFFFFFF) << endl;
-        com_1 << "    base address high  : " << mode::HEX << (uint32_t)(os_hint_table->memory_map_table_address[m].region_base >> 32) << endl;
-        com_1 << "    region size low    : " << mode::HEX << (uint32_t)(os_hint_table->memory_map_table_address[m].region_size & 0xFFFFFFFF) << endl;
-        com_1 << "    region size high   : " << mode::HEX << (uint32_t)(os_hint_table->memory_map_table_address[m].region_size >> 32);
-        com_1 << " (" << mode::DEC << (uint32_t)size << size_scale << endl;
-        com_1 << "    region type        : " << mode::DEC << (os_hint_table->memory_map_table_address[m].region_type == 1 ? "free" : "reserved") << endl;
-        com_1 << "    acpi data          : " << mode::BIN << os_hint_table->memory_map_table_address[m].region_acpi << endl;
+        com_1 << "    base address low   : " << Mode::HEX << (uint32_t)(os_hint_table->memory_map_table_address[m].region_base & 0xFFFFFFFF) << endl;
+        com_1 << "    base address high  : " << Mode::HEX << (uint32_t)(os_hint_table->memory_map_table_address[m].region_base >> 32) << endl;
+        com_1 << "    region size low    : " << Mode::HEX << (uint32_t)(os_hint_table->memory_map_table_address[m].region_size & 0xFFFFFFFF) << endl;
+        com_1 << "    region size high   : " << Mode::HEX << (uint32_t)(os_hint_table->memory_map_table_address[m].region_size >> 32);
+        com_1 << " (" << Mode::DEC << (uint32_t)size << size_scale << endl;
+        com_1 << "    region type        : " << Mode::DEC << (os_hint_table->memory_map_table_address[m].region_type == 1 ? "free" : "reserved") << endl;
+        com_1 << "    acpi data          : " << Mode::BIN << os_hint_table->memory_map_table_address[m].region_acpi << endl;
     }
 
     com_1 << endl;
@@ -74,24 +73,24 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
 
     uint32_t kernel_size = (uint32_t)os_hint_table->kernel_elf_end-(uint32_t)os_hint_table->kernel_elf_start;
     
-    memory::minit((void*)(mmap_start+kernel_size), (mmap_size-kernel_size));
+    memory::mInit((void*)(mmap_start+kernel_size), (mmap_size-kernel_size));
     
     uint8_t* real_buffer = (uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address;
     uint8_t* backbuffer = new uint8_t[640*480*3];
     if (backbuffer == 0x0) { com_1 << "unable to allocate memory for GUI backbuffer. panic!" << endl; panic(); }
-    memory::mview();
+    memory::mView();
 
-    graphics::nov_framebuffer framebuffer{ backbuffer, nov_uvector2{ 640, 480 }, 3 };
-    gui::nov_gui_manager man (framebuffer);
+    graphics::Framebuffer framebuffer{ backbuffer, UVector2{ 640, 480 }, 3 };
+    gui::GuiManager man (framebuffer);
 
-    auto root = man.get_root();
-    auto text_panel = new gui::nov_panel_textbox();
+    auto root = man.getRoot();
+    auto text_panel = new gui::PanelTextbox();
     root->panel = text_panel;
 
-    file::nov_binary_bitmap_header* font_header = (file::nov_binary_bitmap_header*)_res_font_binbmp_start;
+    file::BinaryBitmapHeader* font_header = (file::BinaryBitmapHeader*)_res_font_binbmp_start;
     com_1 << "font checksum:        " << font_header->checksum << endl;
     com_1 << "bitmap checksum:      " << NOV_BINARY_BITMAP_HEADER_CHECKSUM << endl;
-    com_1 << mode::DEC;
+    com_1 << Mode::DEC;
     com_1 << "font bitmap width:    " << font_header->image_width << endl;
     com_1 << "font bitmap height:   " << font_header->image_height << endl;
     com_1 << "font bits per pixel:  " << font_header->bits_per_pixel << endl;
@@ -99,7 +98,7 @@ extern "C" void main(boot::nov_os_hint_table* os_hint_table)
     com_1 << "font bitmap offset:   " << font_header->data_offset << endl;
     com_1.flush();
 
-    nov_font* font = new nov_font();
+    Font* font = new Font();
     font->char_width = 5;
     font->char_height = 8;
     font->bitmap = ((uint8_t*)font_header + font_header->data_offset);
@@ -162,8 +161,8 @@ BARRY:
 
     while (true)
     {
-        man.draw_root();
-        memory::memcpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+        man.drawRoot();
+        memory::memCpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
         text_panel->text[0]++;
     }
 

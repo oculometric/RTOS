@@ -9,12 +9,12 @@ namespace nov
 namespace gui
 {
 
-void calculate_frame_data(const nov_frame_data& parent, const nov_fvector2& division, nov_frame_data* frame_a, nov_frame_data* frame_b)
+void calculateFrameData(const FrameData& parent, const FVector2& division, FrameData* frame_a, FrameData* frame_b)
 {
     // calculate the halfway point between child frames
-    nov_uvector2 halfway;
-    if (division.u == 0) halfway = nov_uvector2{ parent.size.u, (uint32_t)(((float)parent.size.v) * division.v) };
-    else halfway = nov_uvector2{ (uint32_t)(((float)parent.size.u) * division.u), parent.size.v };
+    UVector2 halfway;
+    if (division.u == 0) halfway = UVector2{ parent.size.u, (uint32_t)(((float)parent.size.v) * division.v) };
+    else halfway = UVector2{ (uint32_t)(((float)parent.size.u) * division.u), parent.size.v };
 
     // if frame_a is not null, populate it
     if (frame_a != 0x0)
@@ -27,18 +27,18 @@ void calculate_frame_data(const nov_frame_data& parent, const nov_fvector2& divi
     {
         if (division.u == 0)
         {
-            frame_b->origin = nov_uvector2{ parent.origin.u, parent.origin.v + halfway.v };
-            frame_b->size = nov_uvector2{ halfway.u, parent.size.v - halfway.v };
+            frame_b->origin = UVector2{ parent.origin.u, parent.origin.v + halfway.v };
+            frame_b->size = UVector2{ halfway.u, parent.size.v - halfway.v };
         }
         else
         {
-            frame_b->origin = nov_uvector2{ parent.origin.u + halfway.u, parent.origin.v };
-            frame_b->size = nov_uvector2{ parent.size.u - halfway.u, halfway.v };
+            frame_b->origin = UVector2{ parent.origin.u + halfway.u, parent.origin.v };
+            frame_b->size = UVector2{ parent.size.u - halfway.u, halfway.v };
         }
     }
 }
 
-void split_container(nov_container* parent, const nov_fvector2& division)
+void splitContainer(Container* parent, const FVector2& division)
 {
     // parent cannot be null
     if (parent == 0x0) return;
@@ -46,8 +46,8 @@ void split_container(nov_container* parent, const nov_fvector2& division)
     if (division.u != 0 && division.v != 0) return;
 
     // create children
-    parent->child_a = new nov_container { 0x0, 0x0, parent->panel, parent, nov_fvector2{ 0,0 } };
-    parent->child_b = new nov_container { 0x0, 0x0, 0x0, parent, nov_fvector2{ 0,0 } };
+    parent->child_a = new Container{ 0x0, 0x0, parent->panel, parent, FVector2{ 0,0 } };
+    parent->child_b = new Container{ 0x0, 0x0, 0x0, parent, FVector2{ 0,0 } };
 
     // clear parent panel
     parent->panel = 0x0;
@@ -56,42 +56,42 @@ void split_container(nov_container* parent, const nov_fvector2& division)
     parent->division = division;
 }
 
-void nov_gui_manager::draw_container(nov_container* container, const nov_frame_data& frame)
+void GuiManager::drawContainer(Container* container, const FrameData& frame)
 {
     // fill with black
-    if ((container->panel != 0x0 && container->panel->wants_clear()) || container->panel == 0x0)
+    if ((container->panel != 0x0 && container->panel->wantsClear()) || container->panel == 0x0)
     {
-        graphics::fill_box(frame.origin, frame.size, frame_fill_colour, framebuffer);
+        graphics::fillBox(frame.origin, frame.size, frame_fill_colour, framebuffer);
     }
 
     bool large_enough_for_frame = (frame.size.u >= 8 && frame.size.v > 12);
 
     if (large_enough_for_frame
-        && ((container->panel != 0x0 && container->panel->wants_border())
+        && ((container->panel != 0x0 && container->panel->wantsBorder())
          || (container->panel == 0x0 && container->child_a == 0x0 && container->child_b == 0x0))
        )
     {
         // TODO: text label/title
         // draw the top bar
-        graphics::fill_box(frame.origin+nov_uvector2{1,1}, nov_uvector2{frame.size.u-2,10}, frame_outline_colour, framebuffer);
+        graphics::fillBox(frame.origin+UVector2{1,1}, UVector2{frame.size.u-2,10}, frame_outline_colour, framebuffer);
         // coloured outline
-        graphics::draw_box(frame.origin+nov_uvector2{1,1}, frame.size-nov_uvector2{2,2}, frame_outline_colour, framebuffer);
+        graphics::drawBox(frame.origin+UVector2{1,1}, frame.size-UVector2{2,2}, frame_outline_colour, framebuffer);
     }
 
     // draw panel, if it exists
     if (container->panel != 0x0)
     {
-        nov_frame_data clipped = frame;
-        if (container->panel->wants_border())
+        FrameData clipped = frame;
+        if (container->panel->wantsBorder())
         {
             if (!large_enough_for_frame) return;
-            clipped.origin += nov_uvector2{ 3,12 };
-            clipped.size -= nov_uvector2{ 6,15 };
+            clipped.origin += UVector2{ 3,12 };
+            clipped.size -= UVector2{ 6,15 };
         }
         else
         {
-            clipped.origin += nov_uvector2{ 1,1 };
-            clipped.size -= nov_uvector2{ 2,2 };
+            clipped.origin += UVector2{ 1,1 };
+            clipped.size -= UVector2{ 2,2 };
         }
         container->panel->draw(clipped, framebuffer);
     }
@@ -102,38 +102,38 @@ void nov_gui_manager::draw_container(nov_container* container, const nov_frame_d
         if (container->child_a == 0x0 && container->child_b == 0x0) return;
 
         // otherwise calculate their frames
-        nov_frame_data frame_a;
-        nov_frame_data frame_b;
-        calculate_frame_data(frame, container->division, &frame_a, &frame_b);
+        FrameData frame_a;
+        FrameData frame_b;
+        calculateFrameData(frame, container->division, &frame_a, &frame_b);
 
-        if (container->child_a != 0x0) draw_container(container->child_a, frame_a);
-        if (container->child_b != 0x0) draw_container(container->child_b, frame_b);
+        if (container->child_a != 0x0) drawContainer(container->child_a, frame_a);
+        if (container->child_b != 0x0) drawContainer(container->child_b, frame_b);
     }
 }
 
-bool nov_gui_manager::draw_specific(nov_container* container)
+bool GuiManager::drawSpecific(Container* container)
 {
     // return if this container is invalid
     if (container == 0x0) return false;
 
     // first, check if this container has been cached. if it has, then use the cached data, otherwise
     // calculate it from scratch
-    for (nov_frame_cache fc : frame_cache)
+    for (FrameCache fc : frame_cache)
     {
         if (fc.container == container)
         {
-            draw_container(container, fc.frame_data);
+            drawContainer(container, fc.frame_data);
             return true;
         }
     }
 
-    com_1 << "when drawing frame " << stream::mode::HEX << (uint32_t)container << " found no cached data." << stream::endl;
+    com_1 << "when drawing frame " << stream::Mode::HEX << (uint32_t)container << " found no cached data." << stream::endl;
 
     // return if this container has no parent and is not the root container
     if (container->parent == 0x0 && container != root_container) return false;
 
-    nov_array<nov_container*> container_chain;
-    nov_container* current = container;
+    Array<Container*> container_chain;
+    Container* current = container;
 
     // now we need to find this container in the tree
     while (current != root_container && current->parent != 0x0)
@@ -146,37 +146,37 @@ bool nov_gui_manager::draw_specific(nov_container* container)
     if (current != root_container) return false;
 
     // otherwise, we ended up with a chain of panels from the root to the desired container
-    nov_frame_data current_frame_data = root_container_frame;
-    nov_frame_data next_frame_data;
+    FrameData current_frame_data = root_container_frame;
+    FrameData next_frame_data;
 
-    nov_container* next = 0x0;
-    while (container_chain.get_length() > 0)
+    Container* next = 0x0;
+    while (container_chain.getLength() > 0)
     {
         // get the next container in the chain
         next = container_chain.pop();
         // calculate the frame data, choosing which child we want based on whether the next container is the a or b child
-        calculate_frame_data(current_frame_data, current->division, next == current->child_a ? &next_frame_data : 0x0, next == current->child_b ? &next_frame_data : 0x0);
+        calculateFrameData(current_frame_data, current->division, next == current->child_a ? &next_frame_data : 0x0, next == current->child_b ? &next_frame_data : 0x0);
         // copy the data from this container into the current one
         current_frame_data = next_frame_data;
         current = next;
     }
 
     // now, draw current container and all children
-    draw_container(current, current_frame_data);
-    frame_cache.push(nov_frame_cache{ current_frame_data, container });
+    drawContainer(current, current_frame_data);
+    frame_cache.push(FrameCache{ current_frame_data, container });
 
     return true;
 }
 
-nov_gui_manager::nov_gui_manager(const graphics::nov_framebuffer& framebuffer_info, nov_container* default_root)
+GuiManager::GuiManager(const graphics::Framebuffer& framebuffer_info, Container* default_root)
 {
-    root_container_frame.origin = nov_uvector2{ 0,0 };
+    root_container_frame.origin = UVector2{ 0,0 };
     root_container_frame.size = framebuffer_info.size;
     
     framebuffer = framebuffer_info;
 
     if (default_root == 0x0)
-        root_container = new nov_container{ 0x0, 0x0, 0x0, 0x0, nov_fvector2{ 0,0 } };
+        root_container = new Container{ 0x0, 0x0, 0x0, 0x0, FVector2{ 0,0 } };
     else
         root_container = default_root;
 }

@@ -7,7 +7,7 @@
  * configure the specified serial port
  * @param port serial port to initialise, specified using the provided #defines (COM1, COM2)
  * **/
-uint8_t init_serial(uint32_t port)
+uint8_t initSerial(uint32_t port)
 {
     outb(port+SERIAL_INTERRUPT_REG, 0);             // disable interrupts
     outb(port+SERIAL_LINECONTROL_REG, 0b10000000);  // enable DLAB
@@ -28,9 +28,9 @@ uint8_t init_serial(uint32_t port)
  * @param chr character to output
  * @param port serial port to direct output to 
  * **/
-void serial_print(char chr, uint32_t port)
+void serialPrint(char chr, uint32_t port)
 {
-    while(!transmit_ready(port));
+    while(!transmitReady(port));
     outb(port+SERIAL_DATA_REG, chr);
 }
 
@@ -41,7 +41,7 @@ void serial_print(char chr, uint32_t port)
  * @param port serial port to direct output to
  * @param per_line number of bytes per line; set to zero for all bytes on a single line
  * **/
-void serial_dump_hex_byte(void* start, uint32_t length, uint32_t port, uint8_t per_line)
+void serialDumpHexByte(void* start, uint32_t length, uint32_t port, uint8_t per_line)
 {
     uint8_t* ptr = (uint8_t*)start;
     
@@ -51,8 +51,8 @@ void serial_dump_hex_byte(void* start, uint32_t length, uint32_t port, uint8_t p
     while (offset < length)
     {
         // translate byte
-        nov::int_to_string(ptr[offset], 16, outbuffer+2, 2);
-        for (uint8_t i = 0; i < 6 && outbuffer[i] != 0; i++) serial_print(outbuffer[i], port);
+        nov::intToString(ptr[offset], 16, outbuffer+2, 2);
+        for (uint8_t i = 0; i < 6 && outbuffer[i] != 0; i++) serialPrint(outbuffer[i], port);
         col++;
         offset++;
         if (per_line != 0 && col >= per_line) { com_1 << port << nov::stream::endl; col = 0; }
@@ -66,7 +66,7 @@ void serial_dump_hex_byte(void* start, uint32_t length, uint32_t port, uint8_t p
  * @param port serial port to direct output to
  * @param per_line number of words per line; set to zero for all words on a single line
  * **/
-void serial_dump_hex_word(void* start, uint32_t length, uint32_t port, uint8_t per_line)
+void serialDumpHexWord(void* start, uint32_t length, uint32_t port, uint8_t per_line)
 {
     uint16_t* ptr = (uint16_t*)start;
     
@@ -76,8 +76,8 @@ void serial_dump_hex_word(void* start, uint32_t length, uint32_t port, uint8_t p
     while (offset < length)
     {
         // translate byte
-        nov::int_to_string(ptr[offset], 16, outbuffer+2, 4);
-        for (uint8_t i = 0; i < 8 && outbuffer[i] != 0; i++) serial_print(outbuffer[i], port);
+        nov::intToString(ptr[offset], 16, outbuffer+2, 4);
+        for (uint8_t i = 0; i < 8 && outbuffer[i] != 0; i++) serialPrint(outbuffer[i], port);
         col++;
         offset++;
         if (per_line != 0 && col >= per_line) { com_1 << port << nov::stream::endl; col = 0; }
@@ -91,7 +91,7 @@ void serial_dump_hex_word(void* start, uint32_t length, uint32_t port, uint8_t p
  * @param port serial port to direct output to
  * @param per_line number of dwords per line; set to zero for all dwords on a single line
  * **/
-void serial_dump_hex_dwrd(void* start, uint32_t length, uint32_t port, uint8_t per_line)
+void serialDumpHexDwrd(void* start, uint32_t length, uint32_t port, uint8_t per_line)
 {
     uint32_t* ptr = (uint32_t*)start;
     
@@ -101,8 +101,8 @@ void serial_dump_hex_dwrd(void* start, uint32_t length, uint32_t port, uint8_t p
     while (offset < length)
     {
         // translate byte
-        nov::int_to_string(ptr[offset], 16, outbuffer+2, 8);
-        for (uint8_t i = 0; i < 12 && outbuffer[i] != 0; i++) serial_print(outbuffer[i], port);
+        nov::intToString(ptr[offset], 16, outbuffer+2, 8);
+        for (uint8_t i = 0; i < 12 && outbuffer[i] != 0; i++) serialPrint(outbuffer[i], port);
         col++;
         offset++;
         if (per_line != 0 && col >= per_line) { com_1 << port << nov::stream::endl; col = 0; }
@@ -117,7 +117,7 @@ void serial_dump_hex_dwrd(void* start, uint32_t length, uint32_t port, uint8_t p
  * @param per_line number of bytes per line; set to zero for all bytes on a single line
  * @param separator character to separate data characters, useful for making things more readable; set to null for no separation
  * **/
-void serial_dump_byte(void* start, uint32_t length, uint32_t port, uint8_t per_line, char separator)
+void serialDumpByte(void* start, uint32_t length, uint32_t port, uint8_t per_line, char separator)
 {
     uint8_t* ptr = (uint8_t*)start;
     uint32_t col = 0;
@@ -127,13 +127,13 @@ void serial_dump_byte(void* start, uint32_t length, uint32_t port, uint8_t per_l
     {
         chr = ptr[offset];
         if (chr < ' ' || chr == 127) chr = '.';
-        serial_print(chr, port);
+        serialPrint(chr, port);
         col++;
         offset++;
-        if (separator != '\0') serial_print(separator, port);
+        if (separator != '\0') serialPrint(separator, port);
         if (per_line != 0 && col >= per_line) { com_1 << port << nov::stream::endl; col = 0; }
     }
 }
 
-nov::stream::nov_stream com_1([](char c){ serial_print(c, COM1); });
-nov::stream::nov_stream com_2([](char c){ serial_print(c, COM2); });
+nov::stream::Stream com_1([](char c){ serialPrint(c, COM1); });
+nov::stream::Stream com_2([](char c){ serialPrint(c, COM2); });

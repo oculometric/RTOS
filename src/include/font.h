@@ -5,7 +5,7 @@
 namespace nov
 {
 
-struct nov_font
+struct Font
 {
     uint8_t char_width = 5;
     uint8_t char_height = 8;

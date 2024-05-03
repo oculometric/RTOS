@@ -5,6 +5,8 @@
 #include <stream.h>
 #include <io.h>
 
+// TODO: enumify this stuff so it's not just global defines
+
 #define COM1 0x3f8
 #define COM2 0x2f8
 
@@ -20,18 +22,18 @@
 #define SERIAL_INIT_SUCCESS 0
 #define SERIAL_INIT_FAILURE 1
 
-uint8_t init_serial(uint32_t port);
+uint8_t initSerial(uint32_t port);
 
-static inline bool transmit_ready(uint32_t port) { return inb(port+SERIAL_LINESTATUS_REG) & 0b00100000; }
-static inline bool receive_ready(uint32_t port) { return inb(port+SERIAL_LINESTATUS_REG) & 0b00000001; }
+static inline bool transmitReady(uint32_t port) { return inb(port+SERIAL_LINESTATUS_REG) & 0b00100000; }
+static inline bool receiveReady(uint32_t port) { return inb(port+SERIAL_LINESTATUS_REG) & 0b00000001; }
 
-void serial_print(char chr, uint32_t port);
+void serialPrint(char chr, uint32_t port);
 
-void serial_dump_byte(void* start, uint32_t length, uint32_t port, uint8_t per_line = 0, char separator = '\0');
+void serialDumpByte(void* start, uint32_t length, uint32_t port, uint8_t per_line = 0, char separator = '\0');
 
-void serial_dump_hex_byte(void* start, uint32_t length, uint32_t port, uint8_t per_line = 8);
-void serial_dump_hex_word(void* start, uint32_t length, uint32_t port, uint8_t per_line = 8);
-void serial_dump_hex_dwrd(void* start, uint32_t length, uint32_t port, uint8_t per_line = 8);
+void serialDumpHexByte(void* start, uint32_t length, uint32_t port, uint8_t per_line = 8);
+void serialDumpHexWord(void* start, uint32_t length, uint32_t port, uint8_t per_line = 8);
+void serialDumpHexDwrd(void* start, uint32_t length, uint32_t port, uint8_t per_line = 8);
 
-extern nov::stream::nov_stream com_1;
-extern nov::stream::nov_stream com_2;
+extern nov::stream::Stream com_1;
+extern nov::stream::Stream com_2;

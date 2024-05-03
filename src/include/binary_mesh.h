@@ -16,7 +16,7 @@ namespace nov
 namespace file
 {
 
-struct nov_binary_mesh_header
+struct BinaryMeshHeader
 {
     uint32_t checksum;                  // checksum to verify this is a binary mesh header
 
@@ -35,19 +35,19 @@ struct nov_binary_mesh_header
 
 // TODO: material buffer & specification
 
-struct nov_binary_mesh_vertex
+struct BinaryMeshVertex
 {
     float x,y,z;
 };
 
-typedef nov_binary_mesh_vertex nov_binary_mesh_normal;
+typedef BinaryMeshVertex BinaryMeshNormal;
 
-struct nov_binary_mesh_uv
+struct BinaryMeshUV
 {
     float u,v;
 };
 
-struct nov_binary_mesh_triangle
+struct BinaryMeshTriangle
 {
     uint16_t v0,v1,v2;      // vertex indices of the corners of the faces, indices into the vertex array
     uint16_t n0,n1,n2;      // normal indices of the corners of the faces, indices into the vertex normal array

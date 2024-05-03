@@ -3,15 +3,24 @@
         {
             "name": "Linux",
             "includePath": [
-                "/usr/include/efi",
-                "src/include",
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/src/include"
+                "${workspaceFolder}/src/include",
+                "/home/oculometric/opt/cross/lib/gcc/i386-elf/13.2.0/include",
             ],
             "defines": [],
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "linux-gcc-x64"
+            "intelliSenseMode": "linux-gcc-x86",
+            "compilerPath": "/home/oculometric/opt/cross/bin/i386-elf-gcc",
+            "compilerArgs": [
+                "-ffreestanding",
+                "-masm=intel",
+                "-Wall",
+                "-Wextra",
+                "-Wpedantic",
+                "-Wno-unused-parameter",
+                "-std=c++20"
+            ]
         }
     ],
     "version": 4

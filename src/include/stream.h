@@ -9,7 +9,7 @@ namespace nov
 namespace stream
 {
 
-enum mode
+enum Mode
 {
     DEC = 1,
     HEX,
@@ -18,7 +18,7 @@ enum mode
 
 static const char endl = '\n';
 
-class nov_stream
+class Stream
 {
 private:
     // buffer to hold characters so they can be written as a single block later
@@ -36,22 +36,22 @@ private:
     void (*flush_char)(char c) = 0x0;
 public:
     // mode in which to output numbers
-    mode uint_mode = mode::DEC;
+    Mode uint_mode = Mode::DEC;
 
     void send(char c);
     void flush();
     
-    constexpr nov_stream(void (*flush_function)(char c)) : flush_char(flush_function) { }
+    constexpr Stream(void (*flush_function)(char c)) : flush_char(flush_function) { }
 };
 
-nov_stream& operator<<(nov_stream& stream, char c);
-nov_stream& operator<<(nov_stream& stream, char* s);
-nov_stream& operator<<(nov_stream& stream, const char* s);
-nov_stream& operator<<(nov_stream& stream, uint32_t u);
-nov_stream& operator<<(nov_stream& stream, int32_t i);
-inline nov_stream& operator<<(nov_stream& stream, int i) { return stream << (int32_t)i; }
-nov_stream& operator<<(nov_stream& stream, float f);
-nov_stream& operator<<(nov_stream& stream, mode m);
+Stream& operator<<(Stream& stream, char c);
+Stream& operator<<(Stream& stream, char* s);
+Stream& operator<<(Stream& stream, const char* s);
+Stream& operator<<(Stream& stream, uint32_t u);
+Stream& operator<<(Stream& stream, int32_t i);
+inline Stream& operator<<(Stream& stream, int i) { return stream << (int32_t)i; }
+Stream& operator<<(Stream& stream, float f);
+Stream& operator<<(Stream& stream, Mode m);
 
 }
 }

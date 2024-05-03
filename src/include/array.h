@@ -7,20 +7,20 @@
 namespace nov
 {
 
-struct nov_array_container
+struct ArrayContainer
 {
-    nov_array_container* next;
+    ArrayContainer* next;
     uint32_t elements_in_block;
 };
 
 template <typename T>
-class nov_array
+class Array
 {
 private:
     // pointer to first allocated element slot in the linked list. may or may not actually contain list data
-    nov_array_container* first = 0x0;
+    ArrayContainer* first = 0x0;
     // pointer to last allocated element slot in the linked list. may or may not actually contain list data
-    nov_array_container* last = 0x0;
+    ArrayContainer* last = 0x0;
     // number of consumed element slots in the linked list
     uint32_t length = 0;
     // number of allocated element slots
@@ -28,19 +28,19 @@ private:
     // is this object valid/initialised
     bool is_valid = false;
 public:
-    struct nov_array_iterator
+    struct ArrayIterator
     {
         uint32_t index = 0;
-        nov_array<T>* target = 0x0;
+        Array<T>* target = 0x0;
 
         inline void operator++() { index++; }
-        inline bool operator!=(const nov_array_iterator& other) { return other.index == index; }
+        inline bool operator!=(const ArrayIterator& other) { return other.index == index; }
         inline T operator*() { return (*target)[index]; }
     };
 
     /**
      * extend the array to have a greater capacity to fit more items in.
-     * requests memory from malloc and sets up the array container slots ready for them to be `push`ed into
+     * requests memory from mAlloc and sets up the array container slots ready for them to be `push`ed into
      * 
      * @param new_capacity desired total number of slots in the array (i.e. this function will ensure there
      * is this much capacity in the array)
@@ -50,8 +50,8 @@ public:
         // only allow increasing the size of the array for now
         if (new_capacity <= capacity) return;
         uint32_t extra_capacity = new_capacity-capacity;
-        // request more memory from malloc
-        nov_array_container* first_fresh = (nov_array_container*)memory::malloc(sizeof(nov_array_container) + (extra_capacity * sizeof(T)));
+        // request more memory from mAlloc
+        ArrayContainer* first_fresh = (ArrayContainer*)memory::mAlloc(sizeof(ArrayContainer) + (extra_capacity * sizeof(T)));
         if (first_fresh == 0x0) panic();
 
         // check if the array is uninitialised
@@ -87,7 +87,7 @@ public:
     {
         if (index >= length) { com_1 << "index out of range " << index << stream::endl; panic(); } // crashes the kernel
         // step over the linked list until we reach the block which contains the relevant index
-        nov_array_container* current = first;
+        ArrayContainer* current = first;
         uint32_t cumulative = 0;
         while (index > cumulative + current->elements_in_block)
         {
@@ -108,7 +108,7 @@ public:
     {
         if (index >= length) { com_1 << "index out of range " << index << stream::endl; panic(); } // crashes the kernel
         // step over the linked list until we reach the block which contains the relevant index
-        nov_array_container* current = first;
+        ArrayContainer* current = first;
         uint32_t cumulative = 0;
         while (index > cumulative + current->elements_in_block)
         {
@@ -161,13 +161,13 @@ public:
         length = 0;
     }
 
-    inline uint32_t get_length() const { return length; }
-    inline uint32_t get_capacity() const { return capacity; }
+    inline uint32_t getLength() const { return length; }
+    inline uint32_t getCapacity() const { return capacity; }
 
-    inline nov_array_iterator begin() { return nov_array_iterator{ 0, this }; }
-    inline nov_array_iterator end() { return nov_array_iterator{ get_length()-1, this }; }
+    inline ArrayIterator begin() { return ArrayIterator{ 0, this }; }
+    inline ArrayIterator end() { return ArrayIterator{ getLength()-1, this }; }
 
-    inline constexpr nov_array(uint32_t _capacity)
+    inline constexpr Array(uint32_t _capacity)
     {
         // clear all values, then request a resize to the desired capacity
         first = 0x0;
@@ -178,34 +178,34 @@ public:
         resize(_capacity);
     }
 
-    nov_array(const nov_array&) = delete;
-    nov_array& operator=(const nov_array&) = delete;
-    nov_array(nov_array&&) = delete;
-    nov_array& operator=(nov_array&&) = delete;
+    Array(const Array&) = delete;
+    Array& operator=(const Array&) = delete;
+    Array(Array&&) = delete;
+    Array& operator=(Array&&) = delete;
 
-    nov_array() : first(0x0), last(0x0), length(0), capacity(0), is_valid(true) { };
+    Array() : first(0x0), last(0x0), length(0), capacity(0), is_valid(true) { };
 
-    inline ~nov_array()
+    inline ~Array()
     {
         if (!is_valid) return;
         if (first == 0x0) return;
         // iterate over the containers in the array
-        nov_array_container* current = first;
+        ArrayContainer* current = first;
         while (current != 0x0)
         {
             // free the block
-            memory::mfree((void*)current);
+            memory::mFree((void*)current);
             // step onto the next
             current = current->next;
         }
         first = 0x0; last = 0x0;
-        memory::mconsolidate();
+        memory::mConsolidate();
     }
 };
 
 template <typename T>
-auto begin(nov_array<T>& arr) { return arr.begin(); }
+auto begin(Array<T>& arr) { return arr.begin(); }
 template <typename T>
-auto end(nov_array<T>& arr) { return arr.end(); }
+auto end(Array<T>& arr) { return arr.end(); }
 
 }

@@ -83,12 +83,12 @@ int main(int argc, char* argv[])
     if (found_vertices == 0 || found_triangles == 0) { cout << "stopping." << endl; return 1; }
 
     // allocate space for data
-    auto vertices = new nov_binary_mesh_vertex[found_vertices];
-    auto triangles = new nov_binary_mesh_triangle[found_triangles];
+    auto vertices = new BinaryMeshVertex[found_vertices];
+    auto triangles = new BinaryMeshTriangle[found_triangles];
     auto material_indices = new uint16_t[found_triangles];
 
-    nov_binary_mesh_uv* uvs = new nov_binary_mesh_uv[found_uvs];
-    nov_binary_mesh_vertex* vnorms = new nov_binary_mesh_vertex[found_vnorms];
+    BinaryMeshUV* uvs = new BinaryMeshUV[found_uvs];
+    BinaryMeshVertex* vnorms = new BinaryMeshVertex[found_vnorms];
 
     // process file for realsies, but ignoring faces for now
     file.clear();
@@ -97,8 +97,8 @@ int main(int argc, char* argv[])
     int vt = 0;
     int vn = 0;
     int f = 0;
-    nov_binary_mesh_vertex tmp3;
-    nov_binary_mesh_uv tmp2;
+    BinaryMeshVertex tmp3;
+    BinaryMeshUV tmp2;
     vector<string> split_line;
     vector<string> split_section;
     while(getline(file, line))
@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
     // TODO: handle materials
     // TODO: triangulation
 
-    nov_binary_mesh_header header;
+    BinaryMeshHeader header;
     header.checksum = NOV_BINARY_MESH_HEADER_CHECKSUM;
     header.vertex_buffer_length = found_vertices;
     header.triangle_buffer_length = found_triangles;
@@ -215,44 +215,44 @@ int main(int argc, char* argv[])
 
     cout << "success. outputting..." << endl;
 
-    uint32_t total_size = sizeof(nov_binary_mesh_header)
-                       + (sizeof(nov_binary_mesh_vertex) * header.vertex_buffer_length)
-                       + (sizeof(nov_binary_mesh_triangle) * header.triangle_buffer_length)
-                       + (sizeof(nov_binary_mesh_normal) * header.normal_buffer_length)
-                       + (sizeof(nov_binary_mesh_uv) * header.uv_buffer_length);
+    uint32_t total_size = sizeof(BinaryMeshHeader)
+                       + (sizeof(BinaryMeshVertex) * header.vertex_buffer_length)
+                       + (sizeof(BinaryMeshTriangle) * header.triangle_buffer_length)
+                       + (sizeof(BinaryMeshNormal) * header.normal_buffer_length)
+                       + (sizeof(BinaryMeshUV) * header.uv_buffer_length);
 
     char* output_buffer = new char[total_size];
     
     uint32_t offset = 0;
-    offset += sizeof(nov_binary_mesh_header);
+    offset += sizeof(BinaryMeshHeader);
     offset += 4;
     offset = (offset >> 2) << 2;
 
-    memcpy(output_buffer+offset, (char*)vertices, sizeof(nov_binary_mesh_vertex) * header.vertex_buffer_length);
+    memcpy(output_buffer+offset, (char*)vertices, sizeof(BinaryMeshVertex) * header.vertex_buffer_length);
     header.vertex_buffer_offset = offset;
-    offset += sizeof(nov_binary_mesh_vertex) * header.vertex_buffer_length;
+    offset += sizeof(BinaryMeshVertex) * header.vertex_buffer_length;
     offset += 4;
     offset = (offset >> 2) << 2;
 
-    memcpy(output_buffer+offset, (char*)triangles, sizeof(nov_binary_mesh_triangle) * header.triangle_buffer_length);
+    memcpy(output_buffer+offset, (char*)triangles, sizeof(BinaryMeshTriangle) * header.triangle_buffer_length);
     header.triangle_buffer_offset = offset;
-    offset += sizeof(nov_binary_mesh_triangle) * header.triangle_buffer_length;
+    offset += sizeof(BinaryMeshTriangle) * header.triangle_buffer_length;
     offset += 4;
     offset = (offset >> 2) << 2;
 
-    memcpy(output_buffer+offset, (char*)vnorms, sizeof(nov_binary_mesh_normal) * header.normal_buffer_length);
+    memcpy(output_buffer+offset, (char*)vnorms, sizeof(BinaryMeshNormal) * header.normal_buffer_length);
     header.normal_buffer_offset = offset;
-    offset += sizeof(nov_binary_mesh_normal) * header.normal_buffer_length;
+    offset += sizeof(BinaryMeshNormal) * header.normal_buffer_length;
     offset += 4;
     offset = (offset >> 2) << 2;
 
-    memcpy(output_buffer+offset, (char*)uvs, sizeof(nov_binary_mesh_uv) * header.uv_buffer_length);
+    memcpy(output_buffer+offset, (char*)uvs, sizeof(BinaryMeshUV) * header.uv_buffer_length);
     header.uv_buffer_offset = offset;
-    offset += sizeof(nov_binary_mesh_uv) * header.uv_buffer_length;
+    offset += sizeof(BinaryMeshUV) * header.uv_buffer_length;
     offset += 4;
     offset = (offset >> 2) << 2;
 
-    memcpy(output_buffer, (char*)&header, sizeof(nov_binary_mesh_header));
+    memcpy(output_buffer, (char*)&header, sizeof(BinaryMeshHeader));
 
     delete[] vertices;
     delete[] triangles;
