@@ -1,8 +1,6 @@
 {
     "C_Cpp.default.includePath": [
-        "src/include",
-        "${workspaceFolder}/src/include",
-        "src"
+        "${workspaceFolder}/src/include"
     ],
     "files.associations": {
         "efi.h": "c",
@@ -11,5 +9,7 @@
         "*.bin": "cpp",
         "*.o": "cpp"
     },
-    "C_Cpp.default.compilerPath": "/home/oculometric/opt/cross/bin/i386-elf-gcc"
+    "C_Cpp.default.compilerPath": "/home/oculometric/opt/cross/bin/i386-elf-gcc",
+    "C_Cpp.default.systemIncludePath": [
+    ]
 }
