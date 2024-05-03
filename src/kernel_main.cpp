@@ -108,64 +108,38 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     auto root = man.getRoot();
 
     auto text_panel = new gui::PanelTextbox();
-    root->panel = text_panel;
-
-
     text_panel->name ="text panel";
     text_panel->font = font;
-    text_panel->text = R"""(0: The quick brown fox jumps over the lazy dog. Lorem ipsum dolor sit amet.
-Bee Movie
-By Jerry Seinfeld
+    text_panel->text = R"""(here is some text, this string is multiline)""";
 
-NARRATOR:
-(Black screen with text; The sound of buzzing bees can be heard)
-According to all known laws
-of aviation,
- :
-there is no way a bee
-should be able to fly.
- :
-Its wings are too small to get
-its fat little body off the ground.
- :
-The bee, of course, flies anyway
- :
-because bees don't care
-what humans think is impossible.
-BARRY BENSON:
-(Barry is picking out a shirt)
-Yellow, black. Yellow, black.
-Yellow, black. Yellow, black.
- :
-Ooh, black and yellow!
-Let's shake it up a little.
-JANET BENSON:
-Barry! Breakfast is ready!
-BARRY:
-Coming!
- :
-Hang on a second.
-(Barry uses his antenna like a phone)
- :
-Hello?
-ADAM FLAYMAN:
+    auto star_panel = new gui::PanelStar();
+    star_panel->name = "star";
 
-(Through phone)
-- Barry?
-BARRY:
-- Adam?
-ADAM:
-- Can you believe this is happening?
-BARRY:
-- I can't. I'll pick you up.
-(Barry flies down the stairs)
-    )""";
+    auto mmap_panel = new gui::PanelMemoryMonitor();
+    mmap_panel->name = "memory";
+
+    auto mesh_panel = new gui::PanelMeshrender();
+    mesh_panel->name = "teapot";
+    mesh_panel->line_colour = nov_colour_indigo;
+    mesh_panel->camera_up_direction = norm(FVector3{1,0,1});
+    mesh_panel->camera_look_direction = norm(FVector3{1,0,-1});
+    mesh_panel->camera_position = FVector3{-5,0,5};
+    mesh_panel->mesh = new graphics::Mesh(_res_teapot_binmesh_start);
+
+    gui::splitContainer(root, FVector2{0, 0.8f});
+    auto top_container = root->child_a;
+    auto bottom_container = root->child_b;
+    gui::splitContainer(top_container, FVector2{0, 0.8f});
+    top_container->child_b->panel = star_panel;
+
+    
     text_panel->text_colour = nov_colour_carmine;
     com_1 << "string is: \"" << text_panel->text << "\"" << endl;
 
     while (true)
     {
-        man.drawRoot();
+        man.drawRoot(); // FIXME: getting stuck in here
+        com_1 << "draw done" << endl;
         memory::memCpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
         text_panel->text[0]++;
     }

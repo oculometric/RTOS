@@ -58,6 +58,8 @@ void splitContainer(Container* parent, const FVector2& division)
 
 void GuiManager::drawContainer(Container* container, const FrameData& frame)
 {
+    com_1 << "drawing container" << (uint32_t)container << stream::endl;
+    
     // fill with black
     if ((container->panel != 0x0 && container->panel->wantsClear()) || container->panel == 0x0)
     {
@@ -92,6 +94,7 @@ void GuiManager::drawContainer(Container* container, const FrameData& frame)
     // draw panel, if it exists
     if (container->panel != 0x0)
     {
+        com_1 << "panel named " << container->panel->name << stream::endl;
         FrameData clipped = frame;
         if (container->panel->wantsBorder())
         {
