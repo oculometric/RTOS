@@ -114,6 +114,7 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
 
     auto star_panel = new gui::PanelStar();
     star_panel->name = "star";
+    star_panel->foreground = nov_colour_gold;
 
     auto mmap_panel = new gui::PanelMemoryMonitor();
     mmap_panel->name = "memory";
@@ -123,23 +124,26 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     mesh_panel->line_colour = nov_colour_indigo;
     mesh_panel->camera_up_direction = norm(FVector3{1,0,1});
     mesh_panel->camera_look_direction = norm(FVector3{1,0,-1});
-    mesh_panel->camera_position = FVector3{-5,0,5};
+    mesh_panel->camera_position = FVector3{-4,0,4};
     mesh_panel->mesh = new graphics::Mesh(_res_teapot_binmesh_start);
 
     gui::splitContainer(root, FVector2{0, 0.8f});
     auto top_container = root->child_a;
     auto bottom_container = root->child_b;
-    gui::splitContainer(top_container, FVector2{0, 0.8f});
+    gui::splitContainer(top_container, FVector2{0.8f, 0});
     top_container->child_b->panel = star_panel;
-
+    gui::splitContainer(bottom_container, FVector2{0.3f, 0});
+    bottom_container->child_a->panel = mmap_panel;
+    bottom_container->child_b->panel = text_panel;
+    gui::splitContainer(top_container->child_b, FVector2{0, 0.7f});
+    top_container->child_b->child_b->panel = mesh_panel;
     
     text_panel->text_colour = nov_colour_carmine;
     com_1 << "string is: \"" << text_panel->text << "\"" << endl;
 
     while (true)
     {
-        man.drawRoot(); // FIXME: getting stuck in here
-        com_1 << "draw done" << endl;
+        man.drawRoot();
         memory::memCpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
         text_panel->text[0]++;
     }

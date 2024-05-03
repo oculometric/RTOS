@@ -169,8 +169,8 @@ void mView()
         }
 
         block_size = (uint32_t)next_block-(uint32_t)current_block;
-        com_1 << "block at     " << stream::Mode::HEX << (uint32_t)current_block << stream::endl;
-        com_1 << "   size wo/h " << stream::Mode::DEC << block_size-sizeof(MemoryFrame) << '/' << stream::Mode::HEX << (block_size-sizeof(MemoryFrame)) << stream::endl;
+        com_1 << "block at     " << stream::Mode::HEX << ((uint32_t)current_block) + sizeof(MemoryFrame) << " (actually " << (uint32_t)current_block << ")"  << stream::endl;
+        com_1 << "   size      " << stream::Mode::DEC << block_size-sizeof(MemoryFrame) << '/' << stream::Mode::HEX << (block_size-sizeof(MemoryFrame)) << "(actually " << block_size << ")" << stream::endl;
         com_1 << "   is free?  " << stream::Mode::DEC << current_block->is_free << stream::endl;
     
         current_block = next_block;

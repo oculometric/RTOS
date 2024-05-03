@@ -47,7 +47,7 @@ void splitContainer(Container* parent, const FVector2& division)
 
     // create children
     parent->child_a = new Container{ 0x0, 0x0, parent->panel, parent, FVector2{ 0,0 } };
-    parent->child_b = new Container{ 0x0, 0x0, 0x0, parent, FVector2{ 0,0 } };
+    parent->child_b = new Container{ 0x0, 0x0, 0x0,           parent, FVector2{ 0,0 } };
 
     // clear parent panel
     parent->panel = 0x0;
@@ -58,14 +58,11 @@ void splitContainer(Container* parent, const FVector2& division)
 
 void GuiManager::drawContainer(Container* container, const FrameData& frame)
 {
-    com_1 << "drawing container" << (uint32_t)container << stream::endl;
-    
     // fill with black
     if ((container->panel != 0x0 && container->panel->wantsClear()) || container->panel == 0x0)
     {
         graphics::fillBox(frame.origin, frame.size, frame_fill_colour, framebuffer);
     }
-
     bool large_enough_for_frame = (frame.size.u >= 8 && frame.size.v > 12);
 
     if (large_enough_for_frame
@@ -78,7 +75,7 @@ void GuiManager::drawContainer(Container* container, const FrameData& frame)
         // coloured outline
         graphics::drawBox(frame.origin+UVector2{1,1}, frame.size-UVector2{2,2}, frame_outline_colour, framebuffer);
         // draw title
-        if (guiFont)
+        if (guiFont && container->panel)
         {
             uint32_t length = container->panel->name.getLength();
             UVector2 character_origin = frame.origin + UVector2{8,1};
@@ -94,7 +91,6 @@ void GuiManager::drawContainer(Container* container, const FrameData& frame)
     // draw panel, if it exists
     if (container->panel != 0x0)
     {
-        com_1 << "panel named " << container->panel->name << stream::endl;
         FrameData clipped = frame;
         if (container->panel->wantsBorder())
         {
@@ -119,9 +115,14 @@ void GuiManager::drawContainer(Container* container, const FrameData& frame)
         FrameData frame_a;
         FrameData frame_b;
         calculateFrameData(frame, container->division, &frame_a, &frame_b);
-
-        if (container->child_a != 0x0) drawContainer(container->child_a, frame_a);
-        if (container->child_b != 0x0) drawContainer(container->child_b, frame_b);
+        if (container->child_a != 0x0) 
+        {
+            drawContainer(container->child_a, frame_a);
+        }
+        if (container->child_b != 0x0)
+        {
+            drawContainer(container->child_b, frame_b);
+        }
     }
 }
 
@@ -132,6 +133,7 @@ bool GuiManager::drawSpecific(Container* container)
 
     // first, check if this container has been cached. if it has, then use the cached data, otherwise
     // calculate it from scratch
+    // TODO: remove this. it doesnt work as is
     for (FrameCache fc : frame_cache)
     {
         if (fc.container == container)
