@@ -20,9 +20,9 @@ extern "C" void interruptReintegrator(uint8_t interrupt)
     {
         com_1 << "apparently the keyboard has something to say!" << stream::endl;
         com_1 << stream::Mode::HEX << inb(0x60) << stream::endl;
-        com_1.flush();
         outb(0x20, 0x20); // this tells the PIC that we listened to what it had to say
     }
+    com_1.flush();
 }
 
 void configureInternalInterruptVector(uint8_t interrupt, void(* handler), GateType gate, Privilege priv)
@@ -48,7 +48,8 @@ void configureIDT()
     com_1 << "internal interrupt vectors assigned, handler is located at " << (uint32_t)(&interruptHandlerASM) << stream::endl;
     asm ("lidt %0" : : "m"(protected_idtr));
     com_1 << "IDT loaded" << stream::endl;
-    outb(0x21,0xfd);
+    // mask ALL IRQs from the PIC. TODO: reenable and configure these later
+    outb(0x21,0xff);
     outb(0xa1,0xff);
     enableInterrupts();
     com_1 << "interrupts enabled" << stream::endl;
