@@ -131,7 +131,7 @@ void configureIDT()
     // populate vector tables
     // populate low vector table
     for (int i = 0; i < 32; i++)
-        configureInterruptHandler(i, placeholderCPUInterruptHandler, GateType::TRAP_32, Privilege::LEVEL_0);
+        configureInterruptHandler(i, placeholderCPUInterruptHandler, GateType::TASK, Privilege::LEVEL_0);
     // populate IRQ vector table
     for (int i = 0; i < 16; i++)
         configureIRQHandler(i, placeholderIRQHandler);
@@ -162,7 +162,7 @@ void configureInterruptHandler(uint8_t interrupt, void (*handler)(), GateType ga
         // if the specified interrupt is currently overlapping with an IRQ, assign it anyway,
         // since the IRQs may be remapped later, unmasking these interrupts
         if (interrupt >= irq_interrupt_offset && interrupt < irq_interrupt_offset + 16)
-            com_1 << "this interrupt is currently in use by IRQ " << stream::Mode::HEX << interrupt - irq_interrupt_offset << " so it will never be called." << stream::endl;
+            com_1 << "this interrupt (" << interrupt << ") is currently in use by IRQ " << stream::Mode::HEX << interrupt - irq_interrupt_offset << " so it will never be called." << stream::endl;
         // point the relevant high interrupt handler to the provided function
         high_interrupt_handlers[interrupt - 32] = handler;
     }

@@ -103,7 +103,11 @@ void GuiManager::drawContainer(Container* container, const FrameData& frame)
             clipped.origin += UVector2{ 1,1 };
             clipped.size -= UVector2{ 2,2 };
         }
+        com_1 << "about to draw panel " << container->panel->name << stream::endl;
+        com_1.flush();
         container->panel->draw(clipped, framebuffer);
+        com_1 << "we made it!" << stream::endl;
+        com_1.flush();
     }
     else
     {

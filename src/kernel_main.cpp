@@ -84,24 +84,24 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     memory::mView();
 
     com_1 << "configuring IDT" << endl;
-    interrupts::configureIRQs(0x20);
-    interrupts::setIRQEnabled(0, true);
-    interrupts::setIRQEnabled(1, true);
-    interrupts::setIRQEnabled(2, true);
-    interrupts::setIRQEnabled(3, true);
-    interrupts::setIRQEnabled(4, true);
-    interrupts::setIRQEnabled(5, true);
-    interrupts::setIRQEnabled(6, true);
-    interrupts::setIRQEnabled(7, true);
-    
-    interrupts::setIRQEnabled(8, true);
-    interrupts::setIRQEnabled(9, true);
-    interrupts::setIRQEnabled(10, true);
-    interrupts::setIRQEnabled(12, true);
-    interrupts::setIRQEnabled(13, true);
-    interrupts::setIRQEnabled(14, true);
-    interrupts::setIRQEnabled(15, true);
+    interrupts::configureIRQs((uint8_t)0x20);
     interrupts::configureIDT();
+    //interrupts::setIRQEnabled(0, true);
+    interrupts::setIRQEnabled(1, true);
+    //interrupts::setIRQEnabled(2, true);
+    //interrupts::setIRQEnabled(3, true);
+    //interrupts::setIRQEnabled(4, true);
+    //interrupts::setIRQEnabled(5, true);
+    //interrupts::setIRQEnabled(6, true);
+    //interrupts::setIRQEnabled(7, true);
+
+    //interrupts::setIRQEnabled(8, true);
+    //interrupts::setIRQEnabled(9, true);
+    //interrupts::setIRQEnabled(10, true);
+    //interrupts::setIRQEnabled(12, true);
+    //interrupts::setIRQEnabled(13, true);
+    //interrupts::setIRQEnabled(14, true);
+    //interrupts::setIRQEnabled(15, true);
 
     graphics::Framebuffer framebuffer{ backbuffer, UVector2{ 640, 480 }, 3 };
     gui::GuiManager man (framebuffer);
@@ -169,6 +169,7 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     {
         man.drawSpecific(bottom_container->child_b);
         memory::memCpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+        while (true) {}
         text_panel->text[0]++;
         if (text_panel->text[0] == '\0')
         {

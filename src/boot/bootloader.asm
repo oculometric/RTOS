@@ -157,12 +157,6 @@ protected_mode_setup:
     mov eax, cr0            ; copy out cr0
     or eax, 0x1             ; turn on bit 0 (protected mode)
     mov cr0, eax            ; copy back into cr0
-    mov ax, GDT_DATA_SEGMENT_OFFSET
-    mov es, ax
-    mov ds, ax
-    mov fs, ax
-    mov gs, ax
-    mov ss, ax
     jmp GDT_CODE_SEGMENT_OFFSET:protected_mode_arrival  ; perform the far jump to protected mode entry point
 
 [bits 16]
@@ -186,14 +180,24 @@ gdt_code:
 gdt_data:
     dw 0xffff       ; first 16 bits of limit
     dw 0x0          ; first 16 bits of base
-    db 0x0          ; next 8 bit of base
+    db 0x0          ; next 8 bits of base
     db 0b10010010   ; flags and type
     db 0b11001111   ; other flags and last 4 bits of limit
     db 0x0          ; last 8 bits of base
+gdt_tss:
+    dw TSS_SIZE-1   ; first 16 bits of the TSS size
+    dw TSS_ADDR & 0xffff ; first 16 bits of TSS address
+    db (TSS_ADDR >> 16) & 0xff ; next 8 bits of base
+    db 0x89         ; flags and type (an available, present task segment)
+    db 0x40         ; other flags and last 4 bits of limit
+    db (TSS_ADDR >> 24) & 0xff ; last 8 bits of base
 gdt_end:
 
 GDT_CODE_SEGMENT_OFFSET equ gdt_code - gdt_start
 GDT_DATA_SEGMENT_OFFSET equ gdt_data - gdt_start
+GDT_TSS_SEGMENT_OFFSET  equ gdt_tss - gdt_start
+
+TSS_SIZE equ 0x68   ; size of the TSS. ; FIXME: make this not a magic number
 
 BOOTLOADER_ADDR equ 0x7c00      ; address where the bootloader (this fucker) starts
 STACK_BASE_ADDR equ BOOTLOADER_ADDR + 0x200 + 0x800 ; address where the stack base starts (the stack grows down toward the bootloader, oh boy i sure do hope that doesnt cause any problems)
@@ -201,7 +205,9 @@ KERNEL_LOAD_ADDR equ 0x10000    ; address where the kernel will be loaded (i.e. 
 KERNEL_FINAL_ADDR equ 0x100000  ; address where the kernel code should actually be (something something ELF relocation ill do it later)
 OS_HINT_TABLE equ STACK_BASE_ADDR + 0x200   ; address where the hint table for the OS will be placed, just on top of the stack (with some padding)
 VBE_MODEINFO_ADDR equ OS_HINT_TABLE + 0x400 ; address where the VBE mode info table will be placed
-MMAP_TABLE_ADDR equ VBE_MODEINFO_ADDR + 0x200 ; address where the memory map will be placed, on top of the VBE mode info block
+TSS_ADDR equ VBE_MODEINFO_ADDR + 0x200      ; address where the TSS will be placed (for now) ; FIXME: make this not suck
+TSS_STACK_BASE equ TSS_ADDR + 0x200 + 0x400 ; address of the base of the TSS stack (after the TSS itself, 1kb long)
+MMAP_TABLE_ADDR equ TSS_STACK_BASE + 0x200  ; address where the memory map will be placed, behind the TSS stack
 
 %include "src/os_hint_table.mac"
 
@@ -215,7 +221,22 @@ show_error:             ; places the character in cl as an error code on the scr
 
 [bits 32]
 protected_mode_arrival:
-    mov BYTE [0xb8000], 'N'
+    ; finish setting the segment registers
+    mov ax, GDT_DATA_SEGMENT_OFFSET
+    mov es, ax
+    mov ds, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+load_tss:
+    ; populate and load the TSS
+    mov WORD [TSS_ADDR + 0x08], GDT_DATA_SEGMENT_OFFSET
+    mov DWORD [TSS_ADDR + 0x04], TSS_STACK_BASE
+    mov WORD [TSS_ADDR + 0x66], TSS_SIZE
+    mov ax, GDT_TSS_SEGMENT_OFFSET
+    ltr ax
+prepare_for_launch:
+    ; put a magic value in eax
     mov eax, 0x4a6b7900
     push OS_HINT_TABLE
     jmp KERNEL_LOAD_ADDR                 ; geronimo!

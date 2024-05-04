@@ -14,6 +14,7 @@ interruptHandlerSize:
 ; ISR, the interrupt aggregator below
 %macro interruptHandler 1
 align 4
+interruptHandler%1
     mov DWORD [interruptIndex], %1
     jmp interruptAggregator
 %endmacro
@@ -27,6 +28,7 @@ interruptHandlerASM:
     jmp interruptAggregator
 align 4
 interruptHandlerASMEnd:
+interruptHandler 1
 interruptHandler 2
 interruptHandler 3
 interruptHandler 4
@@ -97,7 +99,7 @@ interruptHandler 63
 ; cleans up after itself
 interruptAggregator:
     cli     ; disable interrupts
-    pusha   ; store registers
+    pushad   ; store registers
     cld     ; what?
 
     ; TODO: stash the rest, including floating point registers
@@ -106,8 +108,14 @@ interruptAggregator:
     push DWORD [interruptIndex]
     call interruptReintegrator
     pop eax ; clean up GCC's mess
-    pop eax
 
-    popa    ; restore registers
+    popad    ; restore registers
     sti     ; enable interrupts
-    iret    ; interrupt return
+    iret    ; interrupt return // FIXME: triple faulting (sometimes) after returning from an interrupt (i.e. after here)
+
+    ; backtrace
+    ; sometime after an interrupt occurs, a general protection fault (interrupt 0x0d) happens, with error code 0x0008
+    ; this means that it relates to a selector, specifically in the GDT, index 1 (or possibly 8? unclear)
+    ; then, for some reason, it can't handle this fault, and the relevant micro-ISR is never called (or while trying to call it, it fails)
+    ; this leads to a double fault (interrupt 0x08), with error code zero, which also cannot be handled
+    ; we end with a triple fault, obviously

@@ -204,6 +204,7 @@ section_headers_read:
     ; fuck it, geronimo part two!!!
     mov eax, [ELF_HEADER_USEFUL+EHU_PROGENT_OFFSET]
     push DWORD [OS_HINT_TABLE]
+    ; jmp $
     jmp eax
 
 elf_load_error:
