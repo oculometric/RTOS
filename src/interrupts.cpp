@@ -1,5 +1,6 @@
 #define INTERRUPTS_INNER
 #include <interrupts.h>
+#undef INTERRUPTS_INNER
 
 #include <memory.h>
 #include <serial.h>
@@ -9,22 +10,99 @@ namespace nov
 namespace interrupts
 {
 
-// TODO: align for performance
+__attribute__((__aligned__(4)))
+// interrupt descriptor table for protected mode
 static ProtectedIDTEntry protected_idt[256];
+__attribute__((__aligned__(4)))
+// IDT descriptor for protected mode
 static ProtectedIDTDescriptor protected_idtr;
 
+// offset of the IRQ vectors in the IDT
+static uint8_t irq_interrupt_offset;
+
+// array containing function pointers which handle the first 32 interrupts
+static void(* low_interrupt_handlers[32])();
+
+// array containing function pointers which handle IRQs
+static void(* irq_interrupt_handlers[16])();
+
+// array containing function pointers which handle interrupts > 32 and not reserved for IRQs
+static void(* high_interrupt_handlers[256-32])();
+
+/**
+ * called from assembly code when an interrupt arrives. the number of the 
+ * interrupt is passed as an argument. this function handles passing that
+ * interrupt on as a function call to a relevant handler function.
+ * 
+ * if the interrupt is one of the 32 reserved by the CPU, it will be passed
+ * to the relevant function in the `low_interrupt_handlers` array.
+ * 
+ * if the interrupt is within the range registered to IRQs from the PIC
+ * (configurable using the `configureIRQS` function), the relevant function
+ * from the `irq_interrupt_handlers` function will be called (corresponding to
+ * the IRQ number, not the interrupt number!)
+ * 
+ * otherwise, the relevant function from the `high_interrupt_handlers` array
+ * will be called (imagine this as the remaining block of available interrupt
+ * vectors with a chunk taken out for the IRQ vectors, and a chunk taken out
+ * from the reserved vectors)
+ * 
+ * @param interrupt the interrupt number currently being serviced
+ * 
+ * **/
 extern "C" void interruptReintegrator(uint8_t interrupt)
 {
-    com_1 << "interrupt " << stream::Mode::HEX << interrupt << " was just called" << stream::endl;
-    if (interrupt == 0x09)
+    if (interrupt < 32)
     {
-        com_1 << "apparently the keyboard has something to say!" << stream::endl;
-        com_1 << stream::Mode::HEX << inb(0x60) << stream::endl;
-        outb(0x20, 0x20); // this tells the PIC that we listened to what it had to say
+        // if this is a reserved interrupt, fire it from the low vector table
+        com_1 << "low interrupt " << stream::Mode::HEX << interrupt << " was just called" << stream::endl;
+        low_interrupt_handlers[interrupt]();
     }
+    else if (interrupt >= irq_interrupt_offset && interrupt < irq_interrupt_offset + 16)
+    {
+        // if this is an IRQ, fire it from the IRQ vector table
+        com_1 << "IRQ interrupt " << stream::Mode::HEX << interrupt - irq_interrupt_offset << " was just called" << stream::endl;
+        (irq_interrupt_handlers[interrupt-irq_interrupt_offset])();
+        acknowledgePICInterrupt(interrupt-irq_interrupt_offset);
+    }
+    else
+    {
+        // this is just any old random interrupt, so fire it from the high vector table
+        uint8_t index = (interrupt < irq_interrupt_offset) ? (interrupt - 32) : (interrupt - (irq_interrupt_offset + 16));
+        com_1 << "high interrupt " << stream::Mode::HEX << index << " was just called (" << interrupt << ")" << stream::endl;
+        (high_interrupt_handlers[index])();
+    }
+    
     com_1.flush();
 }
 
+void placeholderCPUInterruptHandler()
+{
+    com_1 << "a cpu interrupt was handled." << stream::endl;
+}
+
+void placeholderIRQHandler()
+{
+    com_1 << "an irq was handled." << stream::endl;
+}
+
+void placeholderMiscInterruptHandler()
+{
+    com_1 << "some other interrupt was handled." << stream::endl;
+}
+
+/**
+ * performs the real configuration of the actual IDT. this should only be used to set
+ * the ISR to point to an assembly routine. in fact, it should only be used inside the
+ * `configureIDT` function to perform the initial passthrough initialisation with the
+ * micro-ISRs.
+ * 
+ * @param interrupt index of the interrupt to hook
+ * @param handler pointer to bare assembly function which the IDT entry will point to
+ * @param gate gate type for the IDT entry
+ * @param priv privilege level for the IDT entry
+ * 
+ * **/
 void configureInternalInterruptVector(uint8_t interrupt, void(* handler), GateType gate, Privilege priv)
 {
     if (handler == 0x0) { com_1 << "invalid interrupt handler address " << stream::endl; return; }
@@ -38,21 +116,100 @@ void configureInternalInterruptVector(uint8_t interrupt, void(* handler), GateTy
 
 void configureIDT()
 {
+    disableInterrupts();
+    // set up IDT descriptor
     protected_idtr.base = (uint32_t)(&protected_idt);
     protected_idtr.limit = (uint16_t)((sizeof(ProtectedIDTEntry) * 256) - 1);
     com_1 << "IDTR assigned" << stream::endl;
-    com_1 << "interrupt handler size: " << interruptHandlerSize << stream::endl;
 
-    for (int i = 0; i < 32; i++)
+    // configure interrupt vectors to point to incremental ISRs in the assembly file interrupt_handler.asm
+    com_1 << "interrupt handler size: " << interruptHandlerSize << stream::endl;
+    for (int i = 0; i < 64; i++)
         configureInternalInterruptVector(i, (void*)((uint32_t)(&interruptHandlerASM) + (interruptHandlerSize * i)), GateType::INTERRUPT_32, Privilege::LEVEL_0);
-    com_1 << "internal interrupt vectors assigned, handler is located at " << (uint32_t)(&interruptHandlerASM) << stream::endl;
+    com_1 << "internal interrupt vectors assigned, handlers start at " << (uint32_t)(&interruptHandlerASM) << stream::endl;
+    
+    // populate vector tables
+    // populate low vector table
+    for (int i = 0; i < 32; i++)
+        configureInterruptHandler(i, placeholderCPUInterruptHandler, GateType::TRAP_32, Privilege::LEVEL_0);
+    // populate IRQ vector table
+    for (int i = 0; i < 16; i++)
+        configureIRQHandler(i, placeholderIRQHandler);
+    // populate high vector table
+    for (int i = 32; i < 256; i++)
+        configureInterruptHandler(i, placeholderMiscInterruptHandler, GateType::INTERRUPT_32, Privilege::LEVEL_0);
+
+    // load IDT
     asm ("lidt %0" : : "m"(protected_idtr));
     com_1 << "IDT loaded" << stream::endl;
-    // mask ALL IRQs from the PIC. TODO: reenable and configure these later
-    outb(0x21,0xff);
-    outb(0xa1,0xff);
+    
+    // enable interrupts
     enableInterrupts();
     com_1 << "interrupts enabled" << stream::endl;
+}
+
+void configureInterruptHandler(uint8_t interrupt, void (*handler)(), GateType gate, Privilege priv)
+{
+    // set the info of the IDT entry
+    protected_idt[interrupt].attributes = 0b10000000 | ((priv & 0b11) << 5) | (gate & 0b1111);
+    if (interrupt < 32)
+    {
+        // point the relevant low interrupt handler to the provided function
+        low_interrupt_handlers[interrupt] = handler;
+    }
+    else
+    {
+        // if the specified interrupt is currently overlapping with an IRQ, assign it anyway,
+        // since the IRQs may be remapped later, unmasking these interrupts
+        if (interrupt >= irq_interrupt_offset && interrupt < irq_interrupt_offset + 16)
+            com_1 << "this interrupt is currently in use by IRQ " << stream::Mode::HEX << interrupt - irq_interrupt_offset << " so it will never be called." << stream::endl;
+        // point the relevant high interrupt handler to the provided function
+        high_interrupt_handlers[interrupt - 32] = handler;
+    }
+}
+
+void configureIRQs(uint8_t interrupt_base)
+{
+    // codeword 1 - start initialisation, telling both PICs to listen for additional codeword
+    outb(PICRegister::PIC1_COMMAND, PICInitCodeWords1::INIT | PICInitCodeWords1::ICW4_PRESENT);
+    outb(PICRegister::PIC2_COMMAND, PICInitCodeWords1::INIT | PICInitCodeWords1::ICW4_PRESENT);
+    // codeword 2 - set interrupt vector offset of PICs
+    outb(PICRegister::PIC1_DATA, interrupt_base);
+    outb(PICRegister::PIC2_DATA, interrupt_base+8);
+    irq_interrupt_offset = interrupt_base;
+    // codeword 3 - report how primary and secondary are wired
+    outb(PICRegister::PIC1_DATA, 0b00000010); // IRQs from secondary are on IRQ2 on the primary
+    outb(PICRegister::PIC2_DATA, 2); // secondary identity in cascade
+    // codeword 4 - set PICs in 8086 mode
+    outb(PICRegister::PIC1_DATA, PICInitCodeWords4::MODE_8086);
+    outb(PICRegister::PIC2_DATA, PICInitCodeWords4::MODE_8086);
+    // fully set masks to disable all IRQs for now
+    outb(PICRegister::PIC1_DATA, 0xff);
+    outb(PICRegister::PIC2_DATA, 0xff);
+}
+
+void setIRQEnabled(uint8_t irq, bool enabled)
+{
+    if (irq >= 16) return;
+    // get the current IRQ enable mask
+    uint8_t mask = inb(irq < 8 ? PICRegister::PIC1_DATA : PICRegister::PIC2_DATA);
+    uint8_t new_mask = (1 << (irq % 8));
+    // compute new, setting the bit to disable or clearing it to enable
+    mask = enabled ? (mask & ~new_mask) : (mask | new_mask);
+    // send back to the PIC
+    outb(irq < 8 ? PICRegister::PIC1_DATA : PICRegister::PIC2_DATA, mask);
+}
+
+bool getIRQEnabled(uint8_t irq)
+{
+    if (irq >= 16) return false;
+    return inb(irq < 8 ? PICRegister::PIC1_DATA : PICRegister::PIC2_DATA) & (1 << (irq % 8));
+}
+
+void configureIRQHandler(uint8_t irq, void(* handler)())
+{
+    if (irq >= 16) return;
+    irq_interrupt_handlers[irq] = handler;
 }
 
 }
