@@ -41,8 +41,10 @@ inline float modf(float a, float b)
 inline float tanf(float rad)
 {
     float f;
-    asm("fptan;"
-    "fdivp" : "=t" (f) : "0" (rad));
+    asm(
+        "fptan \n\t\
+        fdivp \n\t\
+        " : "=t" (f) : "0" (rad));
     return f;
 }
 

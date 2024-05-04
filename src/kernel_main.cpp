@@ -8,6 +8,7 @@
 #include <string.h>
 #include <binary_bitmap.h>
 #include <font.h>
+#include <interrupts.h>
 
 // TODO: string splitting
 // TODO: interrupts
@@ -79,6 +80,9 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     uint8_t* backbuffer = new uint8_t[640*480*3];
     if (backbuffer == 0x0) panic("unable to allocate memory for GUI backbuffer");
     memory::mView();
+
+    com_1 << "configuring IDT" << endl;
+    interrupts::configureIDT();
 
     graphics::Framebuffer framebuffer{ backbuffer, UVector2{ 640, 480 }, 3 };
     gui::GuiManager man (framebuffer);
