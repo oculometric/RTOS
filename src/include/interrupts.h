@@ -176,7 +176,7 @@ inline void acknowledgePICInterrupt(uint8_t irq)
 /** represents the start of the micro-ISR table from the assmebly file. you need
  * to get a reference to this variable instead of just using it, for some reason
  * **/
-extern void* interruptHandlerASM;
+extern uint8_t interruptHandlerASM;
 // size of each micro-ISR
 extern uint32_t interruptHandlerSize;
 

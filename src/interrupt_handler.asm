@@ -14,18 +14,17 @@ interruptHandlerSize:
 ; ISR, the interrupt aggregator below
 %macro interruptHandler 1
 align 4
-interruptHandler%1
+interruptHandler%+%1:
     mov DWORD [interruptIndex], %1
     jmp interruptAggregator
 %endmacro
 
 ; micro-ISR array starts here
 ; is this too janky? i feel like this is crossing a line
-align 4
 [global interruptHandlerASM]
+align 4
 interruptHandlerASM:
-    mov DWORD [interruptIndex], 0
-    jmp interruptAggregator
+interruptHandler 0
 align 4
 interruptHandlerASMEnd:
 interruptHandler 1
@@ -93,13 +92,16 @@ interruptHandler 62
 interruptHandler 63
 ; FIXME: micro-ISRs only go up to 64. if we want to use all 256 interrupt vectors, this needs to be expanded (also see cpp file)
 
+align 4
+dd 0x4a6b7900
+
 ; this routine does the necessary stack and register protection, grabs the number
 ; of the interrupt currently being serviced, masks interrupts, then calls into the
 ; C function which handles dispatching the real ISRs back in C-land. it also
 ; cleans up after itself
 interruptAggregator:
     cli     ; disable interrupts
-    pushad   ; store registers
+    pushad  ; store registers
     cld     ; what?
 
     ; TODO: stash the rest, including floating point registers

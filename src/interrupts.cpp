@@ -10,10 +10,10 @@ namespace nov
 namespace interrupts
 {
 
-__attribute__((__aligned__(4)))
+__attribute__((__aligned__(0x10)))
 // interrupt descriptor table for protected mode
 static ProtectedIDTEntry protected_idt[256];
-__attribute__((__aligned__(4)))
+__attribute__((__aligned__(0x10)))
 // IDT descriptor for protected mode
 static ProtectedIDTDescriptor protected_idtr;
 
@@ -123,15 +123,24 @@ void configureIDT()
     com_1 << "IDTR assigned" << stream::endl;
 
     // configure interrupt vectors to point to incremental ISRs in the assembly file interrupt_handler.asm
-    com_1 << "interrupt handler size: " << interruptHandlerSize << stream::endl;
+    com_1 << "interrupt micro-ISR size: " << interruptHandlerSize << stream::endl;
+    com_1 << "interrupt micro-ISR start: " << (uint32_t)&interruptHandlerASM << stream::endl;
+    com_1 << "value at micro-ISR start: " << (uint32_t)interruptHandlerASM << stream::endl;
+    uint8_t* nextMicroISR = &interruptHandlerASM;
     for (int i = 0; i < 64; i++)
-        configureInternalInterruptVector(i, (void*)((uint32_t)(&interruptHandlerASM) + (interruptHandlerSize * i)), GateType::INTERRUPT_32, Privilege::LEVEL_0);
+    {
+        // FIXME: later mISRs seem to be being overwritten?? by something??
+        com_1 << "micro-ISR " << stream::Mode::DEC << i << stream::Mode::HEX << " located at " << (uint32_t)nextMicroISR << stream::endl;
+        com_1 << "value at that address: " << *(uint32_t*)nextMicroISR << stream::endl;
+        configureInternalInterruptVector(i, (void*)(nextMicroISR), GateType::INTERRUPT_32, Privilege::LEVEL_0);
+        nextMicroISR += interruptHandlerSize;
+    }
     com_1 << "internal interrupt vectors assigned, handlers start at " << (uint32_t)(&interruptHandlerASM) << stream::endl;
     
     // populate vector tables
     // populate low vector table
     for (int i = 0; i < 32; i++)
-        configureInterruptHandler(i, placeholderCPUInterruptHandler, GateType::TASK, Privilege::LEVEL_0);
+        configureInterruptHandler(i, placeholderCPUInterruptHandler, GateType::TRAP_32, Privilege::LEVEL_0);
     // populate IRQ vector table
     for (int i = 0; i < 16; i++)
         configureIRQHandler(i, placeholderIRQHandler);
@@ -150,8 +159,10 @@ void configureIDT()
 
 void configureInterruptHandler(uint8_t interrupt, void (*handler)(), GateType gate, Privilege priv)
 {
+    com_1 << "configuring interrupt " << stream::Mode::DEC << interrupt;
     // set the info of the IDT entry
     protected_idt[interrupt].attributes = 0b10000000 | ((priv & 0b11) << 5) | (gate & 0b1111);
+    com_1 << " with attributes " << stream::Mode::HEX << protected_idt[interrupt].attributes << stream::endl;
     if (interrupt < 32)
     {
         // point the relevant low interrupt handler to the provided function
@@ -188,6 +199,9 @@ void configureIRQs(uint8_t interrupt_base)
     outb(PICRegister::PIC2_DATA, 0xff);
 }
 
+// TODO: properly implement task switching
+// TODO: reimplement this so it can alter micro-ISRs (or preferably generate its own on the fly) to match type properly
+
 void setIRQEnabled(uint8_t irq, bool enabled)
 {
     if (irq >= 16) return;
@@ -209,6 +223,8 @@ bool getIRQEnabled(uint8_t irq)
 void configureIRQHandler(uint8_t irq, void(* handler)())
 {
     if (irq >= 16) return;
+    // make sure this is a 32-bit interrupt gate
+    protected_idt[irq + irq_interrupt_offset].attributes = 0x8e;
     irq_interrupt_handlers[irq] = handler;
 }
 
