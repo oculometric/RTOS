@@ -141,6 +141,7 @@ void configureIDT()
     // populate low vector table
     for (int i = 0; i < 32; i++)
         configureInterruptHandler(i, placeholderCPUInterruptHandler, GateType::TRAP_32, Privilege::LEVEL_0);
+    configureInterruptHandler(0x02, placeholderCPUInterruptHandler, GateType::INTERRUPT_32, Privilege::LEVEL_0);
     // populate IRQ vector table
     for (int i = 0; i < 16; i++)
         configureIRQHandler(i, placeholderIRQHandler);

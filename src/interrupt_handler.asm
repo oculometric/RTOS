@@ -8,7 +8,6 @@ section .text
 %macro microISR 1
 align 4
 microISR%1:
-    cli
     push DWORD 0
     push DWORD %1
     jmp microISRAggregator
@@ -16,9 +15,7 @@ microISR%1:
 
 %macro microEISR 1
 align 4
-[global microISR%1]
 microISR%1:
-    cli
     push DWORD %1
     jmp microISRAggregator
 %endmacro
@@ -41,11 +38,11 @@ microEISR 13
 microEISR 14
 microISR 15
 microISR 16
-microISR 17
+microEISR 17
 microISR 18
 microISR 19
 microISR 20
-microISR 21
+microEISR 21
 microISR 22
 microISR 23
 microISR 24
@@ -53,8 +50,8 @@ microISR 25
 microISR 26
 microISR 27
 microISR 28
-microISR 29
-microISR 30
+microEISR 29
+microEISR 30
 microISR 31
 microISR 32
 microISR 33
@@ -103,29 +100,30 @@ microISRTable:
 ; C function which handles dispatching the real ISRs back in C-land. it also
 ; cleans up after itself
 microISRAggregator:
-    pushad  ; store registers
+    pushad  ; store registers ; ESP is 0x84cc before this line
     cld     ; puts us in the right calling convention, or something
 
-    push DWORD ds
-    push DWORD es
-    push DWORD fs
-    push DWORD gs
-
+    ;push DWORD ds
+    ;push DWORD es
+    ;push DWORD fs
+    ;push DWORD gs
     ; TODO: stash the rest, including floating point registers
 
     ; we grab the interrupt index from halfway down the stack, and push it again
-    push DWORD [esp + 16 + 32] 
+    push DWORD [esp + 32] 
     ; call the interrupt reintegrator in C
     call interruptReintegrator
 
-    pop gs
-    pop fs
-    pop es
-    pop ds
+    ; stack is maintained to here
+freeze:
+    ;pop gs
+    ;pop fs
+    ;pop es
+    ;pop ds
 
     popad    ; restore registers
 
-    add esp, 8 ; skip down the stack
+    ;; FIXME: something about this is breaking and we end up in the void
+    add esp, 12 ; skip down the stack
 
-    sti     ; enable interrupts
     iret    ; interrupt return
