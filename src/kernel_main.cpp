@@ -9,6 +9,7 @@
 #include <binary_bitmap.h>
 #include <font.h>
 #include <interrupts.h>
+#include <exceptions.h>
 
 // TODO: string splitting
 // TODO: interrupts
@@ -84,10 +85,12 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     memory::mView();
 
     com_1 << "configuring IDT" << endl;
-    interrupts::configureIRQs((uint8_t)0x20);
     interrupts::configureIDT();
-    //interrupts::setIRQEnabled(0, true);
-    interrupts::setIRQEnabled(1, true);
+    exception::registerExceptionHandlers();
+    interrupts::configureIRQs((uint8_t)0x20);
+    interrupts::enableInterrupts();
+    interrupts::setIRQEnabled(0, true);
+    //interrupts::setIRQEnabled(1, true);
     //interrupts::setIRQEnabled(2, true);
     //interrupts::setIRQEnabled(3, true);
     //interrupts::setIRQEnabled(4, true);
@@ -169,7 +172,7 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     {
         man.drawSpecific(bottom_container->child_b);
         memory::memCpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-        while (true) {}
+        //while (true) {}
         text_panel->text[0]++;
         if (text_panel->text[0] == '\0')
         {

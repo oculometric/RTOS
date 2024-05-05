@@ -29,7 +29,7 @@ enum Privilege
 
 /**
  * configures the interrupt descriptor table, and relevant cascading tables,
- * handlers, etc. enables interrupts when it's done. you should remap the PIC with
+ * handlers, etc. does not enable interrupts when it's done. you should remap the PIC with
  * `configureIRQs` before calling this.
  * 
  * interrupts are handled by a set of micro-ISRs in assembly, which simply capture the 
@@ -173,11 +173,6 @@ inline void acknowledgePICInterrupt(uint8_t irq)
 
 #ifdef INTERRUPTS_INNER
 
-/** represents the start of the micro-ISR table from the assmebly file. you need
- * to get a reference to this variable instead of just using it, for some reason
- * **/
-extern uint8_t interruptHandlerASM;
-// size of each micro-ISR
-extern uint32_t interruptHandlerSize;
+extern uint8_t microISRTable;
 
 #endif

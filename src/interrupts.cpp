@@ -18,7 +18,7 @@ __attribute__((__aligned__(0x10)))
 static ProtectedIDTDescriptor protected_idtr;
 
 // offset of the IRQ vectors in the IDT
-static uint8_t irq_interrupt_offset;
+static uint8_t irq_interrupt_offset = 0;
 
 // array containing function pointers which handle the first 32 interrupts
 static void(* low_interrupt_handlers[32])();
@@ -78,17 +78,17 @@ extern "C" void interruptReintegrator(uint8_t interrupt)
 
 void placeholderCPUInterruptHandler()
 {
-    com_1 << "a cpu interrupt was handled." << stream::endl;
+    com_1 << "a cpu interrupt was not handled." << stream::endl;
 }
 
 void placeholderIRQHandler()
 {
-    com_1 << "an irq was handled." << stream::endl;
+    com_1 << "an irq was not handled." << stream::endl;
 }
 
 void placeholderMiscInterruptHandler()
 {
-    com_1 << "some other interrupt was handled." << stream::endl;
+    com_1 << "some other interrupt was not handled." << stream::endl;
 }
 
 /**
@@ -119,23 +119,23 @@ void configureIDT()
     disableInterrupts();
     // set up IDT descriptor
     protected_idtr.base = (uint32_t)(&protected_idt);
-    protected_idtr.limit = (uint16_t)((sizeof(ProtectedIDTEntry) * 256) - 1);
+    protected_idtr.limit = (uint16_t)((sizeof(ProtectedIDTEntry) * 64) - 1);
     com_1 << "IDTR assigned" << stream::endl;
+    com_1 << "IDT base: " << stream::Mode::HEX << protected_idtr.base << stream::endl;
+    com_1 << "IDT limit: " << stream::Mode::HEX << protected_idtr.limit << stream::endl;
+    com_1 << "IDT entry size: " << stream::Mode::DEC << (uint32_t)sizeof(ProtectedIDTEntry) << stream::endl;
+
+    void** microISRTablePointer = (void** )(&microISRTable);
 
     // configure interrupt vectors to point to incremental ISRs in the assembly file interrupt_handler.asm
-    com_1 << "interrupt micro-ISR size: " << interruptHandlerSize << stream::endl;
-    com_1 << "interrupt micro-ISR start: " << (uint32_t)&interruptHandlerASM << stream::endl;
-    com_1 << "value at micro-ISR start: " << (uint32_t)interruptHandlerASM << stream::endl;
-    uint8_t* nextMicroISR = &interruptHandlerASM;
+    com_1 << "first microISR located at: " << stream::Mode::HEX << (uint32_t)microISRTablePointer[0] << stream::endl;
     for (int i = 0; i < 64; i++)
     {
-        // FIXME: later mISRs seem to be being overwritten?? by something??
-        com_1 << "micro-ISR " << stream::Mode::DEC << i << stream::Mode::HEX << " located at " << (uint32_t)nextMicroISR << stream::endl;
-        com_1 << "value at that address: " << *(uint32_t*)nextMicroISR << stream::endl;
-        configureInternalInterruptVector(i, (void*)(nextMicroISR), GateType::INTERRUPT_32, Privilege::LEVEL_0);
-        nextMicroISR += interruptHandlerSize;
+        com_1 << "micro-ISR " << stream::Mode::DEC << i << stream::Mode::HEX << " located at " << (uint32_t)microISRTablePointer[i] << stream::endl;
+        com_1 << "value at that address: " << *((uint32_t* )microISRTablePointer[i]) << stream::endl;
+        configureInternalInterruptVector(i, microISRTablePointer[i], GateType::INTERRUPT_32, Privilege::LEVEL_0);
     }
-    com_1 << "internal interrupt vectors assigned, handlers start at " << (uint32_t)(&interruptHandlerASM) << stream::endl;
+    com_1 << "internal interrupt vectors assigned, handlers start at " << (uint32_t)(microISRTablePointer) << stream::endl;
     
     // populate vector tables
     // populate low vector table
@@ -151,18 +151,12 @@ void configureIDT()
     // load IDT
     asm ("lidt %0" : : "m"(protected_idtr));
     com_1 << "IDT loaded" << stream::endl;
-    
-    // enable interrupts
-    enableInterrupts();
-    com_1 << "interrupts enabled" << stream::endl;
 }
 
 void configureInterruptHandler(uint8_t interrupt, void (*handler)(), GateType gate, Privilege priv)
 {
-    com_1 << "configuring interrupt " << stream::Mode::DEC << interrupt;
     // set the info of the IDT entry
     protected_idt[interrupt].attributes = 0b10000000 | ((priv & 0b11) << 5) | (gate & 0b1111);
-    com_1 << " with attributes " << stream::Mode::HEX << protected_idt[interrupt].attributes << stream::endl;
     if (interrupt < 32)
     {
         // point the relevant low interrupt handler to the provided function
