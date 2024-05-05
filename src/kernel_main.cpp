@@ -89,19 +89,19 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     exception::registerExceptionHandlers();
     interrupts::configureIRQs((uint8_t)0x20);
     interrupts::enableInterrupts();
-    interrupts::setIRQEnabled(0, true);
-    //interrupts::setIRQEnabled(1, true);
-    //interrupts::setIRQEnabled(2, true);
+    //interrupts::setIRQEnabled(0, true);
+    interrupts::setIRQEnabled(1, true);
+    interrupts::setIRQEnabled(2, true);
     //interrupts::setIRQEnabled(3, true);
     //interrupts::setIRQEnabled(4, true);
     //interrupts::setIRQEnabled(5, true);
     //interrupts::setIRQEnabled(6, true);
     //interrupts::setIRQEnabled(7, true);
 
-    //interrupts::setIRQEnabled(8, true);
+    interrupts::setIRQEnabled(8, true);
     //interrupts::setIRQEnabled(9, true);
     //interrupts::setIRQEnabled(10, true);
-    //interrupts::setIRQEnabled(12, true);
+    interrupts::setIRQEnabled(12, true);
     //interrupts::setIRQEnabled(13, true);
     //interrupts::setIRQEnabled(14, true);
     //interrupts::setIRQEnabled(15, true);

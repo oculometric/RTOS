@@ -131,8 +131,8 @@ void configureIDT()
     com_1 << "first microISR located at: " << stream::Mode::HEX << (uint32_t)microISRTablePointer[0] << stream::endl;
     for (int i = 0; i < 64; i++)
     {
-        com_1 << "micro-ISR " << stream::Mode::DEC << i << stream::Mode::HEX << " located at " << (uint32_t)microISRTablePointer[i] << stream::endl;
-        com_1 << "value at that address: " << *((uint32_t* )microISRTablePointer[i]) << stream::endl;
+        //com_1 << "micro-ISR " << stream::Mode::DEC << i << stream::Mode::HEX << " located at " << (uint32_t)microISRTablePointer[i] << stream::endl;
+        //com_1 << "value at that address: " << *((uint32_t* )microISRTablePointer[i]) << stream::endl;
         configureInternalInterruptVector(i, microISRTablePointer[i], GateType::INTERRUPT_32, Privilege::LEVEL_0);
     }
     com_1 << "internal interrupt vectors assigned, handlers start at " << (uint32_t)(microISRTablePointer) << stream::endl;
