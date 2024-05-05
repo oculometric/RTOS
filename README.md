@@ -27,7 +27,7 @@ as of writing this, i've written a reasonably okayish (if not very portable) *bo
     - [ ] update build system to be able to build proper filesystem images
     - [ ] split the kernel into loadable modules?????
 - [ ] write interrupt handler wrapper
-    - [ ] write interrupt handlers
+    - [x] write interrupt handlers
     - [x] write PIC reprogramming code
     - [ ] code for talking to the keyboard
     - [ ] code for talking to timers
