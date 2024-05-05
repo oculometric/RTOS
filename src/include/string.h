@@ -51,14 +51,8 @@ public:
 
 uint32_t findNextByte(char* addr, char target);
 
-uint16_t intToString(const uint32_t i, const uint8_t base, char* buffer, const uint8_t padding = 0);
-void floatToString(const float f, char* buffer, const uint8_t dps = 3);
-
 String intToString(const uint32_t i, const uint8_t base, const uint8_t padding = 0);
 String floatToString(const float f, const uint8_t dps = 3);
-
-int32_t stringToInt(const char* str, uint8_t base);
-float stringToFloat(const char* str);
 
 int32_t stringToInt(const String& str, uint8_t base);
 float stringToFloat(const String& str);
