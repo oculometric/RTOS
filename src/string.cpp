@@ -199,8 +199,6 @@ uint32_t nov::findNextByte(char* addr, char target)
     return -1;
 }
 
-static const char* itos_chars = "0123456789abcdefghijklmnopqrstuvwxyz";
-
 String nov::intToString(const uint32_t i, const uint8_t base, const uint8_t padding)
 {
     uint16_t size = padding > 33 ? padding : 33;

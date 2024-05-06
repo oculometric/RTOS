@@ -33,6 +33,19 @@ struct KeyboardCommand
 
 };
 
+struct KeyState
+{
+    bool is_down;
+    char key;
+};
+
+enum ScancodeSet
+{
+    SET_1,
+    SET_2,
+    SET_3
+};
+
 class PS2KeyboardController
 {
 private:
@@ -54,6 +67,8 @@ public:
 
 void keyboardInterruptCallback();
 void assignPS2KeyboardController(PS2KeyboardController* controller);
+
+KeyState decodeScancode(uint8_t scancode, ScancodeSet scs);
 
 #define PS2_DATA_PORT 0x60
 

@@ -12,8 +12,6 @@
 #include <timer.h>
 
 // TODO: string splitting
-// TODO: interrupts
-// TODO: keyboard
 // TODO: v-tables
 // TODO: timing
 // TODO: text wrapping
@@ -165,7 +163,7 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     {
         man.drawSpecific(bottom_container->child_b);
         memory::memCpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-        //while (true) {}
+        
         text_panel->text[0]++;
         if (text_panel->text[0] == '\0')
         {
@@ -173,7 +171,12 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
         }
 
         uint8_t kb_byte = ps2_keyboard->dequeueInByte();
-        if (kb_byte) com_1 << "keyboard byte: " << Mode::HEX << kb_byte << endl;
+        if (kb_byte)
+        {
+            keyboard::KeyState state = keyboard::decodeScancode(kb_byte, keyboard::ScancodeSet::SET_1);
+            if (state.is_down)
+                com_1 << "keyboard byte: " << (char)state.key << endl;
+        }
     }
 
     com_1 << "all done." << endl;

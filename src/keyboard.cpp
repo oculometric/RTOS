@@ -2,6 +2,7 @@
 
 #include <io.h>
 #include <serial.h>
+#include <scancodes.h>
 
 namespace nov
 {
@@ -19,6 +20,23 @@ void keyboardInterruptCallback()
 void assignPS2KeyboardController(PS2KeyboardController* controller)
 {
     keyboard_controller = controller;
+}
+
+KeyState decodeScancode(uint8_t scancode, ScancodeSet scs)
+{
+    KeyState state;
+    switch (scs)
+    {
+    case ScancodeSet::SET_1:
+        state.key = scan_code_set_1_char[scancode];
+        state.is_down = scan_code_set_1_down[scancode];
+        break;
+    default:
+        state.key = 0;
+        state.is_down = 0;
+        break;
+    }
+    return state;
 }
 
 void PS2KeyboardController::queueInByte(uint8_t byte)

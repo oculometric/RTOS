@@ -100,7 +100,7 @@ microISRTable:
 ; C function which handles dispatching the real ISRs back in C-land. it also
 ; cleans up after itself
 microISRAggregator:
-    pushad  ; store registers ; ESP is 0x84cc before this line
+    pushad  ; store registers
     cld     ; puts us in the right calling convention, or something
 
     ;push DWORD ds
