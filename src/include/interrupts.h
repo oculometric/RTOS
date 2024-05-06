@@ -173,6 +173,6 @@ inline void acknowledgePICInterrupt(uint8_t irq)
 
 #ifdef INTERRUPTS_INNER
 
-extern uint8_t microISRTable;
+extern uint32_t microISRTable;
 
 #endif

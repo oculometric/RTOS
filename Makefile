@@ -5,9 +5,12 @@ AS			:= nasm
 CC			:= $(PREFIX)g++
 LD			:= $(PREFIX)ld
 
-AS_FLAGS		:= -f elf -g
-CC_FLAGS		:= -ffreestanding -m32 -g -masm=intel -Wall -Wextra -Wpedantic -Wno-unused-parameter -mno-red-zone -std=c++20 -fno-exceptions -fno-ident -fno-asynchronous-unwind-tables -O0 # -s
-LD_FLAGS		:= -T linker.ld -g #-s 
+AS_FLAGS		:= -f elf
+CC_FLAGS		:= -ffreestanding -m32 -masm=intel -Wall -Wextra -Wpedantic -Wno-unused-parameter -mno-red-zone -std=c++20 -fno-exceptions -fno-ident -fno-asynchronous-unwind-tables -O3 -s
+LD_FLAGS		:= -T linker.ld -s
+
+# -g flag enables debug symbols
+# -s strips all unecessary shit
 
 BIN				= bin
 SRC				= src
@@ -61,7 +64,6 @@ $(OBJ_DIR)/%.bin: $(BL_DIR)/%.asm $(OBJ_DIR)
 $(BINRES_DIR)/%.o: $(BINRES_DIR)/% $(BINRES_DIR)
 	@echo "Copying resource" $<
 	@$(PREFIX)objcopy -I binary -O elf32-i386 -B i386 $< $@
-	@echo _binary_$(subst /,_,$(subst .,_,$(patsubst %.o,%,$@)))_start=_res_$(subst .,_,$(patsubst $(BINRES_DIR)/%,%,$<))_start
 	@$(PREFIX)objcopy -I binary -O elf32-i386 -B i386 $< $@ \
 		--redefine-sym _binary_$(subst /,_,$(subst .,_,$(patsubst %.o,%,$@)))_start=_res_$(subst .,_,$(patsubst $(BINRES_DIR)/%,%,$<))_start \
 		--redefine-sym _binary_$(subst /,_,$(subst .,_,$(patsubst %.o,%,$@)))_end=_res_$(subst .,_,$(patsubst $(BINRES_DIR)/%,%,$<))_end \

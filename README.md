@@ -22,6 +22,7 @@ as of writing this, i've written a reasonably okayish (if not very portable) *bo
 - [x] text rendering
     - [x] text view UI panel
 - [x] 3D wireframe rendering panel able to read 3D model files
+- [ ] rewrite and abstract graphics API
 - [ ] virtual/abstract file systems
     - [ ] reading from disk, reading into virtual filesystem
     - [ ] update build system to be able to build proper filesystem images
@@ -36,11 +37,9 @@ as of writing this, i've written a reasonably okayish (if not very portable) *bo
 - [x] write interrupt handler wrapper
     - [x] write interrupt handlers
     - [x] write PIC reprogramming code
-    - [ ] code for talking to the keyboard
+    - [x] code for talking to the keyboard
     - [ ] code for talking to timers
-- [ ] exception handling (needs interrupts)
-    - [ ] convert unecessarry panics into throws
-    - [ ] definitely separate the kernel from 'programs'
+- [ ] definitely separate the kernel from 'programs'
 - [ ] proper memory management
     - [ ] better allocation algorithm
     - [ ] paging/virtual memory
