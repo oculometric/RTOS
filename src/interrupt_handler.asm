@@ -113,18 +113,16 @@ microISRAggregator:
     push DWORD [esp + 32] 
     ; call the interrupt reintegrator in C
     call interruptReintegrator
+    pop eax
 
-    ; stack is maintained to here
 freeze:
     ;pop gs
     ;pop fs
     ;pop es
     ;pop ds
-    pop eax
 
     popad    ; restore registers
 
-    ;; FIXME: something about this is breaking and we end up in the void
     add esp, 8 ; skip down the stack
 
     iret    ; interrupt return

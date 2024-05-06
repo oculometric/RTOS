@@ -200,7 +200,8 @@ GDT_TSS_SEGMENT_OFFSET  equ gdt_tss - gdt_start
 TSS_SIZE equ 0x68   ; size of the TSS. ; FIXME: make this not a magic number
 
 BOOTLOADER_ADDR equ 0x7c00      ; address where the bootloader (this fucker) starts
-STACK_BASE_ADDR equ BOOTLOADER_ADDR + 0x200 + 0x800 ; address where the stack base starts (the stack grows down toward the bootloader, oh boy i sure do hope that doesnt cause any problems)
+; TODO: move both the GDT and the stack to more sensible places. this was the interrupt problem
+STACK_BASE_ADDR equ BOOTLOADER_ADDR + 0x800 + 0x800 ; address where the stack base starts (the stack grows down toward the bootloader, oh boy i sure do hope that doesnt cause any problems)
 KERNEL_LOAD_ADDR equ 0x10000    ; address where the kernel will be loaded (i.e. 128 sectors of raw executable)
 KERNEL_FINAL_ADDR equ 0x100000  ; address where the kernel code should actually be (something something ELF relocation ill do it later)
 OS_HINT_TABLE equ STACK_BASE_ADDR + 0x200   ; address where the hint table for the OS will be placed, just on top of the stack (with some padding)

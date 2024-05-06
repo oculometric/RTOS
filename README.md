@@ -26,7 +26,14 @@ as of writing this, i've written a reasonably okayish (if not very portable) *bo
     - [ ] reading from disk, reading into virtual filesystem
     - [ ] update build system to be able to build proper filesystem images
     - [ ] split the kernel into loadable modules?????
-- [ ] write interrupt handler wrapper
+- [ ] proper executable loading and relocation
+    - [ ] relocate stack
+    - [ ] relocate GDT
+- [ ] proper GDT configuration from C++
+    - [ ] kernel code & data
+    - [ ] user code & data
+    - [ ] task segment and task handling
+- [x] write interrupt handler wrapper
     - [x] write interrupt handlers
     - [x] write PIC reprogramming code
     - [ ] code for talking to the keyboard
