@@ -5,7 +5,7 @@
     "files.associations": {
         "efi.h": "c",
         "efilib.h": "c",
-        "*.asm": "asm",
+        "*.asm": "nasm",
         "*.bin": "cpp",
         "*.o": "cpp"
     },

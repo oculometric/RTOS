@@ -5,9 +5,9 @@ AS			:= nasm
 CC			:= $(PREFIX)g++
 LD			:= $(PREFIX)ld
 
-AS_FLAGS		:= -f elf
-CC_FLAGS		:= -ffreestanding -m32 -g -masm=intel -Wall -Wextra -Wpedantic -Wno-unused-parameter -mno-red-zone -std=c++20 -fno-exceptions -s -fno-ident -fno-asynchronous-unwind-tables -O3
-LD_FLAGS		:= -T linker.ld -s
+AS_FLAGS		:= -f elf -g
+CC_FLAGS		:= -ffreestanding -m32 -g -masm=intel -Wall -Wextra -Wpedantic -Wno-unused-parameter -mno-red-zone -std=c++20 -fno-exceptions -fno-ident -fno-asynchronous-unwind-tables -O0 # -s
+LD_FLAGS		:= -T linker.ld -g #-s 
 
 BIN				= bin
 SRC				= src
@@ -85,7 +85,7 @@ build: $(BL_FILES_OUT) $(CC_FILES_OUT) $(AS_FILES_OUT) $(EMBED_FILES_OUT)
 
 emulate:
 	@mkdir -p log
-	qemu-system-x86_64 -drive file=$(BOOT_OUT),format=raw,index=0,media=disk -m 32M -monitor stdio -serial file:log/output.log
+	qemu-system-x86_64 -drive file=$(BOOT_OUT),format=raw,index=0,media=disk -m 32M -monitor stdio -serial file:log/output.log #-d int,cpu_reset -no-reboot -s -S 
 
 disassemble:
 	objdump -m i8086 -M intel -b binary -D $(BOOT_OUT)
@@ -98,6 +98,8 @@ analyse: build
 
 clean:
 	@rm -fr $(BIN)
+
+all: clean build emulate
 
 docker:
 	@echo "Creating build context..."

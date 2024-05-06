@@ -54,4 +54,11 @@ Stream& operator<<(Stream& stream, float f);
 Stream& operator<<(Stream& stream, Mode m);
 
 }
+
+uint16_t intToString(const uint32_t i, const uint8_t base, char* buffer, const uint8_t padding = 0);
+void floatToString(const float f, char* buffer, const uint8_t dps = 3);
+
+int32_t stringToInt(const char* str, uint8_t base);
+float stringToFloat(const char* str);
+
 }

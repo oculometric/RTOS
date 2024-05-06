@@ -1,19 +1,23 @@
 #include <boot.h>
 #include <serial.h>
+#include <interrupts.h>
+#include <exceptions.h>
 #include <memory.h>
-#include <gui.h>
 #include <panic.h>
-#include <3d_demo_meshes.h>
-#include <array.h>
-#include <string.h>
+#include <gui.h>
 #include <binary_bitmap.h>
-#include <font.h>
+#include <binary_mesh.h>
+#include <3d_demo_meshes.h>
+#include <keyboard.h>
+#include <timer.h>
 
 // TODO: string splitting
 // TODO: interrupts
 // TODO: keyboard
 // TODO: v-tables
 // TODO: timing
+// TODO: text wrapping
+// FIXME: append single char broken in string
 
 using namespace nov;
 using namespace stream;
@@ -80,6 +84,21 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     if (backbuffer == 0x0) panic("unable to allocate memory for GUI backbuffer");
     memory::mView();
 
+    com_1 << "configuring IDT" << endl;
+    interrupts::configureIDT();
+    exception::registerExceptionHandlers();
+    interrupts::configureIRQs((uint8_t)0x20);
+    interrupts::enableInterrupts();
+    interrupts::configureIRQHandler(0, timer::timerInterruptCallback);
+    interrupts::configureIRQHandler(1, keyboard::keyboardInterruptCallback);
+    interrupts::setIRQEnabled(0, true);
+    interrupts::setIRQEnabled(1, true);
+    com_1 << "okidoke, all setup." << endl;
+
+    com_1 << "configuring keyboard" << endl;
+    keyboard::PS2KeyboardController* ps2_keyboard = new keyboard::PS2KeyboardController();
+    keyboard::assignPS2KeyboardController(ps2_keyboard);
+
     graphics::Framebuffer framebuffer{ backbuffer, UVector2{ 640, 480 }, 3 };
     gui::GuiManager man (framebuffer);
 
@@ -141,11 +160,20 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     text_panel->text_colour = nov_colour_carmine;
     com_1 << "string is: \"" << text_panel->text << "\"" << endl;
 
+    man.drawRoot();
     while (true)
     {
-        man.drawRoot();
+        man.drawSpecific(bottom_container->child_b);
         memory::memCpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+        //while (true) {}
         text_panel->text[0]++;
+        if (text_panel->text[0] == '\0')
+        {
+            text_panel->text.append(".");
+        }
+
+        uint8_t kb_byte = ps2_keyboard->dequeueInByte();
+        if (kb_byte) com_1 << "keyboard byte: " << Mode::HEX << kb_byte << endl;
     }
 
     com_1 << "all done." << endl;
