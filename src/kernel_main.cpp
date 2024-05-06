@@ -25,7 +25,7 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     exception::registerExceptionHandlers();
     interrupts::configureIRQs((uint8_t)0x20);
     interrupts::enableInterrupts();
-    interrupts::setIRQEnabled(0, false);
+    interrupts::setIRQEnabled(0, true);
     interrupts::setIRQEnabled(1, true);
     //interrupts::setIRQEnabled(2, true);
     //interrupts::setIRQEnabled(3, true);

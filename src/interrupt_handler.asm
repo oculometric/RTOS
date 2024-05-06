@@ -120,10 +120,11 @@ freeze:
     ;pop fs
     ;pop es
     ;pop ds
+    pop eax
 
     popad    ; restore registers
 
     ;; FIXME: something about this is breaking and we end up in the void
-    add esp, 12 ; skip down the stack
+    add esp, 8 ; skip down the stack
 
     iret    ; interrupt return
