@@ -8,6 +8,8 @@
 #include <binary_bitmap.h>
 #include <binary_mesh.h>
 #include <3d_demo_meshes.h>
+#include <keyboard.h>
+#include <timer.h>
 
 // TODO: string splitting
 // TODO: interrupts
@@ -82,30 +84,20 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     if (backbuffer == 0x0) panic("unable to allocate memory for GUI backbuffer");
     memory::mView();
 
-
     com_1 << "configuring IDT" << endl;
     interrupts::configureIDT();
     exception::registerExceptionHandlers();
     interrupts::configureIRQs((uint8_t)0x20);
     interrupts::enableInterrupts();
-    interrupts::setIRQEnabled(0, false);
+    interrupts::configureIRQHandler(0, timer::timerInterruptCallback);
+    interrupts::configureIRQHandler(1, keyboard::keyboardInterruptCallback);
+    interrupts::setIRQEnabled(0, true);
     interrupts::setIRQEnabled(1, true);
-    interrupts::setIRQEnabled(2, true);
-    interrupts::setIRQEnabled(3, true);
-    interrupts::setIRQEnabled(4, true);
-    interrupts::setIRQEnabled(5, true);
-    interrupts::setIRQEnabled(6, true);
-    interrupts::setIRQEnabled(7, true);
-
-    interrupts::setIRQEnabled(8, true);
-    interrupts::setIRQEnabled(9, true);
-    interrupts::setIRQEnabled(10, true);
-    interrupts::setIRQEnabled(12, true);
-    interrupts::setIRQEnabled(13, true);
-    interrupts::setIRQEnabled(14, true);
-    interrupts::setIRQEnabled(15, true);
-
     com_1 << "okidoke, all setup." << endl;
+
+    com_1 << "configuring keyboard" << endl;
+    keyboard::PS2KeyboardController* ps2_keyboard = new keyboard::PS2KeyboardController();
+    keyboard::assignPS2KeyboardController(ps2_keyboard);
 
     graphics::Framebuffer framebuffer{ backbuffer, UVector2{ 640, 480 }, 3 };
     gui::GuiManager man (framebuffer);
@@ -179,6 +171,9 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
         {
             text_panel->text.append(".");
         }
+
+        uint8_t kb_byte = ps2_keyboard->dequeueInByte();
+        if (kb_byte) com_1 << "keyboard byte: " << Mode::HEX << kb_byte << endl;
     }
 
     com_1 << "all done." << endl;

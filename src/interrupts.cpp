@@ -55,13 +55,13 @@ extern "C" void interruptReintegrator(uint8_t interrupt)
     if (interrupt < 32)
     {
         // if this is a reserved interrupt, fire it from the low vector table
-        com_1 << "low interrupt " << stream::Mode::HEX << interrupt << " was just called" << stream::endl;
+        //com_1 << "low interrupt " << stream::Mode::HEX << interrupt << " was just called" << stream::endl;
         low_interrupt_handlers[interrupt]();
     }
     else if (interrupt >= irq_interrupt_offset && interrupt < irq_interrupt_offset + 16)
     {
         // if this is an IRQ, fire it from the IRQ vector table
-        com_1 << "IRQ interrupt " << stream::Mode::HEX << interrupt - irq_interrupt_offset << " was just called" << stream::endl;
+        //com_1 << "IRQ interrupt " << stream::Mode::HEX << interrupt - irq_interrupt_offset << " was just called" << stream::endl;
         (irq_interrupt_handlers[interrupt-irq_interrupt_offset])();
         acknowledgePICInterrupt(interrupt-irq_interrupt_offset);
     }
@@ -69,7 +69,7 @@ extern "C" void interruptReintegrator(uint8_t interrupt)
     {
         // this is just any old random interrupt, so fire it from the high vector table
         uint8_t index = (interrupt < irq_interrupt_offset) ? (interrupt - 32) : (interrupt - (irq_interrupt_offset + 16));
-        com_1 << "high interrupt " << stream::Mode::HEX << index << " was just called (" << interrupt << ")" << stream::endl;
+        //com_1 << "high interrupt " << stream::Mode::HEX << index << " was just called (" << interrupt << ")" << stream::endl;
         (high_interrupt_handlers[index])();
     }
     
