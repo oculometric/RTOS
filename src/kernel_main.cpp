@@ -163,19 +163,16 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     {
         man.drawSpecific(bottom_container->child_b);
         memory::memCpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-        
-        text_panel->text[0]++;
-        if (text_panel->text[0] == '\0')
-        {
-            text_panel->text.append(".");
-        }
 
         uint8_t kb_byte = ps2_keyboard->dequeueInByte();
         if (kb_byte)
         {
             keyboard::KeyState state = keyboard::decodeScancode(kb_byte, keyboard::ScancodeSet::SET_1);
             if (state.is_down)
+            {
+                text_panel->text.append(state.key);
                 com_1 << "keyboard byte: " << (char)state.key << endl;
+            }
         }
     }
 

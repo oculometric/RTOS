@@ -128,7 +128,7 @@ public:
     inline void push(T element)
     {
         // if we're at the limit, resize
-        if (length == capacity)
+        if (length >= capacity - 1)
         {
             resize(capacity+4);
         }
