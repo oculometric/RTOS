@@ -142,6 +142,12 @@ void String::clear()
     backing.clear();
 }
 
+void String::pop(uint32_t num)
+{
+    if (!num) return;
+    for (uint32_t i = 0; i < num; i++) backing.pop();
+}
+
 uint32_t String::getLength() const
 {
     return backing.getLength();

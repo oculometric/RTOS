@@ -39,6 +39,13 @@ KeyState decodeScancode(uint8_t scancode, ScancodeSet scs)
     return state;
 }
 
+bool isAlphaNumeric(char c)
+{
+    if (c < ' ') return false;
+    if (c > '~') return false;
+    return true;
+}
+
 void PS2KeyboardController::queueInByte(uint8_t byte)
 {
     if (in_queue_end == in_queue_start - 1)

@@ -170,8 +170,10 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
             keyboard::KeyState state = keyboard::decodeScancode(kb_byte, keyboard::ScancodeSet::SET_1);
             if (state.is_down)
             {
-                text_panel->text.append(state.key);
-                com_1 << "keyboard byte: " << (char)state.key << endl;
+                if (keyboard::isAlphaNumeric(state.key) || state.key == '\n')
+                    text_panel->text.append(state.key);
+                if (state.key == '\b')
+                    text_panel->text.pop();
             }
         }
     }

@@ -36,6 +36,7 @@ public:
 
     void resize(uint32_t new_capacity);
     void clear();
+    void pop(uint32_t num = 1);
 
     const char* constStr() const;
 
