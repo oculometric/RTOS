@@ -1,10 +1,4 @@
-sudo apt-get install make bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo gnu-efi mtools qemu qemu-system-x86
-
-cd ..
-
-git clone https://git.code.sf.net/p/gnu-efi/code gnu-efi
-cd gnu-efi
-make
+sudo apt-get install make bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo mtools qemu qemu-system-x86
 
 cd ..
 
