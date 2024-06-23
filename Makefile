@@ -6,11 +6,8 @@ CC			:= $(PREFIX)g++
 LD			:= $(PREFIX)ld
 
 AS_FLAGS		:= -f elf
-CC_FLAGS		:= -ffreestanding -m32 -masm=intel -Wall -Wextra -Wpedantic -Wno-unused-parameter -mno-red-zone -std=c++20 -fno-exceptions -fno-ident -fno-asynchronous-unwind-tables -O3 -s
-LD_FLAGS		:= -T linker.ld -s
-
-# -g flag enables debug symbols
-# -s strips all unecessary shit
+CC_FLAGS		:= -ffreestanding -m32 -masm=intel -Wall -Wextra -Wpedantic -Wno-unused-parameter -mno-red-zone -std=c++20 -fno-exceptions -fno-ident -fno-asynchronous-unwind-tables
+LD_FLAGS		:= -T linker.ld
 
 BIN				= bin
 SRC				= src
@@ -42,6 +39,21 @@ BMP_FILES		= $(wildcard $(RES)/*.bmp)
 REENCODED_BMPS  = $(patsubst $(RES)/%.bmp, $(BINRES_DIR)/%.binbmp, $(BMP_FILES))
 EMBED_FILES		= $(REENCODED_MESHES) $(REENCODED_BMPS)
 EMBED_FILES_OUT = $(patsubst $(BINRES_DIR)/%, $(BINRES_DIR)/%.o, $(EMBED_FILES))
+
+QEMU_FLAGS 		= -m 32M -monitor stdio -serial file:log/output.log
+
+ifeq ($(DEBUG), 1)
+	AS_FLAGS 	:= $(AS_FLAGS) -g
+	CC_FLAGS	:= $(CC_FLAGS) -O1 -g
+	LD_FLAGS	:= $(LD_FLAGS) -g
+	QEMU_FLAGS	:= $(QEMU_FLAGS) -d int,cpu_reset -no-reboot -s -S
+else
+	CC_FLAGS	:= $(CC_FLAGS) -O3 -s
+	LD_FLAGS	:= $(LD_FLAGS) -s
+endif
+
+# -g flag enables debug symbols
+# -s strips all unecessary shit
 
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
@@ -87,7 +99,7 @@ build: $(BL_FILES_OUT) $(CC_FILES_OUT) $(AS_FILES_OUT) $(EMBED_FILES_OUT)
 
 emulate:
 	@mkdir -p log
-	qemu-system-x86_64 -drive file=$(BOOT_OUT),format=raw,index=0,media=disk -m 32M -monitor stdio -serial file:log/output.log #-d int,cpu_reset -no-reboot -s -S 
+	qemu-system-x86_64 -drive file=$(BOOT_OUT),format=raw,index=0,media=disk $(QEMU_FLAGS)
 
 disassemble:
 	objdump -m i8086 -M intel -b binary -D $(BOOT_OUT)

@@ -168,7 +168,7 @@ void registerExceptionHandlers()
         0x00, 
         handleDivisionError, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 
     interrupts::configureInterruptHandler
@@ -176,7 +176,7 @@ void registerExceptionHandlers()
         0x05, 
         handleBoundRangeExceeded, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 
     interrupts::configureInterruptHandler
@@ -184,7 +184,7 @@ void registerExceptionHandlers()
         0x06, 
         handleInvalidOpcode, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 
     interrupts::configureInterruptHandler
@@ -192,7 +192,7 @@ void registerExceptionHandlers()
         0x07, 
         handleDeviceNotAvailable, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 
     interrupts::configureInterruptHandler
@@ -200,7 +200,7 @@ void registerExceptionHandlers()
         0x08, 
         handleDoubleFault, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 
     interrupts::configureInterruptHandler
@@ -208,7 +208,7 @@ void registerExceptionHandlers()
         0x0a, 
         handleInvalidTSS, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 
     interrupts::configureInterruptHandler
@@ -216,7 +216,7 @@ void registerExceptionHandlers()
         0x0b, 
         handleSegmentNotPresent, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
     
     interrupts::configureInterruptHandler
@@ -224,7 +224,7 @@ void registerExceptionHandlers()
         0x0c, 
         handleStackSegmentFault, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 
     interrupts::configureInterruptHandler
@@ -232,7 +232,7 @@ void registerExceptionHandlers()
         0x0d, 
         handleGeneralProtectionFault, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
         
     interrupts::configureInterruptHandler
@@ -240,7 +240,7 @@ void registerExceptionHandlers()
         0x10, 
         handlex87Exception, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 
     interrupts::configureInterruptHandler
@@ -248,7 +248,7 @@ void registerExceptionHandlers()
         0x11, 
         handleAlignmentCheck, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 
     interrupts::configureInterruptHandler
@@ -256,7 +256,7 @@ void registerExceptionHandlers()
         0x12, 
         handleMachineCheck, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 
     interrupts::configureInterruptHandler
@@ -264,7 +264,7 @@ void registerExceptionHandlers()
         0x13, 
         handleSIMDException, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 
     interrupts::configureInterruptHandler
@@ -272,7 +272,7 @@ void registerExceptionHandlers()
         0x14, 
         handleVirtualisationException, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 
     interrupts::configureInterruptHandler
@@ -280,7 +280,7 @@ void registerExceptionHandlers()
         0x15, 
         handleControlProtectionException, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 
     interrupts::configureInterruptHandler
@@ -288,7 +288,7 @@ void registerExceptionHandlers()
         0x1C, 
         handleHypervisorInjectionException, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 
     interrupts::configureInterruptHandler
@@ -296,7 +296,7 @@ void registerExceptionHandlers()
         0x1D, 
         handleVMMCommunicationException, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 
     interrupts::configureInterruptHandler
@@ -304,7 +304,7 @@ void registerExceptionHandlers()
         0x1E, 
         handleSecurityException, 
         interrupts::GateType::TRAP_32, 
-        interrupts::Privilege::LEVEL_0
+        Privilege::LEVEL_0
     );
 }
 

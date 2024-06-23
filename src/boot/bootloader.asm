@@ -184,20 +184,10 @@ gdt_data:
     db 0b10010010   ; flags and type
     db 0b11001111   ; other flags and last 4 bits of limit
     db 0x0          ; last 8 bits of base
-gdt_tss:
-    dw TSS_SIZE-1   ; first 16 bits of the TSS size
-    dw TSS_ADDR & 0xffff ; first 16 bits of TSS address
-    db (TSS_ADDR >> 16) & 0xff ; next 8 bits of base
-    db 0x89         ; flags and type (an available, present task segment)
-    db 0x40         ; other flags and last 4 bits of limit
-    db (TSS_ADDR >> 24) & 0xff ; last 8 bits of base
 gdt_end:
 
 GDT_CODE_SEGMENT_OFFSET equ gdt_code - gdt_start
 GDT_DATA_SEGMENT_OFFSET equ gdt_data - gdt_start
-GDT_TSS_SEGMENT_OFFSET  equ gdt_tss - gdt_start
-
-TSS_SIZE equ 0x68   ; size of the TSS. ; FIXME: make this not a magic number
 
 BOOTLOADER_ADDR equ 0x7c00      ; address where the bootloader (this fucker) starts
 ; TODO: move both the GDT and the stack to more sensible places. this was the interrupt problem
@@ -206,9 +196,7 @@ KERNEL_LOAD_ADDR equ 0x10000    ; address where the kernel will be loaded (i.e. 
 KERNEL_FINAL_ADDR equ 0x100000  ; address where the kernel code should actually be (something something ELF relocation ill do it later)
 OS_HINT_TABLE equ STACK_BASE_ADDR + 0x200   ; address where the hint table for the OS will be placed, just on top of the stack (with some padding)
 VBE_MODEINFO_ADDR equ OS_HINT_TABLE + 0x400 ; address where the VBE mode info table will be placed
-TSS_ADDR equ VBE_MODEINFO_ADDR + 0x200      ; address where the TSS will be placed (for now) ; FIXME: make this not suck
-TSS_STACK_BASE equ TSS_ADDR + 0x200 + 0x400 ; address of the base of the TSS stack (after the TSS itself, 1kb long)
-MMAP_TABLE_ADDR equ TSS_STACK_BASE + 0x200  ; address where the memory map will be placed, behind the TSS stack
+MMAP_TABLE_ADDR equ VBE_MODEINFO_ADDR + 0x200  ; address where the memory map will be placed, behind the TSS stack
 
 %include "src/os_hint_table.mac"
 
@@ -229,13 +217,6 @@ protected_mode_arrival:
     mov fs, ax
     mov gs, ax
     mov ss, ax
-load_tss:
-    ; populate and load the TSS
-    mov WORD [TSS_ADDR + 0x08], GDT_DATA_SEGMENT_OFFSET
-    mov DWORD [TSS_ADDR + 0x04], TSS_STACK_BASE
-    mov WORD [TSS_ADDR + 0x66], TSS_SIZE
-    mov ax, GDT_TSS_SEGMENT_OFFSET
-    ltr ax
 prepare_for_launch:
     ; put a magic value in eax
     mov eax, 0x4a6b7900

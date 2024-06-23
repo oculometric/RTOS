@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 #include <io.h>
+#include <assembly.h>
+#include <system_common.h>
 
 namespace nov
 {
@@ -16,15 +18,6 @@ enum GateType
     TRAP_16 = 0x07,
     INTERRUPT_32 = 0x0E,
     TRAP_32 = 0x0F
-};
-
-// privilege level an interrupt should execute at. lower is more privileged
-enum Privilege
-{
-    LEVEL_0 = 0,
-    LEVEL_1 = 1,
-    LEVEL_2 = 2,
-    LEVEL_3 = 3
 };
 
 /**
@@ -85,16 +78,6 @@ bool getIRQEnabled(uint8_t irq);
  * 
  * **/
 void configureIRQHandler(uint8_t irq, void(* handler)());
-
-/**
- * enables interrupts
- * 
- * **/
-inline void enableInterrupts() { asm("sti"); }
-/**
- * disables interrupts
- * **/
-inline void disableInterrupts() { asm("cli"); }
 
 #ifdef INTERRUPTS_INNER
 

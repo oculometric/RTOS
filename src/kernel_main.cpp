@@ -10,6 +10,7 @@
 #include <3d_demo_meshes.h>
 #include <keyboard.h>
 #include <timer.h>
+#include <gdt.h>
 
 // TODO: string splitting
 // TODO: v-tables
@@ -76,6 +77,16 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     uint32_t kernel_size = (uint32_t)os_hint_table->kernel_elf_end-(uint32_t)os_hint_table->kernel_elf_start;
     
     memory::mInit((void*)(mmap_start+kernel_size), (mmap_size-kernel_size));
+
+    disableInterrupts();
+    gdt::ProtectedGDTEntry new_gdt[3];
+    // null entry
+    new_gdt[0] = gdt::ProtectedGDTEntry{ 0, 0, 0, 0, 0, 0 };
+    new_gdt[1] = gdt::createProtectedGDTEntry(0x0, 0xFFFFF, Privilege::LEVEL_0, gdt::SegmentConfig::CODE_NONCONFORMING_READABLE, gdt::Flags::PROT_MODE_PAGE);
+    new_gdt[2] = gdt::createProtectedGDTEntry(0x0, 0xFFFFF, Privilege::LEVEL_0, gdt::SegmentConfig::DATA_UPWARD_WRITEABLE, gdt::Flags::PROT_MODE_PAGE);
+    gdt::loadGDT(new_gdt, 3, 1, 2);
+    com_1 << "new GDT located at " << Mode::HEX << (uint32_t)new_gdt << endl;
+    // TODO: task segment
     
     uint8_t* real_buffer = (uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address;
     uint8_t* backbuffer = new uint8_t[640*480*3];
@@ -86,7 +97,7 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     interrupts::configureIDT();
     exception::registerExceptionHandlers();
     interrupts::configureIRQs((uint8_t)0x20);
-    interrupts::enableInterrupts();
+    enableInterrupts();
     interrupts::configureIRQHandler(0, timer::timerInterruptCallback);
     interrupts::configureIRQHandler(1, keyboard::keyboardInterruptCallback);
     interrupts::setIRQEnabled(0, true);
