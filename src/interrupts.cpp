@@ -4,6 +4,7 @@
 
 #include <memory.h>
 #include <serial.h>
+#include <gdt.h>
 
 namespace nov
 {
@@ -55,13 +56,11 @@ extern "C" void interruptReintegrator(uint8_t interrupt)
     if (interrupt < 32)
     {
         // if this is a reserved interrupt, fire it from the low vector table
-        //com_1 << "low interrupt " << stream::Mode::HEX << interrupt << " was just called" << stream::endl;
         low_interrupt_handlers[interrupt]();
     }
     else if (interrupt >= irq_interrupt_offset && interrupt < irq_interrupt_offset + 16)
     {
         // if this is an IRQ, fire it from the IRQ vector table
-        //com_1 << "IRQ interrupt " << stream::Mode::HEX << interrupt - irq_interrupt_offset << " was just called" << stream::endl;
         (irq_interrupt_handlers[interrupt-irq_interrupt_offset])();
         acknowledgePICInterrupt(interrupt-irq_interrupt_offset);
     }
@@ -69,26 +68,25 @@ extern "C" void interruptReintegrator(uint8_t interrupt)
     {
         // this is just any old random interrupt, so fire it from the high vector table
         uint8_t index = (interrupt < irq_interrupt_offset) ? (interrupt - 32) : (interrupt - (irq_interrupt_offset + 16));
-        //com_1 << "high interrupt " << stream::Mode::HEX << index << " was just called (" << interrupt << ")" << stream::endl;
         (high_interrupt_handlers[index])();
     }
     
-    com_1.flush();
+    serial::com_1.flush();
 }
 
 void placeholderCPUInterruptHandler()
 {
-    com_1 << "a cpu interrupt was not handled." << stream::endl;
+    serial::com_1 << "a cpu interrupt was not handled." << stream::endl;
 }
 
 void placeholderIRQHandler()
 {
-    com_1 << "an irq was not handled." << stream::endl;
+    serial::com_1 << "an irq was not handled." << stream::endl;
 }
 
 void placeholderMiscInterruptHandler()
 {
-    com_1 << "some other interrupt was not handled." << stream::endl;
+    serial::com_1 << "some other interrupt was not handled." << stream::endl;
 }
 
 /**
@@ -103,39 +101,37 @@ void placeholderMiscInterruptHandler()
  * @param priv privilege level for the IDT entry
  * 
  * **/
-void configureInternalInterruptVector(uint8_t interrupt, void(* handler), GateType gate, Privilege priv)
+void configureInternalInterruptVector(uint8_t interrupt, void(* handler), GateType gate, Privilege priv, uint16_t segment_selector)
 {
-    if (handler == 0x0) { com_1 << "invalid interrupt handler address " << stream::endl; return; }
+    if (handler == 0x0) { serial::com_1 << "invalid interrupt handler address " << stream::endl; return; }
 
     protected_idt[interrupt].isr_low_word = (uint32_t)handler & 0xFFFF;
     protected_idt[interrupt].isr_high_word = (uint32_t)handler >> 16;
-    protected_idt[interrupt].segment_selector = 0x08; // FIXME: write C-based GDT code and put the kernel offset in here, instead of this magic number
+    protected_idt[interrupt].segment_selector = segment_selector;
     protected_idt[interrupt].attributes = 0b10000000 | ((priv & 0b11) << 5) | (gate & 0b1111);
     protected_idt[interrupt].reserved_for_zero = 0;
 }
 
-void configureIDT()
+void configureIDT(uint16_t kernel_code_gdt_index)
 {
     disableInterrupts();
     // set up IDT descriptor
     protected_idtr.base = (uint32_t)(&protected_idt);
     protected_idtr.limit = (uint16_t)((sizeof(ProtectedIDTEntry) * 64) - 1);
-    com_1 << "IDTR assigned" << stream::endl;
-    com_1 << "IDT base: " << stream::Mode::HEX << protected_idtr.base << stream::endl;
-    com_1 << "IDT limit: " << stream::Mode::HEX << protected_idtr.limit << stream::endl;
-    com_1 << "IDT entry size: " << stream::Mode::DEC << (uint32_t)sizeof(ProtectedIDTEntry) << stream::endl;
+    serial::com_1 << "IDTR assigned" << stream::endl;
+    serial::com_1 << "IDT base: " << stream::Mode::HEX << protected_idtr.base << stream::endl;
+    serial::com_1 << "IDT limit: " << stream::Mode::HEX << protected_idtr.limit << stream::endl;
+    serial::com_1 << "IDT entry size: " << stream::Mode::DEC << (uint32_t)sizeof(ProtectedIDTEntry) << stream::endl;
 
     void** microISRTablePointer = (void** )(&microISRTable);
 
     // configure interrupt vectors to point to incremental ISRs in the assembly file interrupt_handler.asm
-    com_1 << "first microISR located at: " << stream::Mode::HEX << (uint32_t)microISRTablePointer[0] << stream::endl;
+    serial::com_1 << "first microISR located at: " << stream::Mode::HEX << (uint32_t)microISRTablePointer[0] << stream::endl;
     for (int i = 0; i < 64; i++)
     {
-        //com_1 << "micro-ISR " << stream::Mode::DEC << i << stream::Mode::HEX << " located at " << (uint32_t)microISRTablePointer[i] << stream::endl;
-        //com_1 << "value at that address: " << *((uint32_t* )microISRTablePointer[i]) << stream::endl;
-        configureInternalInterruptVector(i, microISRTablePointer[i], GateType::INTERRUPT_32, Privilege::LEVEL_0);
+        configureInternalInterruptVector(i, microISRTablePointer[i], GateType::INTERRUPT_32, Privilege::LEVEL_0, kernel_code_gdt_index * sizeof(gdt::ProtectedGDTEntry));
     }
-    com_1 << "internal interrupt vectors assigned, handlers start at " << (uint32_t)(microISRTablePointer) << stream::endl;
+    serial::com_1 << "internal interrupt vectors assigned, handlers start at " << (uint32_t)(microISRTablePointer) << stream::endl;
     
     // populate vector tables
     // populate low vector table
@@ -151,7 +147,7 @@ void configureIDT()
 
     // load IDT
     asm ("lidt %0" : : "m"(protected_idtr));
-    com_1 << "IDT loaded" << stream::endl;
+    serial::com_1 << "IDT loaded" << stream::endl;
 }
 
 void configureInterruptHandler(uint8_t interrupt, void (*handler)(), GateType gate, Privilege priv)
@@ -168,7 +164,7 @@ void configureInterruptHandler(uint8_t interrupt, void (*handler)(), GateType ga
         // if the specified interrupt is currently overlapping with an IRQ, assign it anyway,
         // since the IRQs may be remapped later, unmasking these interrupts
         if (interrupt >= irq_interrupt_offset && interrupt < irq_interrupt_offset + 16)
-            com_1 << "this interrupt (" << interrupt << ") is currently in use by IRQ " << stream::Mode::HEX << interrupt - irq_interrupt_offset << " so it will never be called." << stream::endl;
+            serial::com_1 << "this interrupt (" << interrupt << ") is currently in use by IRQ " << stream::Mode::HEX << interrupt - irq_interrupt_offset << " so it will never be called." << stream::endl;
         // point the relevant high interrupt handler to the provided function
         high_interrupt_handlers[interrupt - 32] = handler;
     }

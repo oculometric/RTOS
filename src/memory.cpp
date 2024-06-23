@@ -109,7 +109,7 @@ void* mAlloc(uint32_t size)
         // the block wasn't big enough, so lets move onto the next
         current_block = next_block;
     }
-    com_1 << size << stream::endl;
+    serial::com_1 << size << stream::endl;
     panic("unable to allocate memory!!");
     return 0x0;
 }
@@ -119,7 +119,7 @@ void mFree(void* ptr)
     // step back to the metadata of the block
     MemoryFrame* block = (MemoryFrame*)((uint32_t)ptr-sizeof(MemoryFrame));
     // someone tried to free an invalid block, or the block metadata has been corrupted (oh no)
-    if (block->signature != 0x4a6b || block->signature_end != 0x79) { com_1 << "memory free error: " << stream::Mode::HEX << (uint32_t)ptr << stream::endl << (uint32_t)block->signature << stream::endl; panic("memory free error"); }
+    if (block->signature != 0x4a6b || block->signature_end != 0x79) { serial::com_1 << "memory free error: " << stream::Mode::HEX << (uint32_t)ptr << stream::endl << (uint32_t)block->signature << stream::endl; panic("memory free error"); }
     // if this block is already free, um, cry
     if (block->is_free) return;
     // mark as free
@@ -129,8 +129,6 @@ void mFree(void* ptr)
     if (block->next == 0x0) return;
     if (!block->next->is_free) return;
     block->next = block->next->next;
-
-    // TODO: add a last pointer? so blocks can be merged backwards
 }
 
 void mConsolidate()
@@ -156,27 +154,27 @@ void mView()
     MemoryFrame* next_block;
     uint32_t block_size;
 
-    com_1 << "=== MMAP START ===" << stream::endl;
+    serial::com_1 << "=== MMAP START ===" << stream::endl;
     while (current_block != 0x0)
     {
         next_block = current_block->next;
         if (next_block == 0x0) 
         {
-            com_1 << "end block found at " << stream::Mode::HEX << (uint32_t)current_block << stream::endl;
-            com_1 << "=== MMAP END ===" << stream::endl;
-            com_1.flush();
+            serial::com_1 << "end block found at " << stream::Mode::HEX << (uint32_t)current_block << stream::endl;
+            serial::com_1 << "=== MMAP END ===" << stream::endl;
+            serial::com_1.flush();
             return;
         }
 
         block_size = (uint32_t)next_block-(uint32_t)current_block;
-        com_1 << "block at     " << stream::Mode::HEX << ((uint32_t)current_block) + sizeof(MemoryFrame) << " (actually " << (uint32_t)current_block << ")"  << stream::endl;
-        com_1 << "   size      " << stream::Mode::DEC << block_size-sizeof(MemoryFrame) << '/' << stream::Mode::HEX << (block_size-sizeof(MemoryFrame)) << "(actually " << block_size << ")" << stream::endl;
-        com_1 << "   is free?  " << stream::Mode::DEC << current_block->is_free << stream::endl;
+        serial::com_1 << "block at     " << stream::Mode::HEX << ((uint32_t)current_block) + sizeof(MemoryFrame) << " (actually " << (uint32_t)current_block << ")"  << stream::endl;
+        serial::com_1 << "   size      " << stream::Mode::DEC << block_size-sizeof(MemoryFrame) << '/' << stream::Mode::HEX << (block_size-sizeof(MemoryFrame)) << "(actually " << block_size << ")" << stream::endl;
+        serial::com_1 << "   is free?  " << stream::Mode::DEC << current_block->is_free << stream::endl;
     
         current_block = next_block;
     }
-    com_1 << "=== MMAP END ===" << stream::endl;
-    com_1.flush();
+    serial::com_1 << "=== MMAP END ===" << stream::endl;
+    serial::com_1.flush();
 }
 
 MemoryInformation memory_information;

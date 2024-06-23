@@ -131,20 +131,6 @@ bool GuiManager::drawSpecific(Container* container)
     // return if this container is invalid
     if (container == 0x0) return false;
 
-    // first, check if this container has been cached. if it has, then use the cached data, otherwise
-    // calculate it from scratch
-    // TODO: remove this. it doesnt work as is
-    for (FrameCache fc : frame_cache)
-    {
-        if (fc.container == container)
-        {
-            drawContainer(container, fc.frame_data);
-            return true;
-        }
-    }
-
-    com_1 << "when drawing frame " << stream::Mode::HEX << (uint32_t)container << " found no cached data." << stream::endl;
-
     // return if this container has no parent and is not the root container
     if (container->parent == 0x0 && container != root_container) return false;
 
@@ -179,7 +165,6 @@ bool GuiManager::drawSpecific(Container* container)
 
     // now, draw current container and all children
     drawContainer(current, current_frame_data);
-    frame_cache.push(FrameCache{ current_frame_data, container });
 
     return true;
 }

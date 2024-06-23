@@ -123,8 +123,6 @@ private:
     FrameData root_container_frame;
     // information about the current framebuffer being drawn into
     graphics::Framebuffer framebuffer;
-    // array of cached information about the container tree
-    Array<FrameCache> frame_cache;
 
     /**
      * draw a container, calling draw on the panel inside it if it has one, then drawing its children

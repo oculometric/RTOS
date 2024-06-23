@@ -5,13 +5,13 @@ using namespace nov;
 
 String::String()
 {
-    com_1 << "base constructor" << stream::endl;
+    serial::com_1 << "base constructor" << stream::endl;
     backing.resize(8);
 }
 
 String::String(const String& str)
 {
-    com_1 << "copy constructor from " << stream::Mode::HEX << (uint32_t)(&str) << stream::endl;
+    serial::com_1 << "copy constructor from " << stream::Mode::HEX << (uint32_t)(&str) << stream::endl;
 
     backing.resize(str.getLength());
     for (uint32_t i = 0; i < str.getLength(); i++)
@@ -22,7 +22,7 @@ String::String(const String& str)
 
 String::String(const char* chrs)
 {
-    com_1 << "char* constructor from " << stream::Mode::HEX << (uint32_t)chrs << stream::endl;
+    serial::com_1 << "char* constructor from " << stream::Mode::HEX << (uint32_t)chrs << stream::endl;
 
     uint32_t chr_len = 0;
     while (chrs[chr_len] != 0x0)
@@ -35,7 +35,7 @@ String::String(const char* chrs)
 
 String::String(char* chrs)
 {
-    com_1 << "char* constructor from " << stream::Mode::HEX << (uint32_t)chrs << stream::endl;
+    serial::com_1 << "char* constructor from " << stream::Mode::HEX << (uint32_t)chrs << stream::endl;
 
     uint32_t chr_len = 0;
     while (chrs[chr_len] != 0x0)
@@ -47,14 +47,14 @@ String::String(char* chrs)
 
 String::String(uint32_t initial_capacity)
 {
-    com_1 << "initial capacity constructor sized " << stream::Mode::DEC << initial_capacity << stream::endl;
+    serial::com_1 << "initial capacity constructor sized " << stream::Mode::DEC << initial_capacity << stream::endl;
 
     backing.resize(initial_capacity);
 }
 
 String::String(String&& str)
 {
-    com_1 << "move constructor from " << stream::Mode::HEX << (uint32_t)(&str) << stream::endl;
+    serial::com_1 << "move constructor from " << stream::Mode::HEX << (uint32_t)(&str) << stream::endl;
 
     backing.resize(str.getLength());
     for (uint32_t i = 0; i < str.getLength(); i++)
@@ -188,7 +188,6 @@ String String::substring(uint32_t start, uint32_t end) const
 
 String::~String()
 {
-    com_1 << "destructor" << stream::endl;
 }
 
 uint32_t nov::findNextByte(char* addr, char target)

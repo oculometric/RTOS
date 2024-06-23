@@ -17,31 +17,31 @@ ProtectedGDTEntry createProtectedGDTEntry(uint32_t base, uint32_t limit, Privile
 
     if (limit > 0xFFFFF)
     {
-        com_1 << "invalid limit for GDT entry!" << stream::endl;
+        serial::com_1 << "invalid limit for GDT entry!" << stream::endl;
         exception::handleGeneralProtectionFault();
     }
 
     if ((flags & 0b10) && !(config & 0b100))
     {
-        com_1 << "64 bit code segments must have a code configuration" << stream::endl;
+        serial::com_1 << "64 bit code segments must have a code configuration" << stream::endl;
         exception::handleGeneralProtectionFault();
     }
 
     if (privilege > 3)
     {
-        com_1 << "invalid privilege level" << stream::endl;
+        serial::com_1 << "invalid privilege level" << stream::endl;
         exception::handleGeneralProtectionFault();
     }
 
     if (config > 0b111)
     {
-        com_1 << "invalid segment config" << stream::endl;
+        serial::com_1 << "invalid segment config" << stream::endl;
         exception::handleGeneralProtectionFault();
     }
 
     if ((flags & 0b0001) || (flags > 0b1100))
     {
-        com_1 << "invalid segment flags" << stream::endl;
+        serial::com_1 << "invalid segment flags" << stream::endl;
         exception::handleGeneralProtectionFault();
     }
     
@@ -59,19 +59,19 @@ void loadGDT(const ProtectedGDTEntry* first_entry, uint16_t num_entries, uint16_
 {
     if (num_entries > 8192)
     {
-        com_1 << "unable to load GDT with more than 8192 entries" << stream::endl;
+        serial::com_1 << "unable to load GDT with more than 8192 entries" << stream::endl;
         exception::handleGeneralProtectionFault();
     }
 
     if (num_entries == 0)
     {
-        com_1 << "unable to load GDT with zero entries" << stream::endl;
+        serial::com_1 << "unable to load GDT with zero entries" << stream::endl;
         exception::handleGeneralProtectionFault();
     }
 
     if (code_segment_index >= num_entries || data_segment_index >= num_entries)
     {
-        com_1 << "invalid data/code segment" << stream::endl;
+        serial::com_1 << "invalid data/code segment" << stream::endl;
         exception::handleGeneralProtectionFault();
     }
 

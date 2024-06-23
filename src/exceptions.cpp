@@ -10,153 +10,153 @@ namespace exception
 
 void handleDivisionError()
 {
-    com_1 << "--> oh shit! fatal exception: #DE - division error" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #DE - division error" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleBoundRangeExceeded()
 {
-    com_1 << "--> oh shit! fatal exception: #BR - bound range exceeded" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #BR - bound range exceeded" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleInvalidOpcode()
 {
-    com_1 << "--> oh shit! fatal exception: #UD - invalid opcode (doesn't rhyme does it)" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #UD - invalid opcode (doesn't rhyme does it)" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleDeviceNotAvailable()
 {
-    com_1 << "--> oh shit! fatal exception: #NM - device not available (doesn't rhyme does it)" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #NM - device not available (doesn't rhyme does it)" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleDoubleFault()
 {
-    com_1 << "--> oh shit! fatal exception: #DF - double fault" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #DF - double fault" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleInvalidTSS()
 {
-    com_1 << "--> oh shit! fatal exception: #TS - invalid task segment" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #TS - invalid task segment" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleSegmentNotPresent()
 {
-    com_1 << "--> oh shit! fatal exception: #NP - segment not present" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #NP - segment not present" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleStackSegmentFault()
 {
-    com_1 << "--> oh shit! fatal exception: #SS - stack segment fault" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #SS - stack segment fault" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleGeneralProtectionFault()
 {
-    com_1 << "--> oh shit! fatal exception: #GP - general protection" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #GP - general protection" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handlePageFault()
 {
-    com_1 << "--> oh shit! fatal exception: #PF - page fault" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #PF - page fault" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handlex87Exception()
 {
-    com_1 << "--> oh shit! fatal exception: #MF - x87 floating point exception" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #MF - x87 floating point exception" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleAlignmentCheck()
 {
-    com_1 << "--> oh shit! fatal exception: #AC - alignment check" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #AC - alignment check" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleMachineCheck()
 {
-    com_1 << "--> oh shit! fatal exception: #MC - machine check" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #MC - machine check" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleSIMDException()
 {
-    com_1 << "--> oh shit! fatal exception: #XM/#XF - SIMD floating point exception" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #XM/#XF - SIMD floating point exception" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleVirtualisationException()
 {
-    com_1 << "--> oh shit! fatal exception: #VE - virtualisation exception" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #VE - virtualisation exception" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleControlProtectionException()
 {
-    com_1 << "--> oh shit! fatal exception: #CP - control protection exception" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #CP - control protection exception" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleHypervisorInjectionException()
 {
-    com_1 << "--> oh shit! fatal exception: #HV - hypervisor injection exception" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #HV - hypervisor injection exception" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleVMMCommunicationException()
 {
-    com_1 << "--> oh shit! fatal exception: #VC - VMM communication exception" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #VC - VMM communication exception" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 
 void handleSecurityException()
 {
-    com_1 << "--> oh shit! fatal exception: #SX - security exception" << stream::endl;
-    com_1 << "halting." << stream::endl;
-    com_1.flush();
+    serial::com_1 << "--> oh shit! fatal exception: #SX - security exception" << stream::endl;
+    serial::com_1 << "halting." << stream::endl;
+    serial::com_1.flush();
     while (true) { }
 }
 

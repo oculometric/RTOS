@@ -151,8 +151,7 @@ void gui::PanelMeshrender::_draw draw_function_stub
 
     delete[] transformed_vertex_buffer;
 
-    com_1.flush();
-
+    serial::com_1.flush();
 }
 
 

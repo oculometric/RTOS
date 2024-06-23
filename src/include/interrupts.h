@@ -29,8 +29,10 @@ enum GateType
  * interrupt number before passing it onto a routine which protects the stack and register
  * states, then calls into the interrupt reintegrator in C++, passing in the interrupt number
  * 
+ * @param kernel_code_gdt_index index into the GDT of the segment which contains this code, and the interrupt handlers
+ * 
  * **/
-void configureIDT();
+void configureIDT(uint16_t kernel_code_gdt_index);
 
 /**
  * configures an interrupt to be assigned a particular handler. `configureIDT` **MUST** be called first

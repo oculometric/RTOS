@@ -348,7 +348,7 @@ bool Mesh::readObj(const char* mesh_data)
     // pump the last bit of backing data, FIXME: disabled for now since most of the data isn't needed 
     updateMeshData();
 
-    com_1 << "successfully read a mesh with " << stream::Mode::DEC 
+    serial::com_1 << "successfully read a mesh with " << stream::Mode::DEC 
           << countVertices() << " verts and " 
           << countTriangles() << " tris." << stream::endl;
 
