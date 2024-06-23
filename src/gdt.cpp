@@ -75,7 +75,7 @@ void loadGDT(const ProtectedGDTEntry* first_entry, uint16_t num_entries, uint16_
         exception::handleGeneralProtectionFault();
     }
 
-    // TODO: handle non-zero data segment base
+    // TODO: handle non-zero current data segment base
     setProtectedGDT((num_entries * sizeof(ProtectedGDTEntry) - 1), (uint32_t)first_entry);
     reloadSegments(code_segment_index * sizeof(ProtectedGDTEntry), data_segment_index * sizeof(ProtectedGDTEntry));
 }

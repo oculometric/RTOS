@@ -82,8 +82,11 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     gdt::ProtectedGDTEntry new_gdt[3];
     // null entry
     new_gdt[0] = gdt::ProtectedGDTEntry{ 0, 0, 0, 0, 0, 0 };
+    // kernel code entry
     new_gdt[1] = gdt::createProtectedGDTEntry(0x0, 0xFFFFF, Privilege::LEVEL_0, gdt::SegmentConfig::CODE_NONCONFORMING_READABLE, gdt::Flags::PROT_MODE_PAGE);
+    // kernel data entry
     new_gdt[2] = gdt::createProtectedGDTEntry(0x0, 0xFFFFF, Privilege::LEVEL_0, gdt::SegmentConfig::DATA_UPWARD_WRITEABLE, gdt::Flags::PROT_MODE_PAGE);
+    // jettison old bootloader GDT
     gdt::loadGDT(new_gdt, 3, 1, 2);
     com_1 << "new GDT located at " << Mode::HEX << (uint32_t)new_gdt << endl;
     // TODO: task segment

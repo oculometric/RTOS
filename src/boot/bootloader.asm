@@ -196,7 +196,7 @@ KERNEL_LOAD_ADDR equ 0x10000    ; address where the kernel will be loaded (i.e. 
 KERNEL_FINAL_ADDR equ 0x100000  ; address where the kernel code should actually be (something something ELF relocation ill do it later)
 OS_HINT_TABLE equ STACK_BASE_ADDR + 0x200   ; address where the hint table for the OS will be placed, just on top of the stack (with some padding)
 VBE_MODEINFO_ADDR equ OS_HINT_TABLE + 0x400 ; address where the VBE mode info table will be placed
-MMAP_TABLE_ADDR equ VBE_MODEINFO_ADDR + 0x200  ; address where the memory map will be placed, behind the TSS stack
+MMAP_TABLE_ADDR equ VBE_MODEINFO_ADDR + 0x200  ; address where the memory map will be placed, behind the VBE mode info block
 
 %include "src/os_hint_table.mac"
 
