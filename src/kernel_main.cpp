@@ -108,8 +108,8 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     com_1 << "okidoke, all setup." << endl;
 
     com_1 << "configuring keyboard" << endl;
-    keyboard::PS2KeyboardController* ps2_keyboard = new keyboard::PS2KeyboardController();
-    keyboard::assignPS2KeyboardController(ps2_keyboard);
+    keyboard::KeyboardDriver* keyboard_driver = new keyboard::KeyboardDriver();
+    keyboard::assignKeyboardDriver(keyboard_driver);
 
     graphics::Framebuffer framebuffer{ backbuffer, UVector2{ 640, 480 }, 3 };
     gui::GuiManager man (framebuffer);
@@ -178,16 +178,16 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
         man.drawSpecific(bottom_container->child_b);
         memory::memCpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
-        uint8_t kb_byte = ps2_keyboard->dequeueInByte();
-        if (kb_byte)
+        if (keyboard_driver->hasEventWaiting())
         {
-            keyboard::KeyState state = keyboard::decodeScancode(kb_byte, keyboard::ScancodeSet::SET_1);
-            if (state.is_down)
+            keyboard::KeyEvent event = keyboard_driver->pollNextEvent();
+            if (event.is_down)
             {
-                if (keyboard::isAlphaNumeric(state.key) || state.key == '\n')
-                    text_panel->text.append(state.key);
-                if (state.key == '\b')
-                    text_panel->text.pop();
+                if (event.ascii)
+                {
+                    if (event.ascii == '\b') text_panel->text.pop();
+                    else text_panel->text.append(event.ascii);
+                }
             }
         }
     }
