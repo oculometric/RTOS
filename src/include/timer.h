@@ -15,9 +15,9 @@ enum Port
 
 enum CommandRegChannel
 {
-    CHANNEL_0 = 0b00,
-    CHANNEL_1 = 0b01,
-    CHANNEL_2 = 0b10,
+    PIT_CHANNEL_0 = 0b00,
+    PIT_CHANNEL_1 = 0b01,
+    PIT_CHANNEL_2 = 0b10,
     READBACK  = 0b11
 };
 
