@@ -15,7 +15,7 @@ namespace nov
 namespace gui
 {
 
-using namespace nov::vector;
+using namespace vector;
 
 /**
  * contains data about the frame (block of memory) into which something should be rendered
@@ -56,6 +56,8 @@ public:
     inline bool wantsBorder() { return show_border; }
     inline bool wantsClear() { return clear_on_draw; }
 };
+
+// FIXME: eliminate Panel, figure out new structure
 
 /**
  * represents a GUI block, which may either contain a panel, or be split into

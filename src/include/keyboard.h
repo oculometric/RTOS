@@ -248,6 +248,13 @@ public:
     bool getKeyState(Key key);
     bool hasEventWaiting();
     KeyEvent pollNextEvent();
+
+    inline KeyboardDriver() { }
+
+    KeyboardDriver(KeyboardDriver& other) = delete;
+    KeyboardDriver(KeyboardDriver&& other) = delete;
+    KeyboardDriver operator=(const KeyboardDriver& other) = delete;
+    KeyboardDriver operator=(KeyboardDriver&& other) = delete;
 };
 
 void assignKeyboardDriver(KeyboardDriver* controller);

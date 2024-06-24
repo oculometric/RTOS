@@ -12,7 +12,7 @@ namespace nov
 namespace graphics
 {
 
-using namespace nov::vector;
+using namespace vector;
 
 struct Framebuffer
 {
