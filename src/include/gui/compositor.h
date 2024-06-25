@@ -19,10 +19,11 @@ enum ContainerDecorationMode
 class ContainerHandle
 {
 private:
-    uint32_t handle_id = 0;
-    uint16_t subdivision_address = 0;
+    uint32_t handle_id = -1;
     bool is_valid = false;
     graphics::Framebuffer framebuffer_details;
+
+    bool has_been_resized = false;
 
     ContainerHandle();
 public:
@@ -32,7 +33,9 @@ public:
     inline bool isValid() { return is_valid; }
     inline graphics::Framebuffer getFramebuffer() { return framebuffer_details; }
     void blit();
+    void clear();
     void setDecoration(ContainerDecorationMode mode);
+    void setTitle(String new_title);
 
     friend class Compositor;
 };
@@ -53,7 +56,7 @@ public:
     Compositor();
 
     void resizeCanvas(uint32_t width, uint32_t height);
-    ContainerHandle createContainer(ContainerHandle existing_container, ContainerSplitDecision split);
+    ContainerHandle createContainer(uint32_t existing_id = 0, ContainerSplitDecision split);
     void destroyContainer();
 
     Compositor(Compositor& other) = delete;
