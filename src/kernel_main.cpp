@@ -90,9 +90,9 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     serial::com_1 << "new GDT located at " << Mode::HEX << (uint32_t)new_gdt << endl;
     // TODO: task segment
     
-    uint8_t* real_buffer = (uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address;
-    uint8_t* backbuffer = new uint8_t[640*480*3];
-    if (backbuffer == 0x0) panic("unable to allocate memory for GUI backbuffer");
+    //uint8_t* real_buffer = (uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address;
+    //uint8_t* backbuffer = new uint8_t[640*480*3];
+    //if (backbuffer == 0x0) panic("unable to allocate memory for GUI backbuffer");
     memory::mView();
 
     serial::com_1 << "configuring IDT" << endl;
@@ -110,8 +110,8 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     keyboard::KeyboardDriver* keyboard_driver = new keyboard::KeyboardDriver();
     keyboard::assignKeyboardDriver(keyboard_driver);
 
-    graphics::Framebuffer framebuffer{ backbuffer, UVector2{ 640, 480 }, 3 };
-    gui::GuiManager man (framebuffer);
+    //graphics::Framebuffer framebuffer{ backbuffer, UVector2{ 640, 480 }, 3 };
+    //gui::GuiManager man (framebuffer);
 
     file::BinaryBitmapHeader* font_header = (file::BinaryBitmapHeader*)_res_font_binbmp_start;
     serial::com_1 << "font checksum:        " << font_header->checksum << endl;
@@ -133,6 +133,7 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     font->tiles_per_row = font->bitmap_width / font->char_width;
     font->tiles_per_column = font->bitmap_height / font->char_height;
 
+    /*
     man.guiFont = font;
 
     auto root = man.getRoot();
@@ -170,12 +171,15 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     
     text_panel->text_colour = nov_colour_carmine;
     serial::com_1 << "string is: \"" << text_panel->text << "\"" << endl;
+    */
+    //man.drawRoot();
 
-    man.drawRoot();
+    gui::Compositor compositor((uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address, 640, 480, font);
+
     while (true)
     {
-        man.drawSpecific(bottom_container->child_b);
-        memory::memCpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
+        //man.drawSpecific(bottom_container->child_b);
+        //memory::memCpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
 
         if (keyboard_driver->hasEventWaiting())
         {
@@ -184,8 +188,8 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
             {
                 if (event.ascii)
                 {
-                    if (event.ascii == '\b') text_panel->text.pop();
-                    else text_panel->text.append(event.ascii);
+                    //if (event.ascii == '\b') text_panel->text.pop();
+                    //else text_panel->text.append(event.ascii);
                 }
             }
         }

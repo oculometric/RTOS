@@ -44,7 +44,7 @@ QEMU_FLAGS 		= -m 32M -monitor stdio -serial file:log/output.log
 
 ifeq ($(DEBUG), 1)
 	AS_FLAGS 	:= $(AS_FLAGS) -g
-	CC_FLAGS	:= $(CC_FLAGS) -O1 -g
+	CC_FLAGS	:= $(CC_FLAGS) -O0 -g
 	LD_FLAGS	:= $(LD_FLAGS) -g
 	QEMU_FLAGS	:= $(QEMU_FLAGS) -d int,cpu_reset -no-reboot -s -S
 else
