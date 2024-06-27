@@ -20,7 +20,7 @@ public:
 
     String& operator=(const char* chrs);
     
-    String& operator=(const String&) = delete;
+    String& operator=(const String& other);
     String& operator=(String&&) = delete;
 
     char& operator[](uint32_t index);

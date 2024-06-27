@@ -5,6 +5,8 @@
 #include <graphics/mesh.h>
 #include <graphics/bounds.h>
 #include <graphics/material.h>
+#include <graphics/framebuffer.h>
+#include <graphics/graphics_demos.h>
 #include <font.h>
 
 namespace nov
@@ -13,13 +15,6 @@ namespace graphics
 {
 
 using namespace vector;
-
-struct Framebuffer
-{
-    uint8_t* address;
-    UVector2 size;
-    uint8_t bytes_per_pixel;
-};
 
 static inline void setPixel(uint32_t at, const Colour& col, const Framebuffer& framebuffer) 
 {
@@ -33,6 +28,7 @@ static inline uint32_t getOffset(const UVector2& co, const UVector2& framebuffer
     return (co.u % framebuffer_size.u) + ((co.v % framebuffer_size.v) * framebuffer_size.u);
 }
 
+void copyBox(const UVector2& tar_offset, const UVector2& src_offset, const UVector2& size, const Framebuffer& target, const Framebuffer& source);
 void drawBox(const UVector2& origin, const UVector2& size, const Colour& col, const Framebuffer& framebuffer);
 void fillBox(const UVector2& origin, const UVector2& size, const Colour& col, const Framebuffer& framebuffer);
 void drawLine(const UVector2& start, const UVector2& end, const Colour& col, const Framebuffer& framebuffer);

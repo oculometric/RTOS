@@ -10,6 +10,28 @@ namespace graphics
 // TODO: comments in this file
 using namespace vector;
 
+void copyBox(const UVector2& tar_offset, const UVector2& src_offset, const UVector2& size, const Framebuffer& target, const Framebuffer& source)
+{
+    // TODO: make this more efficient by copying as dwords (handle edges nicely)
+    uint32_t t_pos = tar_offset.u + (tar_offset.v * target.size.u);
+    uint32_t s_pos = src_offset.u + (src_offset.v * source.size.u);
+    uint32_t t_wrap = target.size.u - size.u;
+    uint32_t s_wrap = source.size.u - size.u;
+    for (uint32_t y = 0; y < size.v; y++)
+    {
+        for (uint32_t x = 0; x < size.u; x++)
+        {
+            target.address[(t_pos * 3) + 0] = source.address[(s_pos * 3) + 0];
+            target.address[(t_pos * 3) + 1] = source.address[(s_pos * 3) + 1];
+            target.address[(t_pos * 3) + 2] = source.address[(s_pos * 3) + 2];
+            t_pos++;
+            s_pos++;
+        }
+        t_pos += t_wrap;
+        s_pos += s_wrap;
+    }
+}
+
 void drawBox(const UVector2& origin, const UVector2& size, const Colour& col, const Framebuffer& framebuffer)
 {
     uint32_t top_left = getOffset(origin, framebuffer.size);
@@ -42,7 +64,7 @@ void drawBox(const UVector2& origin, const UVector2& size, const Colour& col, co
 void fillBox(const UVector2& origin, const UVector2& size, const Colour& col, const Framebuffer& framebuffer)
 {
     uint32_t offset = getOffset(origin, framebuffer.size);
-    uint32_t end_offset = getOffset(origin+size-UVector2{ 1,1 }, framebuffer.size);
+    uint32_t end_offset = getOffset(origin + size - UVector2{ 1,1 }, framebuffer.size);
     uint32_t x = 0;
 
     while (offset <= end_offset)
@@ -71,7 +93,7 @@ void drawLine(const UVector2& start, const UVector2& end, const Colour& col, con
     }
 
     UVector2 current = minimum;
-    UVector2 offset = UVector2{0,0};
+    UVector2 offset = UVector2{ 0,0 };
 
     float m = ((float)maximum.v-(float)minimum.v)/((float)maximum.u-(float)minimum.u);
 

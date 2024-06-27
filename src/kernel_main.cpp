@@ -176,6 +176,13 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
 
     gui::Compositor compositor((uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address, 640, 480, font);
 
+    gui::ContainerHandle root = compositor.getRootContainer();
+    serial::com_1 << root.isValid() << endl;
+    graphics::drawStar(root.getFramebuffer(), UVector2{ 1,1 }, nov_colour_gold, nov_colour_nearblack, true);
+    root.blit();
+    
+    gui::ContainerHandle container = root;
+
     while (true)
     {
         //man.drawSpecific(bottom_container->child_b);
@@ -186,8 +193,15 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
             keyboard::KeyEvent event = keyboard_driver->pollNextEvent();
             if (event.is_down)
             {
-                if (event.ascii)
+                if (event.key == keyboard::Key::K_S)
                 {
+                    serial::com_1 << "boom!" << stream::endl;
+                    serial::com_1.flush();
+                    gui::ContainerHandle another = compositor.divideContainer(container, gui::ContainerSplitDecision::SPLIT_VERTICAL_RIGHT);
+                    container.clear();
+                    graphics::drawStar(container.getFramebuffer(), UVector2{ 1,1 }, nov_colour_gold, nov_colour_nearblack, true);
+                    compositor.debug();
+                    container = another;
                     //if (event.ascii == '\b') text_panel->text.pop();
                     //else text_panel->text.append(event.ascii);
                 }

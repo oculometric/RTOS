@@ -70,6 +70,17 @@ String& nov::String::operator=(const char* chrs)
     return *this;
 }
 
+String& nov::String::operator=(const String& other)
+{
+    backing.resize(other.getLength());
+    for (uint32_t i = 0; i < other.getLength(); i++)
+    {
+        backing.push(other[i]);
+    }
+
+    return *this;
+}
+
 char& String::operator[](uint32_t index)
 {
     if (index >= backing.getLength()) panic("index out of range");
