@@ -32,32 +32,37 @@ void Compositor::initContainerTree()
 
 Pair<UVector2, UVector2> Compositor::computeBounds(Container* target, bool account_for_border)
 {
+    // FIXME: this seems to be wrong somehow aaaa
     vector::UVector2 offset{ 0,0 };
     vector::UVector2 size = front_buffer.size;
 
     Container* walkup = target->parent;
+    Container* child = target;
     while (walkup != nullptr)
     {
         if (walkup->division.u > 0)
         {
-            if (target == walkup->child_a)
+            if (child == walkup->child_a)
                 size.u *= walkup->division.u;
-            else
+            else if (child == walkup->child_b)
             {
                 offset.u = (offset.u * (1 - walkup->division.u)) + (walkup->division.u * front_buffer.size.u);
                 size.u *= 1 - walkup->division.u;
             }
+            else panic ("OH FUCK");
         }
         else
         {
-            if (target == walkup->child_a)
+            if (child == walkup->child_a)
                 size.v *= walkup->division.v;
-            else
+            else if (child == walkup->child_b)
             {
                 offset.v = (offset.v * (1 - walkup->division.v)) + (walkup->division.v * front_buffer.size.v);
                 size.v *= 1 - walkup->division.v;
             }
+            else panic("OH FUCK");
         }
+        child = walkup;
         walkup = walkup->parent;
     }
 
@@ -85,8 +90,9 @@ Container* Compositor::findContainer(ContainerHandle handle)
 {
     if (!handle.isValid()) return nullptr;
     
-    for (ContainerLinkNode node : handle_map)
+    for (int i = 0; i < handle_map.getLength(); i++)
     {
+        ContainerLinkNode node = handle_map[i];
         if (node.handle_id == handle.handle_id) return node.container;
     }
 
@@ -122,7 +128,7 @@ void Compositor::blit(Container* target, graphics::Framebuffer source)
 
 void Compositor::clear(Container* target)
 {
-    if (target == nullptr) return;
+    if (target == nullptr) { serial::com_1 << "compositor clear target was null" << stream::endl; return; }
     if (target->parent == nullptr && target != root) return;
     if (target->child_a != nullptr || target->child_b != nullptr) return;
     if (front_buffer.address == nullptr) return;
@@ -201,10 +207,10 @@ void Compositor::resizeCanvas(uint16_t width, uint16_t height)
 
 ContainerHandle Compositor::divideContainer(ContainerHandle handle, ContainerSplitDecision split)
 {
-    if (!handle.isValid()) return ContainerHandle(0);
+    if (!handle.isValid()) { serial::com_1 << "uh oh! container is invalid!" << stream::endl; return ContainerHandle(0); }
     Container* target = findContainer(handle);
-    if (target == nullptr) return ContainerHandle(0);
-    if (target->child_a != nullptr || target->child_b != nullptr) return ContainerHandle(0);
+    if (target == nullptr) { serial::com_1 << "uh oh! unable to find container in tree!" << stream::endl; return ContainerHandle(0); }
+    if (target->child_a != nullptr || target->child_b != nullptr) { serial::com_1 << "uh oh! this container already has children!" << stream::endl; return ContainerHandle(0); }
 
     Container* new_parent = new Container();
     handle_map.push(ContainerLinkNode{ getUnusedHandleID(), new_parent });
@@ -255,17 +261,19 @@ ContainerHandle Compositor::divideContainer(ContainerHandle handle, ContainerSpl
     {
         delete[] handle.framebuffer_details->address;
     }
-    UVector2 existing_container_new_bounds = computeBounds(target).b - UVector2{ 6,6 };
+    UVector2 existing_container_new_bounds = computeBounds(target, true).b;
     handle.framebuffer_details->address = new uint8_t[3 * existing_container_new_bounds.u * existing_container_new_bounds.v];
     handle.framebuffer_details->bytes_per_pixel = 3;
     handle.framebuffer_details->size = existing_container_new_bounds;
 
     // update framebuffer for the new container
-    UVector2 new_container_bounds = computeBounds(new_container).b - UVector2{ 6,6 };
+    UVector2 new_container_bounds = computeBounds(new_container, true).b;
     new_handle.framebuffer_details = new graphics::Framebuffer;
     new_handle.framebuffer_details->address = new uint8_t[3 * new_container_bounds.u * new_container_bounds.v];
     new_handle.framebuffer_details->bytes_per_pixel = 3;
     new_handle.framebuffer_details->size = new_container_bounds;
+
+    serial::com_1 << "container " << handle.handle_id << " split into " << handle.handle_id << " and " << new_handle.handle_id << stream::endl;
 
     return new_handle;
 }
@@ -273,6 +281,18 @@ ContainerHandle Compositor::divideContainer(ContainerHandle handle, ContainerSpl
 ContainerHandle Compositor::getRootContainer()
 {
     return root_handle;
+}
+
+void dbg(Container* c, int d)
+{
+    for (int i = 0; i < d; i++)
+        serial::com_1 << "    ";
+    serial::com_1 << stream::HEX << (uint32_t)c << stream::endl;
+    if (c)
+    {
+        dbg(c->child_a, d+1);
+        dbg(c->child_b, d+1);
+    }
 }
 
 void Compositor::debug()
@@ -286,17 +306,32 @@ void Compositor::debug()
     }
     serial::com_1 << "" << stream::endl;
 
+    serial::com_1 << "    root: " << (uint32_t)root << stream::endl;
+    serial::com_1 << "    root handle: " << root_handle.handle_id << stream::endl;
+    
+    serial::com_1 << "    tree:" << stream::endl;
+    
+    dbg(root, 2);
 }
 
 void ContainerHandle::blit()
 {
-    compositor->blitContainer(*this);
+    if (compositor && isValid())
+        compositor->blitContainer(*this);
 }
 
 
 void ContainerHandle::clear()
 {
-    compositor->clearContainer(*this);
+    if (compositor && isValid())
+        compositor->clearContainer(*this);
+}
+
+
+void ContainerHandle::setTitle(String new_title)
+{
+    if (compositor && isValid())
+        compositor->setContainerTitle(*this, new_title);
 }
 
 }

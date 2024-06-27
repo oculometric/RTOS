@@ -177,34 +177,45 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     gui::Compositor compositor((uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address, 640, 480, font);
 
     gui::ContainerHandle root = compositor.getRootContainer();
-    serial::com_1 << root.isValid() << endl;
     graphics::drawStar(root.getFramebuffer(), UVector2{ 1,1 }, nov_colour_gold, nov_colour_nearblack, true);
     root.blit();
+    compositor.debug();
     
     gui::ContainerHandle container = root;
 
     while (true)
     {
-        //man.drawSpecific(bottom_container->child_b);
-        //memory::memCpy((uint32_t*)backbuffer, (uint32_t*)real_buffer, 640*120*3);
-
         if (keyboard_driver->hasEventWaiting())
         {
             keyboard::KeyEvent event = keyboard_driver->pollNextEvent();
             if (event.is_down)
             {
-                if (event.key == keyboard::Key::K_S)
+                auto new_container = container;
+                serial::com_1 << "splitting: " << container.getID() << stream::endl;
+                switch (event.key)
                 {
-                    serial::com_1 << "boom!" << stream::endl;
-                    serial::com_1.flush();
-                    gui::ContainerHandle another = compositor.divideContainer(container, gui::ContainerSplitDecision::SPLIT_VERTICAL_RIGHT);
-                    container.clear();
-                    graphics::drawStar(container.getFramebuffer(), UVector2{ 1,1 }, nov_colour_gold, nov_colour_nearblack, true);
-                    compositor.debug();
-                    container = another;
-                    //if (event.ascii == '\b') text_panel->text.pop();
-                    //else text_panel->text.append(event.ascii);
+                case keyboard::K_UP:
+                    new_container = compositor.divideContainer(container, gui::ContainerSplitDecision::SPLIT_HORIZONTAL_TOP); break;
+                case keyboard::K_DOWN:
+                    new_container = compositor.divideContainer(container, gui::ContainerSplitDecision::SPLIT_HORIZONTAL_BOTTOM); break;
+                case keyboard::K_LEFT:
+                    new_container = compositor.divideContainer(container, gui::ContainerSplitDecision::SPLIT_VERTICAL_LEFT); break;
+                case keyboard::K_RIGHT:
+                    new_container = compositor.divideContainer(container, gui::ContainerSplitDecision::SPLIT_VERTICAL_RIGHT); break;
+                default: break;
                 }
+
+                //serial::com_1 << "done, container is now: " << new_container.getID() << stream::endl;
+
+                container.setTitle(intToString((uint32_t)container.getID(), 16));
+                container.clear();
+
+                graphics::drawStar(new_container.getFramebuffer(), UVector2{ 1,1 }, nov_colour_gold, nov_colour_nearblack, false);
+                new_container.setTitle(intToString((uint32_t)new_container.getID(), 16));
+                new_container.clear();
+
+                new_container.blit();
+                compositor.debug();
             }
         }
     }

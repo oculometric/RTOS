@@ -44,7 +44,7 @@ void drawStar(Framebuffer buffer, vector::UVector2 uv, Colour foreground, Colour
             value = (abs(y - half_y) * scale_y + 1.0f);
             value = ((c / value) - 1.0f) * scale_x_inv;
             first_intersection = (uint32_t)(half_x - value);
-            second_intersection = (uint32_t)(half_x + value) - 1;
+            second_intersection = (uint32_t)(half_x + value);
         }
 
         if (skip_background)

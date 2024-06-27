@@ -5,14 +5,11 @@ using namespace nov;
 
 String::String()
 {
-    serial::com_1 << "base constructor" << stream::endl;
     backing.resize(8);
 }
 
 String::String(const String& str)
 {
-    serial::com_1 << "copy constructor from " << stream::Mode::HEX << (uint32_t)(&str) << stream::endl;
-
     backing.resize(str.getLength());
     for (uint32_t i = 0; i < str.getLength(); i++)
     {
@@ -22,8 +19,6 @@ String::String(const String& str)
 
 String::String(const char* chrs)
 {
-    serial::com_1 << "char* constructor from " << stream::Mode::HEX << (uint32_t)chrs << stream::endl;
-
     uint32_t chr_len = 0;
     while (chrs[chr_len] != 0x0)
         chr_len++;
@@ -35,8 +30,6 @@ String::String(const char* chrs)
 
 String::String(char* chrs)
 {
-    serial::com_1 << "char* constructor from " << stream::Mode::HEX << (uint32_t)chrs << stream::endl;
-
     uint32_t chr_len = 0;
     while (chrs[chr_len] != 0x0)
         chr_len++;
@@ -47,15 +40,11 @@ String::String(char* chrs)
 
 String::String(uint32_t initial_capacity)
 {
-    serial::com_1 << "initial capacity constructor sized " << stream::Mode::DEC << initial_capacity << stream::endl;
-
     backing.resize(initial_capacity);
 }
 
 String::String(String&& str)
 {
-    serial::com_1 << "move constructor from " << stream::Mode::HEX << (uint32_t)(&str) << stream::endl;
-
     backing.resize(str.getLength());
     for (uint32_t i = 0; i < str.getLength(); i++)
     {
@@ -72,6 +61,7 @@ String& nov::String::operator=(const char* chrs)
 
 String& nov::String::operator=(const String& other)
 {
+    backing.clear();
     backing.resize(other.getLength());
     for (uint32_t i = 0; i < other.getLength(); i++)
     {

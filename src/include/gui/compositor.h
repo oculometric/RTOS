@@ -40,6 +40,7 @@ public:
     void clear();
     void setDecoration(ContainerDecorationMode mode);
     void setTitle(String new_title);
+    inline uint32_t getID() { return handle_id; }
 
     friend class Compositor;
 };
