@@ -101,6 +101,7 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     interrupts::configureIRQHandler(1, keyboard::keyboardInterruptCallback);
     interrupts::setIRQEnabled(0, true);
     interrupts::setIRQEnabled(1, true);
+    //interrupts::configureInterruptHandler(0x80, mailboxCall, interrupts::GateType::INTERRUPT_32, Privilege::LEVEL_3);
     serial::com_1 << "okidoke, all setup." << endl;
 
     serial::com_1 << "configuring keyboard" << endl;
