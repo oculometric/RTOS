@@ -259,5 +259,9 @@ public:
 
 void assignKeyboardDriver(KeyboardDriver* controller);
 
+bool keyboardGetKeyState(Key key);
+bool keyboardHasEventWaiting();
+KeyEvent keyboardPollNextEvent();
+
 }
 }

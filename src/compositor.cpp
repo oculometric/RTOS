@@ -450,6 +450,16 @@ void Compositor::debug()
     dbg(root, 2);
 }
 
+Compositor::~Compositor()
+{
+    for (uint32_t i = 0; i < handle_map.getLength(); i++)
+    {
+        delete handle_map[i].container->framebuffer_details.address;
+        delete handle_map[i].container;
+    }
+    handle_map.clear();
+}
+
 ProtectedFramebuffer* ContainerHandle::getFramebuffer()
 {
     if (compositor && isValid())

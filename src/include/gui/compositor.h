@@ -58,13 +58,17 @@ public:
     inline bool isValid() { return handle_id != 0; }
     ProtectedFramebuffer* getFramebuffer();
     void blit();
+    // TODO: add separate repaint function which doesn't clear
     void clear();
     void setDecoration(ContainerDecorationMode mode);
     void setTitle(String new_title);
     inline uint32_t getID() { return handle_id; }
 
     friend class Compositor;
+    
+    inline bool operator==(const ContainerHandle& b) const { return handle_id == b.handle_id; }
 };
+
 
 enum ContainerSplitDecision
 {

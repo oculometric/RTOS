@@ -187,6 +187,27 @@ void assignKeyboardDriver(KeyboardDriver* controller)
     keyboard_driver = controller;
 }
 
+bool keyboardGetKeyState(Key key)
+{
+    if (keyboard_driver)
+        return keyboard_driver->getKeyState(key);
+    return false;
+}
+
+bool keyboardHasEventWaiting()
+{
+    if (keyboard_driver)
+        return keyboard_driver->hasEventWaiting();
+    return false;
+}
+
+KeyEvent keyboardPollNextEvent()
+{
+    if (keyboard_driver)
+        return keyboard_driver->pollNextEvent();
+    return KeyEvent{ };
+}
+
 void KeyboardDriver::enqueueEvent(KeyEvent event)
 {
     if (event_queue_end == event_queue_start - 1)

@@ -89,10 +89,7 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     gdt::loadGDT(new_gdt, 3, 1, 2);
     serial::com_1 << "new GDT located at " << Mode::HEX << (uint32_t)new_gdt << endl;
     // TODO: task segment
-    
-    //uint8_t* real_buffer = (uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address;
-    //uint8_t* backbuffer = new uint8_t[640*480*3];
-    //if (backbuffer == 0x0) panic("unable to allocate memory for GUI backbuffer");
+
     memory::mView();
 
     serial::com_1 << "configuring IDT" << endl;
@@ -107,139 +104,12 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     serial::com_1 << "okidoke, all setup." << endl;
 
     serial::com_1 << "configuring keyboard" << endl;
-    keyboard::KeyboardDriver* keyboard_driver = new keyboard::KeyboardDriver();
-    keyboard::assignKeyboardDriver(keyboard_driver);
-
-    //graphics::Framebuffer framebuffer{ backbuffer, UVector2{ 640, 480 }, 3 };
-    //gui::GuiManager man (framebuffer);
-
-    file::BinaryBitmapHeader* font_header = (file::BinaryBitmapHeader*)_res_font_binbmp_start;
-    serial::com_1 << "font checksum:        " << font_header->checksum << endl;
-    serial::com_1 << "bitmap checksum:      " << NOV_BINARY_BITMAP_HEADER_CHECKSUM << endl;
-    serial::com_1 << Mode::DEC;
-    serial::com_1 << "font bitmap width:    " << font_header->image_width << endl;
-    serial::com_1 << "font bitmap height:   " << font_header->image_height << endl;
-    serial::com_1 << "font bits per pixel:  " << font_header->bits_per_pixel << endl;
-    serial::com_1 << "font bitmap length:   " << font_header->image_size << endl;
-    serial::com_1 << "font bitmap offset:   " << font_header->data_offset << endl;
-    serial::com_1.flush();
-
-    Font* font = new Font();
-    font->char_width = 5;
-    font->char_height = 8;
-    font->bitmap = ((uint8_t*)font_header + font_header->data_offset);
-    font->bitmap_width = font_header->image_width;
-    font->bitmap_height = font_header->image_height;
-    font->tiles_per_row = font->bitmap_width / font->char_width;
-    font->tiles_per_column = font->bitmap_height / font->char_height;
-
-    /*
-    man.guiFont = font;
-
-    auto root = man.getRoot();
-
-    auto text_panel = new gui::PanelTextbox();
-    text_panel->name ="text panel";
-    text_panel->font = font;
-    text_panel->text = R"""(here is some text, this string is multiline)""";
-
-    auto star_panel = new gui::PanelStar();
-    star_panel->name = "star";
-    star_panel->foreground = nov_colour_gold;
-
-    auto mmap_panel = new gui::PanelMemoryMonitor();
-    mmap_panel->name = "memory";
-
-    auto mesh_panel = new gui::PanelMeshrender();
-    mesh_panel->name = "teapot";
-    mesh_panel->line_colour = nov_colour_indigo;
-    mesh_panel->camera_up_direction = norm(FVector3{1,0,1});
-    mesh_panel->camera_look_direction = norm(FVector3{1,0,-1});
-    mesh_panel->camera_position = FVector3{-4,0,4};
-    mesh_panel->mesh = new graphics::Mesh(_res_teapot_binmesh_start);
-
-    gui::splitContainer(root, FVector2{0, 0.8f});
-    auto top_container = root->child_a;
-    auto bottom_container = root->child_b;
-    gui::splitContainer(top_container, FVector2{0.8f, 0});
-    top_container->child_b->panel = star_panel;
-    gui::splitContainer(bottom_container, FVector2{0.3f, 0});
-    bottom_container->child_a->panel = mmap_panel;
-    bottom_container->child_b->panel = text_panel;
-    gui::splitContainer(top_container->child_b, FVector2{0, 0.7f});
-    top_container->child_b->child_b->panel = mesh_panel;
+    keyboard::assignKeyboardDriver(new keyboard::KeyboardDriver());
     
-    text_panel->text_colour = nov_colour_carmine;
-    serial::com_1 << "string is: \"" << text_panel->text << "\"" << endl;
-    */
-    //man.drawRoot();
-
-    gui::Compositor compositor((uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address, 640, 480, font);
-
-    gui::ContainerHandle root = compositor.getRootContainer();
-    graphics::drawStar(root.getFramebuffer()->getWeakCopy(), UVector2{ 1,1 }, nov_colour_gold, nov_colour_nearblack, true);
-    root.blit();
-    compositor.debug();
-    
-    gui::ContainerHandle container = root;
-
-    while (true)
-    {
-        if (keyboard_driver->hasEventWaiting())
-        {
-            keyboard::KeyEvent event = keyboard_driver->pollNextEvent();
-            if (event.is_down && event.modifiers & keyboard::Modifier::L_ALT && event.key != keyboard::K_L_ALT)
-            {
-                auto new_container = container;
-                serial::com_1 << "splitting: " << container.getID() << stream::endl;
-                switch (event.key)
-                {
-                case keyboard::K_UP:
-                    new_container = compositor.divideContainer(container, gui::ContainerSplitDecision::SPLIT_HORIZONTAL_TOP); break;
-                case keyboard::K_DOWN:
-                    new_container = compositor.divideContainer(container, gui::ContainerSplitDecision::SPLIT_HORIZONTAL_BOTTOM); break;
-                case keyboard::K_LEFT:
-                    new_container = compositor.divideContainer(container, gui::ContainerSplitDecision::SPLIT_VERTICAL_LEFT); break;
-                case keyboard::K_RIGHT:
-                    new_container = compositor.divideContainer(container, gui::ContainerSplitDecision::SPLIT_VERTICAL_RIGHT); break;
-                default: break;
-                }
-
-                serial::com_1 << "done, main container is now: " << new_container.getID() << stream::endl;
-
-                container.setTitle(intToString((uint32_t)container.getID(), 16));
-                container.clear();
-
-                graphics::drawStar(new_container.getFramebuffer()->getWeakCopy(), UVector2{ 1,1 }, nov_colour_gold, nov_colour_nearblack, false);
-                new_container.setTitle(intToString((uint32_t)new_container.getID(), 16));
-                new_container.clear();
-
-                new_container.blit();
-                compositor.debug();
-
-                container = new_container;
-            }
-            else if (event.is_down)
-            {
-                container.clear();
-                switch (event.key)
-                {
-                case keyboard::K_UP:
-                    container = compositor.getNorthContainer(container); break;
-                case keyboard::K_DOWN:
-                    container = compositor.getSouthContainer(container); break;
-                case keyboard::K_LEFT:
-                    container = compositor.getWestContainer(container); break;
-                case keyboard::K_RIGHT:
-                    container = compositor.getEastContainer(container); break;
-                default: break;
-                }
-                
-                graphics::drawStar(container.getFramebuffer()->getWeakCopy(), UVector2{ 1,1 }, nov_colour_gold, nov_colour_nearblack, false);
-                container.blit();
-            }
-        }
-    }
+    gui::SegmentedDesktop desktop((uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address, os_hint_table->vbe_mode_info_block->x_resolution, os_hint_table->vbe_mode_info_block->y_resolution);
+    serial::com_1 << "entering gui main on main thread" << endl;
+    desktop.takeControl();
+    serial::com_1 << "gui main exited" << endl;
 
     serial::com_1 << "all done." << endl;
     serial::com_1.flush();
