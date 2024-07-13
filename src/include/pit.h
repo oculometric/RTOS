@@ -2,7 +2,7 @@
 
 namespace nov
 {
-namespace timer
+namespace pit
 {
 
 enum Port

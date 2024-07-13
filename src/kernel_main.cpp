@@ -9,7 +9,7 @@
 #include <binary_mesh.h>
 #include <3d_demo_meshes.h>
 #include <keyboard.h>
-#include <timer.h>
+#include <acpi.h>
 #include <gdt.h>
 
 // TODO: string splitting
@@ -100,9 +100,9 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     exception::registerExceptionHandlers();
     interrupts::configureIRQs((uint8_t)0x20);
     enableInterrupts();
-    interrupts::configureIRQHandler(0, timer::timerInterruptCallback);
+    //interrupts::configureIRQHandler(0, timer::timerInterruptCallback);
     interrupts::configureIRQHandler(1, keyboard::keyboardInterruptCallback);
-    interrupts::setIRQEnabled(0, true);
+    interrupts::setIRQEnabled(0, false);
     interrupts::setIRQEnabled(1, true);
     serial::com_1 << "okidoke, all setup." << endl;
 
@@ -123,6 +123,8 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     serial::com_1 << "font bitmap length:   " << font_header->image_size << endl;
     serial::com_1 << "font bitmap offset:   " << font_header->data_offset << endl;
     serial::com_1.flush();
+
+    //acpi::initACPI(); // WILL crash the kernel, right now
 
     Font* font = new Font();
     font->char_width = 5;

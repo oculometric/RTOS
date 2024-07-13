@@ -58,6 +58,8 @@ String floatToString(const float f, const uint8_t dps = 3);
 int32_t stringToInt(const String& str, uint8_t base);
 float stringToFloat(const String& str);
 
+bool strcmp(char* a, char* b, uint32_t len = -1);
+
 stream::Stream& operator<<(stream::Stream& stream, const String& s);
 
 }

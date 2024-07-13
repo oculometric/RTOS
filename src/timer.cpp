@@ -1,10 +1,10 @@
-#include <timer.h>
+#include <pit.h>
 
 #include <serial.h>
 
 namespace nov
 {
-namespace timer
+namespace pit
 {
 
 void timerInterruptCallback()

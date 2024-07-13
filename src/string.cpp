@@ -236,6 +236,16 @@ float nov::stringToFloat(const String& str)
     return stringToFloat(str.constStr());
 }
 
+bool nov::strcmp(char* a, char* b, uint32_t len)
+{
+    for (uint32_t i = 0; i < len; i++)
+    {
+        if (a[i] != b[i]) return false;
+        if (a[i] == '\0' || b[i] == '\0') return false;
+    }
+    return true;
+}
+
 String nov::floatToString(const float f, const uint8_t dps)
 {
     uint16_t size = 64 + dps + 3;
