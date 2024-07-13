@@ -9,6 +9,8 @@
 #include <colour.h>
 #include <pair.h>
 
+// TODO: comments in this file
+
 namespace nov
 {
 namespace gui
@@ -23,19 +25,38 @@ enum ContainerDecorationMode
 
 class Compositor;
 
+class ProtectedFramebuffer
+{
+private:
+    uint8_t* address = nullptr;
+    vector::UVector2 size;
+    uint8_t bytes_per_pixel = 0;
+
+    ProtectedFramebuffer(uint8_t* _address, vector::UVector2 _size, uint8_t _bytes_per_pixel) : address(_address), size(_size), bytes_per_pixel(_bytes_per_pixel) { };
+public:
+    inline uint8_t* getAddress() { return address; }
+    inline vector::UVector2 getSize() { return size; }
+    inline uint8_t getBytesPerPixel() { return bytes_per_pixel; }
+
+    inline ProtectedFramebuffer() { };
+
+    inline graphics::Framebuffer getWeakCopy() { return graphics::Framebuffer{ address, size, bytes_per_pixel }; }
+
+    friend class Compositor;
+};
+
 class ContainerHandle
 {
 private:
     uint32_t handle_id = 0;
-    graphics::Framebuffer* framebuffer_details = nullptr;
     Compositor* compositor = nullptr;
 
     bool has_been_resized = false;
 
-    ContainerHandle(uint32_t id) : handle_id(id) {};
+    ContainerHandle(uint32_t id, Compositor* manager) : handle_id(id), compositor(manager) { };
 public:
     inline bool isValid() { return handle_id != 0; }
-    inline graphics::Framebuffer getFramebuffer() { return *framebuffer_details; }
+    ProtectedFramebuffer* getFramebuffer();
     void blit();
     void clear();
     void setDecoration(ContainerDecorationMode mode);
@@ -65,6 +86,9 @@ struct Container
     String title = "container";
     Colour clear_colour = nov_colour_nearblack;
     Colour frame_colour = nov_colour_gold;
+
+    uint32_t handle_id = 0;
+    ProtectedFramebuffer framebuffer_details;
 };
 
 struct ContainerLinkNode
@@ -77,7 +101,7 @@ class Compositor
 {
 private:
     Container* root = nullptr;
-    ContainerHandle root_handle = ContainerHandle(0);
+    ContainerHandle root_handle = ContainerHandle(0, nullptr);
     graphics::Framebuffer front_buffer;
     uint8_t* framebuffer_address = nullptr;
     Font* guiFont = nullptr;
@@ -85,10 +109,11 @@ private:
     Array<ContainerLinkNode> handle_map;
     uint32_t getUnusedHandleID();
 
-    void blit(Container* target, graphics::Framebuffer source);
+    void blit(Container* target, ProtectedFramebuffer source);
     void clear(Container* target);
     void repaint(Container* target);
 
+    ProtectedFramebuffer* getContainerFramebuffer(ContainerHandle handle);
     void blitContainer(ContainerHandle handle);
     void clearContainer(ContainerHandle handle);
     void setContainerDecoration(ContainerHandle handle, ContainerDecorationMode mode);
@@ -98,6 +123,16 @@ private:
 
     Pair<UVector2, UVector2> computeBounds(Container* target, bool account_for_border = false);
     Container* findContainer(ContainerHandle handle);
+
+    enum Direction
+    {
+        NORTH,
+        SOUTH,
+        EAST,
+        WEST
+    };
+
+    Container* findClosestLeafContainer(Container* within, vector::UVector2 to, Direction preferred_direction);
 public:
     Compositor(uint8_t* framebuffer_address, uint16_t width, uint16_t height, Font* font);
 
@@ -105,6 +140,11 @@ public:
     ContainerHandle divideContainer(ContainerHandle handle, ContainerSplitDecision split);
     ContainerHandle getRootContainer();
     void destroyContainer(ContainerHandle handle);
+
+    ContainerHandle getNorthContainer(ContainerHandle handle);
+    ContainerHandle getSouthContainer(ContainerHandle handle);
+    ContainerHandle getEastContainer(ContainerHandle handle);
+    ContainerHandle getWestContainer(ContainerHandle handle);
 
     Compositor() = delete;
     Compositor(Compositor& other) = delete;

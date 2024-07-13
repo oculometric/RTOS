@@ -177,7 +177,7 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
     gui::Compositor compositor((uint8_t*)os_hint_table->vbe_mode_info_block->flat_framebuffer_address, 640, 480, font);
 
     gui::ContainerHandle root = compositor.getRootContainer();
-    graphics::drawStar(root.getFramebuffer(), UVector2{ 1,1 }, nov_colour_gold, nov_colour_nearblack, true);
+    graphics::drawStar(root.getFramebuffer()->getWeakCopy(), UVector2{ 1,1 }, nov_colour_gold, nov_colour_nearblack, true);
     root.blit();
     compositor.debug();
     
@@ -188,7 +188,7 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
         if (keyboard_driver->hasEventWaiting())
         {
             keyboard::KeyEvent event = keyboard_driver->pollNextEvent();
-            if (event.is_down)
+            if (event.is_down && event.modifiers & keyboard::Modifier::L_ALT && event.key != keyboard::K_L_ALT)
             {
                 auto new_container = container;
                 serial::com_1 << "splitting: " << container.getID() << stream::endl;
@@ -205,17 +205,38 @@ extern "C" void main(boot::OSHintTable* os_hint_table)
                 default: break;
                 }
 
-                //serial::com_1 << "done, container is now: " << new_container.getID() << stream::endl;
+                serial::com_1 << "done, main container is now: " << new_container.getID() << stream::endl;
 
                 container.setTitle(intToString((uint32_t)container.getID(), 16));
                 container.clear();
 
-                graphics::drawStar(new_container.getFramebuffer(), UVector2{ 1,1 }, nov_colour_gold, nov_colour_nearblack, false);
+                graphics::drawStar(new_container.getFramebuffer()->getWeakCopy(), UVector2{ 1,1 }, nov_colour_gold, nov_colour_nearblack, false);
                 new_container.setTitle(intToString((uint32_t)new_container.getID(), 16));
                 new_container.clear();
 
                 new_container.blit();
                 compositor.debug();
+
+                container = new_container;
+            }
+            else if (event.is_down)
+            {
+                container.clear();
+                switch (event.key)
+                {
+                case keyboard::K_UP:
+                    container = compositor.getNorthContainer(container); break;
+                case keyboard::K_DOWN:
+                    container = compositor.getSouthContainer(container); break;
+                case keyboard::K_LEFT:
+                    container = compositor.getWestContainer(container); break;
+                case keyboard::K_RIGHT:
+                    container = compositor.getEastContainer(container); break;
+                default: break;
+                }
+                
+                graphics::drawStar(container.getFramebuffer()->getWeakCopy(), UVector2{ 1,1 }, nov_colour_gold, nov_colour_nearblack, false);
+                container.blit();
             }
         }
     }
