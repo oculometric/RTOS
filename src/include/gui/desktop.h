@@ -12,9 +12,11 @@ namespace gui
 class SegmentedDesktop
 {
 private:
-    Compositor* primary_compositor;
+    Compositor* primary_compositor = nullptr;
 
     LinkedList<ContainerHandle> handle_order;
+    bool is_overlay_showing = false;
+    Font* font = nullptr;
 
     inline ContainerHandle getActiveHandle() { return handle_order[0]; }
 public:

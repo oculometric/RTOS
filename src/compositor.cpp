@@ -26,6 +26,7 @@ void Compositor::initContainerTree()
     UVector2 bounds = computeBounds(root, true).b;
     root->framebuffer_details = ProtectedFramebuffer(new uint8_t[3 * bounds.u * bounds.v], bounds, 3);
     root_handle = handle;
+    overlay_framebuffer = ProtectedFramebuffer(new uint8_t[3 * front_buffer.size.u * front_buffer.size.v], front_buffer.size, 3);
 }
 
 Pair<UVector2, UVector2> Compositor::computeBounds(Container* target, bool account_for_border)
@@ -114,6 +115,8 @@ Compositor::Compositor(uint8_t* framebuffer_address, uint16_t width, uint16_t he
     clear(root);
 }
 
+// TODO: move computebounds outside of these individual functions
+
 void Compositor::blit(Container* target, ProtectedFramebuffer source)
 {
     if (target == nullptr) return;
@@ -127,6 +130,9 @@ void Compositor::blit(Container* target, ProtectedFramebuffer source)
     UVector2 src_size = UVector2{ min(source.size.u, bounds.b.u), min(source.size.v, bounds.b.v) };
 
     graphics::copyBox(bounds.a, src_off, src_size, front_buffer, source.getWeakCopy());
+
+    if (overlay_visible)
+        blitOverlayFramebuffer();
 }
 
 void Compositor::clear(Container* target)
@@ -147,8 +153,6 @@ void Compositor::clear(Container* target)
 
 void Compositor::repaint(Container* target)
 {
-    // TODO: better bordering
-
     Pair<UVector2, UVector2> bounds = computeBounds(target);
     UVector2 offset = bounds.a;
     UVector2 size = bounds.b;
@@ -162,7 +166,7 @@ void Compositor::repaint(Container* target)
     graphics::fillBox(offset + UVector2{ 2,2 }, UVector2{ size.u - 4,10 }, target->frame_colour, front_buffer);
 
     uint32_t length = target->title.getLength();
-    UVector2 character_origin = offset + UVector2{8,1};
+    UVector2 character_origin = offset + UVector2{8,2};
     for (uint32_t char_ind = 0; char_ind < length; char_ind++)
     {
         char chr = target->title[char_ind];
@@ -180,6 +184,12 @@ void Compositor::blitContainer(ContainerHandle handle)
 {
     Container* container = findContainer(handle);
     blit(container, container->framebuffer_details);
+}
+
+void Compositor::repaintContainer(ContainerHandle handle)
+{
+    Container* container = findContainer(handle);
+    repaint(container);
 }
 
 void Compositor::clearContainer(ContainerHandle handle)
@@ -211,7 +221,7 @@ void Compositor::resizeCanvas(uint16_t width, uint16_t height)
 {
     front_buffer.size = vector::UVector2{ width, height };
 
-    // TODO: resize children oh god
+    // TODO: resize children oh god, and the overlay framebuffer
 }
 
 ContainerHandle Compositor::divideContainer(ContainerHandle handle, ContainerSplitDecision split)
@@ -419,6 +429,45 @@ ContainerHandle Compositor::getEastContainer(ContainerHandle handle)
     return handle;
 }
 
+ProtectedFramebuffer* Compositor::getOverlayFramebuffer()
+{
+    return &overlay_framebuffer;
+}
+
+void Compositor::setOverlayVisible(bool visible)
+{
+    overlay_visible = visible;
+    blitOverlayFramebuffer();
+}
+
+void Compositor::blitOverlayFramebuffer()
+{
+    if (overlay_visible)
+    {
+        uint32_t buffer_length = front_buffer.size.u * front_buffer.size.v * 3;
+        for (uint32_t i = 0; i < buffer_length; i+=3)
+        {
+            if (!(overlay_framebuffer.address[i] == 0xFF && overlay_framebuffer.address[i+2] == 0xFF))
+            {
+                front_buffer.address[i] = overlay_framebuffer.address[i];
+                front_buffer.address[i+1] = overlay_framebuffer.address[i+1];
+                front_buffer.address[i+2] = overlay_framebuffer.address[i+2];
+            }
+        }
+    }
+    else
+    {
+        for (uint32_t i = 0; i < handle_map.getLength(); i++)
+        {
+            if (isLeaf(handle_map[i].container))
+            {
+                clear(handle_map[i].container);
+                blit(handle_map[i].container, handle_map[i].container->framebuffer_details);
+            }
+        }
+    }
+}
+
 void dbg(Container* c, int d)
 {
     for (int i = 0; i < d; i++)
@@ -474,13 +523,17 @@ void ContainerHandle::blit()
         compositor->blitContainer(*this);
 }
 
+void ContainerHandle::repaint()
+{
+    if (compositor && isValid())
+        compositor->repaintContainer(*this);
+}
 
 void ContainerHandle::clear()
 {
     if (compositor && isValid())
         compositor->clearContainer(*this);
 }
-
 
 void ContainerHandle::setTitle(String new_title)
 {

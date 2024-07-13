@@ -3,6 +3,8 @@
 #include <vector.h>
 #include <font.h>
 #include <string.h>
+#include <colour.h>
+#include <gui/compositor.h>
 
 namespace nov
 {
@@ -24,7 +26,7 @@ struct IMTextBoxResult
     bool is_confirmed = false;
 };
 
-void drawIMLabel(String text, vector::IVector2 offset, vector::IVector2 size, Font* font);
+void drawIMLabel(String text, vector::IVector2 offset, vector::IVector2 size, ProtectedFramebuffer* framebuffer, Font* font);
 void drawIMButton(String text, IMButtonResult& result, vector::IVector2 offset, vector::IVector2 size, bool enabled, Font* font);
 void drawIMTextBox(IMTextBoxResult& result, vector::IVector2 offset, vector::IVector2 size, bool enabled, Font* font);
 

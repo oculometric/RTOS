@@ -58,7 +58,7 @@ public:
     inline bool isValid() { return handle_id != 0; }
     ProtectedFramebuffer* getFramebuffer();
     void blit();
-    // TODO: add separate repaint function which doesn't clear
+    void repaint();
     void clear();
     void setDecoration(ContainerDecorationMode mode);
     void setTitle(String new_title);
@@ -111,6 +111,10 @@ private:
     Font* guiFont = nullptr;
 
     Array<ContainerLinkNode> handle_map;
+
+    ProtectedFramebuffer overlay_framebuffer;
+    bool overlay_visible = false;
+
     uint32_t getUnusedHandleID();
 
     void blit(Container* target, ProtectedFramebuffer source);
@@ -119,6 +123,7 @@ private:
 
     ProtectedFramebuffer* getContainerFramebuffer(ContainerHandle handle);
     void blitContainer(ContainerHandle handle);
+    void repaintContainer(ContainerHandle handle);
     void clearContainer(ContainerHandle handle);
     void setContainerDecoration(ContainerHandle handle, ContainerDecorationMode mode);
     void setContainerTitle(ContainerHandle handle, String new_title);
@@ -149,6 +154,10 @@ public:
     ContainerHandle getSouthContainer(ContainerHandle handle);
     ContainerHandle getEastContainer(ContainerHandle handle);
     ContainerHandle getWestContainer(ContainerHandle handle);
+
+    ProtectedFramebuffer* getOverlayFramebuffer();
+    void blitOverlayFramebuffer();
+    void setOverlayVisible(bool visible);
 
     Compositor() = delete;
     Compositor(Compositor& other) = delete;

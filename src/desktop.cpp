@@ -3,6 +3,7 @@
 #include <binary_bitmap.h>
 #include <3d_demo_meshes.h>
 #include <keyboard.h>
+#include <gui/interface.h>
 
 namespace nov
 {
@@ -22,7 +23,7 @@ SegmentedDesktop::SegmentedDesktop(uint8_t* framebuffer_address, uint16_t width,
     serial::com_1 << "font bitmap offset:   " << font_header->data_offset << stream::endl;
     serial::com_1.flush();
 
-    Font* font = new Font();
+    font = new Font();
     font->char_width = 5;
     font->char_height = 8;
     font->bitmap = ((uint8_t*)font_header + font_header->data_offset);
@@ -50,11 +51,19 @@ void SegmentedDesktop::takeControl()
         if (keyboard::keyboardHasEventWaiting())
         {
             keyboard::KeyEvent event = keyboard::keyboardPollNextEvent();
-            if (event.is_down && event.modifiers & keyboard::Modifier::L_ALT && event.key != keyboard::K_L_ALT)
+            if (event.is_down
+                && !is_overlay_showing
+                && (event.modifiers & keyboard::Modifier::L_ALT) 
+                && event.key != keyboard::K_L_ALT 
+                && (event.key == keyboard::K_UP
+                    || event.key == keyboard::K_DOWN
+                    || event.key == keyboard::K_LEFT
+                    || event.key == keyboard::K_RIGHT
+                    )
+                )
             {
                 auto container = getActiveHandle();
                 auto new_container = container;
-                serial::com_1 << "splitting: " << container.getID() << stream::endl;
                 switch (event.key)
                 {
                 case keyboard::K_UP:
@@ -68,23 +77,30 @@ void SegmentedDesktop::takeControl()
                 default: break;
                 }
 
-                serial::com_1 << "done, main container is now: " << new_container.getID() << stream::endl;
-
                 container.setTitle(intToString((uint32_t)container.getID(), 16));
-                container.clear();
+                container.repaint();
 
                 graphics::drawStar(new_container.getFramebuffer()->getWeakCopy(), UVector2{ 1,1 }, nov_colour_gold, nov_colour_nearblack, false);
-                new_container.setTitle(intToString((uint32_t)new_container.getID(), 16));
+                String title = intToString((uint32_t)new_container.getID(), 16);
+                title.append(" (active)");
+                new_container.setTitle(title);
                 new_container.clear();
-
                 new_container.blit();
 
                 handle_order.insert(new_container, 0);
             }
-            else if (event.is_down)
+            else if (event.is_down 
+                && !is_overlay_showing
+                && (event.key == keyboard::K_UP
+                    || event.key == keyboard::K_DOWN
+                    || event.key == keyboard::K_LEFT
+                    || event.key == keyboard::K_RIGHT
+                    )
+                )
             {
                 auto container = getActiveHandle();
-                container.clear();
+                container.setTitle(intToString((uint32_t)container.getID(), 16));
+                container.repaint();
                 switch (event.key)
                 {
                 case keyboard::K_UP:
@@ -99,9 +115,28 @@ void SegmentedDesktop::takeControl()
                 }
                 
                 graphics::drawStar(container.getFramebuffer()->getWeakCopy(), UVector2{ 1,1 }, nov_colour_gold, nov_colour_nearblack, false);
+                String title = intToString((uint32_t)container.getID(), 16);
+                title.append(" (active)");
+                container.setTitle(title);
+                container.repaint();
                 container.blit();
+
                 handle_order.move(container, 0);
             }
+            else if (!event.is_down && event.key == keyboard::K_L_GUI)
+            {
+                is_overlay_showing = !is_overlay_showing;
+                primary_compositor->setOverlayVisible(is_overlay_showing);
+            }
+        }
+    
+        if (is_overlay_showing)
+        {
+            // TODO: immediate mode overlay
+            ProtectedFramebuffer* fb = primary_compositor->getOverlayFramebuffer();
+            graphics::fillBox(UVector2{ 0,0 }, fb->getSize(), nov_colour_magenta, fb->getWeakCopy());
+            drawIMLabel("help me", IVector2{50,50}, IVector2{200, 20}, fb, font);
+            primary_compositor->blitOverlayFramebuffer();
         }
     }
 }
