@@ -17,7 +17,7 @@ as of writing this, i've written a reasonably okayish (if not very portable) *bo
 - [x] dynamic arrays
 - [x] strings
     - [ ] stream into a string
-    - [ ] string splitting
+    - [x] string splitting
 - [x] memory view UI panel
 - [x] text rendering
     - [x] text view UI panel
@@ -29,7 +29,7 @@ as of writing this, i've written a reasonably okayish (if not very portable) *bo
     - [ ] split the kernel into loadable modules?????
 - [ ] proper executable loading and relocation
     - [ ] relocate stack
-    - [ ] relocate GDT
+    - [x] relocate GDT
 - [ ] proper GDT configuration from C++
     - [ ] kernel code & data
     - [ ] user code & data
@@ -44,7 +44,7 @@ as of writing this, i've written a reasonably okayish (if not very portable) *bo
     - [ ] better allocation algorithm
     - [ ] paging/virtual memory
 - [ ] implement necessarry functions to re-enable v-tables and virtual functions
-- [ ] keyboard input support
+- [x] keyboard input support
 - [ ] timers
 - [ ] multithreading
 - [ ] design the game engine side, then implement it, then make it work, oh have mercy upon me please
